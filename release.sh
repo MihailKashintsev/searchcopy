@@ -1,22 +1,29 @@
 #!/bin/bash
 # ══════════════════════════════════════════
 #  SearchCopy — RENDERGAMES
-#  Использование: ./release.sh 1.2.0
+#  Использование: ./release.sh 1.2.0 "Что добавилось"
 # ══════════════════════════════════════════
 
 set -e
 
 VERSION=$1
+CHANGELOG=$2
 
 if [ -z "$VERSION" ]; then
-  echo "❌  Укажи версию: ./release.sh 1.2.0"
+  echo "❌  Укажи версию: ./release.sh 1.2.0 \"Что нового\""
+  exit 1
+fi
+
+if [ -z "$CHANGELOG" ]; then
+  echo "❌  Укажи что изменилось: ./release.sh 1.2.0 \"Что нового\""
   exit 1
 fi
 
 echo ""
 echo "🚀  SearchCopy — RENDERGAMES"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo "📦  Версия: v$VERSION"
+echo "📦  Версия:  v$VERSION"
+echo "📝  Что нового: $CHANGELOG"
 echo ""
 
 # Обновить версию в package.json
@@ -27,14 +34,17 @@ npm version $VERSION --no-git-tag-version
 echo "📝  Обновляю tauri.conf.json..."
 sed -i '' "s/\"version\": \".*\"/\"version\": \"$VERSION\"/" src-tauri/tauri.conf.json
 
+# Сохранить changelog во временный файл (его прочитает GitHub Actions)
+echo "$CHANGELOG" > .changelog
+
 # Коммит
 echo "💾  Коммит..."
-git add package.json src-tauri/tauri.conf.json
+git add package.json src-tauri/tauri.conf.json .changelog
 git commit -m "chore: release v$VERSION"
 
-# Тег
+# Тег с changelog в сообщении
 echo "🏷   Создаю тег v$VERSION..."
-git tag -a "v$VERSION" -m "SearchCopy v$VERSION"
+git tag -a "v$VERSION" -m "$CHANGELOG"
 
 # Push
 echo "⬆️   Пушу в GitHub..."
