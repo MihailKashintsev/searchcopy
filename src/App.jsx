@@ -1,6 +1,11 @@
 import { useState, useEffect, useRef } from "react";
 
-const VERSION = "1.0.0";
+import { getVersion } from "@tauri-apps/api/app";
+
+const [VERSION, setVERSION] = useState("...");
+useEffect(() => {
+  getVersion().then(setVERSION);
+}, []);
 
 // ─── База знаний ─────────────────────────────────────────────────────────────
 const DB = {
