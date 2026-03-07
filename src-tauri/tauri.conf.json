@@ -1,20 +1,23 @@
 {
-  "$schema": "https://schema.tauri.app/config/2",
-  "productName": "tauri-app",
-  "version": "0.1.0",
-  "identifier": "com.mihailkasincev.tauri-app",
+  "productName": "SearchCopy",
+  "version": "1.0.0",
+  "identifier": "com.rendergames.searchcopy",
   "build": {
-    "beforeDevCommand": "npm run dev",
+    "frontendDist": "../dist",
     "devUrl": "http://localhost:1420",
-    "beforeBuildCommand": "npm run build",
-    "frontendDist": "../dist"
+    "beforeDevCommand": "npm run dev",
+    "beforeBuildCommand": "npm run build"
   },
   "app": {
     "windows": [
       {
-        "title": "tauri-app",
-        "width": 800,
-        "height": 600
+        "title": "SearchCopy — RENDERGAMES",
+        "width": 820,
+        "height": 700,
+        "minWidth": 600,
+        "minHeight": 500,
+        "resizable": true,
+        "center": true
       }
     ],
     "security": {
@@ -30,6 +33,19 @@
       "icons/128x128@2x.png",
       "icons/icon.icns",
       "icons/icon.ico"
-    ]
+    ],
+    "publisher": "RENDERGAMES",
+    "category": "Productivity",
+    "shortDescription": "Hotkeys and formulas finder",
+    "longDescription": "SearchCopy by RENDERGAMES — find hotkeys and formulas by typing what you want to do.",
+    "createUpdaterArtifacts": true
+  },
+  "plugins": {
+    "updater": {
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IEU1REVDQkE5RjVBNUE0OTEKUldTUnBLWDFxY3ZlNVlUbmxVNDNudkhWNGh2M0QycGNmTytEV1MzZnM1bW5ZZHNDV1pjWVNSVDgK",
+      "endpoints": [
+        "https://github.com/MihailKashintsev/searchcopy/releases/latest/download/latest.json"
+      ]
+    }
   }
 }
