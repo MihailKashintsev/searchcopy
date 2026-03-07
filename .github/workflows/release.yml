@@ -52,6 +52,7 @@ jobs:
 
       - name: Read changelog
         id: changelog
+        shell: bash
         run: |
           if [ -f .changelog ]; then
             echo "text=$(cat .changelog)" >> $GITHUB_OUTPUT
