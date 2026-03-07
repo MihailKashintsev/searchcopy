@@ -1,3 +1,4 @@
+cat > .github/workflows/release.yml << 'EOF'
 name: 🚀 Release SearchCopy
 
 on:
@@ -40,11 +41,7 @@ jobs:
         if: matrix.platform == 'ubuntu-22.04'
         run: |
           sudo apt-get update
-          sudo apt-get install -y \
-            libwebkit2gtk-4.1-dev \
-            libappindicator3-dev \
-            librsvg2-dev \
-            patchelf
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
 
       - name: Cache Rust
         uses: Swatinem/rust-cache@v2
@@ -65,8 +62,6 @@ jobs:
           releaseName: "SearchCopy ${{ github.ref_name }}"
           releaseBody: |
             ## SearchCopy ${{ github.ref_name }} — RENDERGAMES
-
-            ### Платформы
             - 🍎 macOS Universal (.dmg)
             - 🪟 Windows (.msi + .exe)
             - 🐧 Linux (.AppImage + .deb)
@@ -118,3 +113,4 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: src-tauri/gen/android/app/build/outputs/apk/universal/release/*.apk
+EOF
