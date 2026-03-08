@@ -6,16 +6,31 @@
 <title>SearchCopy — RENDERGAMES</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-body{min-height:100vh;background:#070710;font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;color:#e2e8f0;overflow-x:hidden}
+:root{
+  --bg:#070710;--bg2:rgba(12,12,22,0.92);--bg3:rgba(255,255,255,0.025);
+  --border:rgba(255,255,255,0.07);--text:#e2e8f0;--text2:#64748b;--text3:#334155;
+  --accent:#4f46e5;--accent2:#818cf8;--accent3:#c7d2fe;
+  --card-border:rgba(255,255,255,0.06);--input-bg:rgba(12,12,22,0.98);
+  --badge-bg:rgba(99,102,241,0.1);--badge-border:rgba(99,102,241,0.22);
+}
+.light{
+  --bg:#f1f5f9;--bg2:#ffffff;--bg3:rgba(0,0,0,0.03);
+  --border:rgba(0,0,0,0.08);--text:#0f172a;--text2:#64748b;--text3:#94a3b8;
+  --accent:#4f46e5;--accent2:#6366f1;--accent3:#4338ca;
+  --card-border:rgba(0,0,0,0.06);--input-bg:#ffffff;
+  --badge-bg:rgba(99,102,241,0.08);--badge-border:rgba(99,102,241,0.2);
+}
+body{min-height:100vh;background:var(--bg);font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;color:var(--text);overflow-x:hidden;transition:background 0.3s,color 0.3s}
 input,button{font-family:inherit}
 button{cursor:pointer}
 ::-webkit-scrollbar{width:4px}
 ::-webkit-scrollbar-thumb{background:rgba(99,102,241,0.3);border-radius:4px}
-input::placeholder{color:#1e293b}
+input::placeholder{color:var(--text3)}
 @keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.3}}
 .glow1{position:fixed;top:-250px;left:50%;transform:translateX(-50%);width:900px;height:500px;background:radial-gradient(ellipse,rgba(79,70,229,0.13) 0%,transparent 65%);pointer-events:none;z-index:0}
 .glow2{position:fixed;bottom:-150px;right:-80px;width:450px;height:350px;background:radial-gradient(ellipse,rgba(14,165,233,0.07) 0%,transparent 70%);pointer-events:none;z-index:0}
+.light .glow1,.light .glow2{opacity:0.4}
 .wrap{position:relative;z-index:1;max-width:760px;margin:0 auto;padding:40px 20px 100px}
 </style>
 </head>
@@ -23,257 +38,315 @@ input::placeholder{color:#1e293b}
 <div class="glow1"></div>
 <div class="glow2"></div>
 <div class="wrap" id="app"></div>
-<div id="version-badge" style="position:fixed;bottom:18px;right:20px;background:rgba(7,7,16,0.92);border:1px solid rgba(99,102,241,0.18);border-radius:8px;padding:5px 12px;font-size:10px;color:#1e293b;backdrop-filter:blur(12px);z-index:100;display:flex;align-items:center;gap:6px;letter-spacing:0.5px">
+<div id="version-badge" style="position:fixed;bottom:18px;right:20px;background:var(--bg);border:1px solid rgba(99,102,241,0.18);border-radius:8px;padding:5px 12px;font-size:10px;color:var(--text3);backdrop-filter:blur(12px);z-index:100;display:flex;align-items:center;gap:6px;letter-spacing:0.5px">
   <span style="color:#4f46e5">◆</span> SearchCopy v<span id="vnum">1.0.0</span>
 </div>
 
 <script>
-const VERSION = "1.1.7";
+const VERSION = "1.0.0";
 document.getElementById('vnum').textContent = VERSION;
+
+// ── Detect OS ──
+function detectOS(){
+  const p = navigator.platform || navigator.userAgent;
+  if(/Mac/.test(p)) return 'mac';
+  if(/Win/.test(p)) return 'win';
+  if(/Linux|Android/.test(p)) return 'linux';
+  return 'win';
+}
+
+// ── Settings ──
+const SETTINGS_KEY = 'sc_settings';
+function loadSettings(){
+  try{ return JSON.parse(localStorage.getItem(SETTINGS_KEY)||'{}'); }catch{ return {}; }
+}
+function saveSettings(s){ localStorage.setItem(SETTINGS_KEY, JSON.stringify(s)); }
+
+const detectedOS = detectOS();
+let settings = {
+  lang: 'ru',
+  theme: 'dark',
+  os: detectedOS,
+  autoUpdate: true,
+  ...loadSettings()
+};
+
+function applyTheme(){
+  document.body.classList.toggle('light', settings.theme === 'light');
+}
+applyTheme();
+
+// ── OS key adapter ──
+function adaptKeys(keys){
+  if(settings.os === 'mac'){
+    return keys
+      .replace(/Ctrl/g, '⌘ Cmd')
+      .replace(/Alt/g, '⌥ Alt')
+      .replace(/Shift/g, '⇧ Shift');
+  }
+  return keys;
+}
 
 // ── Translations ──
 const T = {
-  ru: {
-    tagline: "Горячие клавиши · Формулы · Цепочки действий",
-    tabSearch: "⌘ Поиск",
-    tabAbout: "◎ О приложении",
-    tryLabel: "Попробуй:",
-    suggestions: ["посчитай столбец G и B","найти значение","удалить строку","сумма столбца C","добавить слайд","терминал"],
-    placeholder: 'Например: "посчитай столбец G и B"...',
-    chainTitle: "⛓ Цепочка действий",
-    chainSteps: (n) => `${n} шага`,
-    chainCol: (c) => `столбец ${c}`,
-    chainCopyAll: "Скопировать все формулы",
-    typeFormula: "📊 Формула",
-    typeHotkey: "⌨️ Клавиша",
-    adapted: "✦ Адаптировано",
-    foundChain: (n) => `Цепочка + ${n} результатов`,
-    found: (n) => `Найдено: ${n}`,
-    notFound: (q) => `Ничего не найдено по «${q}»`,
-    notFoundHint: "Попробуй другие слова или включи больше программ",
-    aboutHero: "Ищи горячие клавиши и формулы на русском — просто напиши что хочешь сделать.",
-    h_howto: "Как пользоваться поиском",
-    h_filters: "Фильтры по программам",
-    h_updates: "Обновления",
-    h_errors: "Частые ошибки",
-    rows: [
+  ru:{
+    tagline:"Горячие клавиши · Формулы · Цепочки действий",
+    tabSearch:"⌘ Поиск", tabAbout:"◎ О приложении", tabSettings:"⚙ Настройки",
+    tryLabel:"Попробуй:",
+    suggestions:["посчитай столбец G и B","найти значение","удалить строку","сумма столбца C","добавить слайд","терминал"],
+    placeholder:'Например: "посчитай столбец G и B"...',
+    chainTitle:"⛓ Цепочка действий",
+    chainSteps:n=>`${n} шага`,
+    chainCol:c=>`столбец ${c}`,
+    chainCopyAll:"Скопировать все формулы",
+    typeFormula:"📊 Формула", typeHotkey:"⌨️ Клавиша", adapted:"✦ Адаптировано",
+    foundChain:n=>`Цепочка + ${n} результатов`,
+    found:n=>`Найдено: ${n}`,
+    notFound:q=>`Ничего не найдено по «${q}»`,
+    notFoundHint:"Попробуй другие слова или включи больше программ",
+    aboutHero:"Ищи горячие клавиши и формулы на русском — просто напиши что хочешь сделать.",
+    h_howto:"Как пользоваться поиском", h_filters:"Фильтры по программам",
+    h_updates:"Обновления", h_errors:"Частые ошибки",
+    rows:[
       ["🔍","Пиши по-русски, как обычно","Введи в строку поиска что хочешь сделать: «посчитать сумму», «удалить строку», «найти значение». Приложение само найдёт нужные формулы и горячие клавиши."],
       ["⛓","Цепочки действий","Укажи несколько столбцов — получишь цепочку. Например: «посчитай столбец G и B» выдаст =SUM(G:G) и =SUM(B:B) по отдельности."],
       ["✦","Адаптация под твои столбцы","Напиши «сумма столбца C» — формула подстроится как =SUM(C:C). Такие результаты помечены тегом «Адаптировано»."],
-      ["🏷","Кнопки над строкой поиска","Выбирай нужные программы — поиск ведётся только по ним. Минимум одна всегда активна. По умолчанию — Excel."],
-      ["🔔","Автообновление","Когда выйдет новая версия — в правом нижнем углу появится баннер. Нажми «Установить» — приложение обновится и перезапустится само."],
+      ["🏷","Кнопки над строкой поиска","Выбирай нужные программы — поиск ведётся только по ним. Минимум одна всегда активна."],
+      ["🔔","Автообновление","Когда выйдет новая версия — появится баннер. Нажми «Установить» — приложение обновится и перезапустится само."],
     ],
-    errs: [
-      ["Ничего не найдено","Попробуй переформулировать: вместо «calc» пиши «посчитать». Убедись, что нужная программа включена в фильтрах."],
+    errs:[
+      ["Ничего не найдено","Попробуй переформулировать. Убедись, что нужная программа включена в фильтрах."],
       ["Формула выглядит странно","Если в запросе нет конкретного столбца — подставляется стандартный пример. Просто замени A:A на нужный столбец."],
     ],
-    footer: "RENDERGAMES © 2025",
+    footer:"RENDERGAMES © 2025",
+    // Settings
+    sTitle:"Настройки",
+    sLang:"Язык интерфейса", sTheme:"Тема оформления", sOS:"Платформа клавиатуры", sUpdate:"Автообновление",
+    sLangDesc:"Язык отображения и поиска",
+    sThemeDesc:"Светлая или тёмная тема",
+    sOSDesc:"Под какую ОС адаптировать горячие клавиши",
+    sUpdateDesc:"Проверять обновления при запуске",
+    sDetected:"определено автоматически",
+    dark:"Тёмная", light:"Светлая",
+    on:"Включено", off:"Выключено",
+    updateBanner:v=>`🔔 Новая версия ${v}`,
+    updateBody:"Доступно обновление",
+    install:"Установить",
+    installing:"⏳",
   },
-  en: {
-    tagline: "Hotkeys · Formulas · Action Chains",
-    tabSearch: "⌘ Search",
-    tabAbout: "◎ About",
-    tryLabel: "Try:",
-    suggestions: ["sum column G and B","find value","delete row","column C sum","add slide","terminal"],
-    placeholder: 'e.g. "sum column G and B"...',
-    chainTitle: "⛓ Action Chain",
-    chainSteps: (n) => `${n} steps`,
-    chainCol: (c) => `column ${c}`,
-    chainCopyAll: "Copy all formulas",
-    typeFormula: "📊 Formula",
-    typeHotkey: "⌨️ Hotkey",
-    adapted: "✦ Adapted",
-    foundChain: (n) => `Chain + ${n} results`,
-    found: (n) => `Found: ${n}`,
-    notFound: (q) => `Nothing found for "${q}"`,
-    notFoundHint: "Try different words or enable more programs",
-    aboutHero: "Find hotkeys and formulas in plain English — just type what you want to do.",
-    h_howto: "How to use search",
-    h_filters: "Program filters",
-    h_updates: "Updates",
-    h_errors: "Common issues",
-    rows: [
+  en:{
+    tagline:"Hotkeys · Formulas · Action Chains",
+    tabSearch:"⌘ Search", tabAbout:"◎ About", tabSettings:"⚙ Settings",
+    tryLabel:"Try:",
+    suggestions:["sum column G and B","find value","delete row","column C sum","add slide","terminal"],
+    placeholder:'e.g. "sum column G and B"...',
+    chainTitle:"⛓ Action Chain",
+    chainSteps:n=>`${n} steps`,
+    chainCol:c=>`column ${c}`,
+    chainCopyAll:"Copy all formulas",
+    typeFormula:"📊 Formula", typeHotkey:"⌨️ Hotkey", adapted:"✦ Adapted",
+    foundChain:n=>`Chain + ${n} results`,
+    found:n=>`Found: ${n}`,
+    notFound:q=>`Nothing found for "${q}"`,
+    notFoundHint:"Try different words or enable more programs",
+    aboutHero:"Find hotkeys and formulas in plain English — just type what you want to do.",
+    h_howto:"How to use search", h_filters:"Program filters",
+    h_updates:"Updates", h_errors:"Common issues",
+    rows:[
       ["🔍","Type naturally","Enter what you want to do: 'sum a column', 'delete row', 'find value'. The app will find the right formulas and hotkeys automatically."],
       ["⛓","Action chains","Specify multiple columns to get a chain. For example: 'sum column G and B' returns =SUM(G:G) and =SUM(B:B) separately."],
       ["✦","Adapted to your columns","Type 'sum column C' and the formula adapts to =SUM(C:C). These results are marked with the 'Adapted' tag."],
-      ["🏷","Buttons above search bar","Select the programs you need — search only runs through them. At least one must stay active. Excel is selected by default."],
-      ["🔔","Auto-update","When a new version is released, a banner appears in the bottom-right corner. Click 'Install' — the app updates and restarts automatically."],
+      ["🏷","Buttons above search bar","Select the programs you need — search only runs through them. At least one must stay active."],
+      ["🔔","Auto-update","When a new version is released, a banner appears. Click 'Install' — the app updates and restarts automatically."],
     ],
-    errs: [
-      ["Nothing found","Try rephrasing: instead of 'calc' try 'sum'. Make sure the right program is enabled in filters."],
+    errs:[
+      ["Nothing found","Try rephrasing. Make sure the right program is enabled in filters."],
       ["Formula looks wrong","If no column is specified in the query, a default example is shown. Just replace A:A with your column."],
     ],
-    footer: "RENDERGAMES © 2025",
+    footer:"RENDERGAMES © 2025",
+    sTitle:"Settings",
+    sLang:"Interface language", sTheme:"Appearance", sOS:"Keyboard platform", sUpdate:"Auto-update",
+    sLangDesc:"Language for display and search",
+    sThemeDesc:"Light or dark theme",
+    sOSDesc:"Which OS to adapt hotkeys for",
+    sUpdateDesc:"Check for updates on launch",
+    sDetected:"auto-detected",
+    dark:"Dark", light:"Light",
+    on:"On", off:"Off",
+    updateBanner:v=>`🔔 New version ${v}`,
+    updateBody:"Update available",
+    install:"Install",
+    installing:"⏳",
   }
 };
 
-// ── DB (bilingual) ──
+// ── DB ──
 const DB = {
   Excel:[
-    {id:1, keys:"SUM",        type:"formula",template:"=SUM({col}:{col})",example:"=SUM(A:A)",
+    {id:1, keys:"Ctrl + SUM",   keysDisplay:"SUM", type:"formula",template:"=SUM({col}:{col})",example:"=SUM(A:A)",
       desc:{ru:"Сумма столбца",en:"Sum of a column"},
-      tags:{ru:["сумма","посчитать","столбец","итого","сложить","подсчитать"],en:["sum","total","column","add up","calculate"]}},
-    {id:2, keys:"AVERAGE",    type:"formula",template:"=AVERAGE({col}:{col})",example:"=AVERAGE(A:A)",
+      tags:{ru:["сумма","посчитать","столбец","итого","сложить"],en:["sum","total","column","add up","calculate"]}},
+    {id:2, keys:"AVERAGE", keysDisplay:"AVERAGE", type:"formula",template:"=AVERAGE({col}:{col})",example:"=AVERAGE(A:A)",
       desc:{ru:"Среднее значение",en:"Average value"},
       tags:{ru:["среднее","average","средний"],en:["average","mean","avg"]}},
-    {id:3, keys:"VLOOKUP",    type:"formula",template:"=VLOOKUP({col}2,B:C,2,0)",example:"=VLOOKUP(A2,B:C,2,0)",
+    {id:3, keys:"VLOOKUP", keysDisplay:"VLOOKUP", type:"formula",template:"=VLOOKUP({col}2,B:C,2,0)",example:"=VLOOKUP(A2,B:C,2,0)",
       desc:{ru:"Поиск значения по столбцу",en:"Look up value by column"},
-      tags:{ru:["найти","поиск","vlookup","подтянуть","справочник"],en:["find","search","vlookup","lookup","reference"]}},
-    {id:4, keys:"IF",         type:"formula",template:'=IF({col}1>0,"Да","Нет")',example:'=IF(A1>0,"Yes","No")',
+      tags:{ru:["найти","поиск","vlookup","подтянуть"],en:["find","search","vlookup","lookup"]}},
+    {id:4, keys:"IF", keysDisplay:"IF", type:"formula",template:'=IF({col}1>0,"Да","Нет")',example:'=IF(A1>0,"Yes","No")',
       desc:{ru:"Логическое условие",en:"Logical condition"},
-      tags:{ru:["если","условие","if","логика","проверить"],en:["if","condition","logic","check","else"]}},
-    {id:5, keys:"COUNTIF",    type:"formula",template:'=COUNTIF({col}:{col},"*")',example:'=COUNTIF(A:A,"yes")',
+      tags:{ru:["если","условие","if","логика"],en:["if","condition","logic","check"]}},
+    {id:5, keys:"COUNTIF", keysDisplay:"COUNTIF", type:"formula",template:'=COUNTIF({col}:{col},"*")',example:'=COUNTIF(A:A,"yes")',
       desc:{ru:"Подсчёт ячеек по условию",en:"Count cells by condition"},
-      tags:{ru:["посчитать","количество","countif","сколько раз"],en:["count","countif","how many","occurrences"]}},
-    {id:6, keys:"SUMIF",      type:"formula",template:'=SUMIF({col}:{col},"condition",B:B)',example:'=SUMIF(A:A,"yes",B:B)',
+      tags:{ru:["посчитать","количество","countif","сколько"],en:["count","countif","how many"]}},
+    {id:6, keys:"SUMIF", keysDisplay:"SUMIF", type:"formula",template:'=SUMIF({col}:{col},"cond",B:B)',example:'=SUMIF(A:A,"yes",B:B)',
       desc:{ru:"Сумма по условию",en:"Sum by condition"},
-      tags:{ru:["сумма с условием","sumif","выборочная сумма"],en:["sum if","conditional sum","sumif"]}},
-    {id:7, keys:"MAX / MIN",  type:"formula",template:"=MAX({col}:{col})",example:"=MAX(A:A)",
-      desc:{ru:"Максимальное значение",en:"Maximum value"},
-      tags:{ru:["максимум","минимум","max","min","наибольший"],en:["max","min","maximum","minimum","largest","smallest"]}},
-    {id:8, keys:"ROUND",      type:"formula",template:"=ROUND({col}1,2)",example:"=ROUND(A1,2)",
+      tags:{ru:["сумма с условием","sumif"],en:["sum if","conditional sum","sumif"]}},
+    {id:7, keys:"MAX / MIN", keysDisplay:"MAX / MIN", type:"formula",template:"=MAX({col}:{col})",example:"=MAX(A:A)",
+      desc:{ru:"Максимальное / минимальное",en:"Maximum / minimum value"},
+      tags:{ru:["максимум","минимум","max","min"],en:["max","min","maximum","minimum","largest"]}},
+    {id:8, keys:"ROUND", keysDisplay:"ROUND", type:"formula",template:"=ROUND({col}1,2)",example:"=ROUND(A1,2)",
       desc:{ru:"Округление числа",en:"Round a number"},
-      tags:{ru:["округлить","round","округление"],en:["round","decimal","rounding"]}},
-    {id:9, keys:"IFERROR",    type:"formula",template:'=IFERROR({col}1,"—")',example:'=IFERROR(A1,"—")',
+      tags:{ru:["округлить","round"],en:["round","decimal","rounding"]}},
+    {id:9, keys:"IFERROR", keysDisplay:"IFERROR", type:"formula",template:'=IFERROR({col}1,"—")',example:'=IFERROR(A1,"—")',
       desc:{ru:"Скрыть ошибку в формуле",en:"Hide formula error"},
-      tags:{ru:["ошибка","скрыть ошибку","iferror"],en:["error","hide error","iferror","suppress"]}},
-    {id:10,keys:"INDEX+MATCH",type:"formula",template:"=INDEX(B:B,MATCH({col}2,A:A,0))",example:"=INDEX(B:B,MATCH(A2,A:A,0))",
+      tags:{ru:["ошибка","скрыть ошибку","iferror"],en:["error","hide error","iferror"]}},
+    {id:10,keys:"INDEX+MATCH",keysDisplay:"INDEX+MATCH",type:"formula",template:"=INDEX(B:B,MATCH({col}2,A:A,0))",example:"=INDEX(B:B,MATCH(A2,A:A,0))",
       desc:{ru:"Гибкий поиск (лучше VLOOKUP)",en:"Flexible lookup (better than VLOOKUP)"},
-      tags:{ru:["найти","поиск","index match","гибкий поиск"],en:["find","lookup","index match","flexible search"]}},
-    {id:11,keys:"CONCATENATE",type:"formula",template:'={col}1&" "&{col}2',example:'=A1&" "&B1',
+      tags:{ru:["найти","поиск","index match"],en:["find","lookup","index match"]}},
+    {id:11,keys:"CONCATENATE",keysDisplay:"CONCATENATE",type:"formula",template:'={col}1&" "&{col}2',example:'=A1&" "&B1',
       desc:{ru:"Объединить текст из ячеек",en:"Merge text from cells"},
-      tags:{ru:["объединить","склеить","текст","соединить"],en:["merge","join","concatenate","combine text"]}},
-    {id:12,keys:"TODAY",      type:"formula",template:"=TODAY()",example:"=TODAY()",
+      tags:{ru:["объединить","склеить","текст"],en:["merge","join","concatenate","combine"]}},
+    {id:12,keys:"TODAY",keysDisplay:"TODAY",type:"formula",template:"=TODAY()",example:"=TODAY()",
       desc:{ru:"Текущая дата",en:"Current date"},
-      tags:{ru:["дата","сегодня","today","текущая дата"],en:["date","today","current date"]}},
-    {id:13,keys:"LEN",        type:"formula",template:"=LEN({col}1)",example:"=LEN(A1)",
+      tags:{ru:["дата","сегодня","today"],en:["date","today","current date"]}},
+    {id:13,keys:"LEN",keysDisplay:"LEN",type:"formula",template:"=LEN({col}1)",example:"=LEN(A1)",
       desc:{ru:"Длина текста в ячейке",en:"Text length in cell"},
-      tags:{ru:["длина","символы","len","текст"],en:["length","characters","len","text length"]}},
-    {id:20,keys:"Alt + =",          type:"hotkey",
-      desc:{ru:"Автосумма выделенного диапазона",en:"AutoSum selected range"},
-      tags:{ru:["автосумма","сумма","autosum","быстрая сумма"],en:["autosum","sum","quick sum"]}},
-    {id:21,keys:"Ctrl + Shift + L", type:"hotkey",
-      desc:{ru:"Включить / выключить фильтр",en:"Toggle filter on/off"},
-      tags:{ru:["фильтр","filter","включить фильтр"],en:["filter","toggle filter","autofilter"]}},
-    {id:22,keys:"Ctrl + T",         type:"hotkey",
+      tags:{ru:["длина","символы","len"],en:["length","characters","len"]}},
+    {id:20,keys:"Alt + =",type:"hotkey",
+      desc:{ru:"Автосумма",en:"AutoSum"},
+      tags:{ru:["автосумма","сумма","быстрая сумма"],en:["autosum","sum","quick sum"]}},
+    {id:21,keys:"Ctrl + Shift + L",type:"hotkey",
+      desc:{ru:"Включить / выключить фильтр",en:"Toggle filter"},
+      tags:{ru:["фильтр","включить фильтр"],en:["filter","toggle filter"]}},
+    {id:22,keys:"Ctrl + T",type:"hotkey",
       desc:{ru:"Создать умную таблицу",en:"Create smart table"},
-      tags:{ru:["таблица","умная таблица","создать таблицу"],en:["table","smart table","create table"]}},
-    {id:23,keys:"F4",               type:"hotkey",
+      tags:{ru:["таблица","умная таблица"],en:["table","smart table"]}},
+    {id:23,keys:"F4",type:"hotkey",
       desc:{ru:"Переключить тип ссылки ($A$1)",en:"Toggle reference type ($A$1)"},
-      tags:{ru:["закрепить","абсолютная ссылка","$","fix"],en:["lock","absolute reference","$","fix cell"]}},
-    {id:24,keys:"Ctrl + 1",         type:"hotkey",
-      desc:{ru:"Открыть «Формат ячеек»",en:"Open Format Cells dialog"},
-      tags:{ru:["формат","формат ячеек","форматировать"],en:["format","format cells","formatting"]}},
-    {id:25,keys:"Ctrl + Shift + +", type:"hotkey",
+      tags:{ru:["закрепить","абсолютная ссылка","$"],en:["lock","absolute reference","$"]}},
+    {id:24,keys:"Ctrl + 1",type:"hotkey",
+      desc:{ru:"Открыть «Формат ячеек»",en:"Open Format Cells"},
+      tags:{ru:["формат","формат ячеек"],en:["format","format cells"]}},
+    {id:25,keys:"Ctrl + Shift + +",type:"hotkey",
       desc:{ru:"Вставить строку / столбец",en:"Insert row / column"},
-      tags:{ru:["добавить строку","вставить строку","новая строка"],en:["insert row","add row","new row","insert column"]}},
-    {id:26,keys:"Ctrl + -",         type:"hotkey",
+      tags:{ru:["добавить строку","вставить строку"],en:["insert row","add row","new row"]}},
+    {id:26,keys:"Ctrl + -",type:"hotkey",
       desc:{ru:"Удалить строку / столбец",en:"Delete row / column"},
-      tags:{ru:["удалить строку","удалить столбец"],en:["delete row","remove row","delete column"]}},
-    {id:27,keys:"Ctrl + F",         type:"hotkey",
+      tags:{ru:["удалить строку","удалить столбец"],en:["delete row","remove row"]}},
+    {id:27,keys:"Ctrl + F",type:"hotkey",
       desc:{ru:"Найти в документе",en:"Find in document"},
-      tags:{ru:["найти","поиск","find"],en:["find","search"]}},
-    {id:28,keys:"Ctrl + H",         type:"hotkey",
+      tags:{ru:["найти","поиск"],en:["find","search"]}},
+    {id:28,keys:"Ctrl + H",type:"hotkey",
       desc:{ru:"Найти и заменить",en:"Find and replace"},
-      tags:{ru:["заменить","replace","найти и заменить"],en:["replace","find and replace"]}},
-    {id:29,keys:"Ctrl + Z",         type:"hotkey",
-      desc:{ru:"Отменить действие",en:"Undo action"},
-      tags:{ru:["отменить","undo","назад"],en:["undo","revert","go back"]}},
-    {id:30,keys:"Ctrl + S",         type:"hotkey",
+      tags:{ru:["заменить","найти и заменить"],en:["replace","find and replace"]}},
+    {id:29,keys:"Ctrl + Z",type:"hotkey",
+      desc:{ru:"Отменить действие",en:"Undo"},
+      tags:{ru:["отменить","undo"],en:["undo","revert"]}},
+    {id:30,keys:"Ctrl + S",type:"hotkey",
       desc:{ru:"Сохранить файл",en:"Save file"},
-      tags:{ru:["сохранить","save"],en:["save","save file"]}},
+      tags:{ru:["сохранить"],en:["save"]}},
   ],
   Word:[
-    {id:40,keys:"Ctrl + B / I / U",  type:"hotkey",
+    {id:40,keys:"Ctrl + B / I / U",type:"hotkey",
       desc:{ru:"Жирный / Курсив / Подчёркивание",en:"Bold / Italic / Underline"},
-      tags:{ru:["жирный","курсив","подчеркнуть","bold","форматирование"],en:["bold","italic","underline","formatting"]}},
-    {id:41,keys:"Ctrl + Enter",       type:"hotkey",
+      tags:{ru:["жирный","курсив","подчеркнуть","bold"],en:["bold","italic","underline"]}},
+    {id:41,keys:"Ctrl + Enter",type:"hotkey",
       desc:{ru:"Разрыв страницы",en:"Page break"},
-      tags:{ru:["новая страница","разрыв страницы"],en:["page break","new page"]}},
-    {id:42,keys:"Ctrl + L/E/R/J",     type:"hotkey",
+      tags:{ru:["новая страница","разрыв"],en:["page break","new page"]}},
+    {id:42,keys:"Ctrl + L/E/R/J",type:"hotkey",
       desc:{ru:"Выравнивание текста",en:"Text alignment"},
-      tags:{ru:["выравнивание","по центру","по правому","justify"],en:["align","center","justify","alignment"]}},
-    {id:43,keys:"Ctrl + Alt + 1/2/3", type:"hotkey",
+      tags:{ru:["выравнивание","по центру","justify"],en:["align","center","justify"]}},
+    {id:43,keys:"Ctrl + Alt + 1/2/3",type:"hotkey",
       desc:{ru:"Стиль Заголовок 1/2/3",en:"Heading style 1/2/3"},
-      tags:{ru:["заголовок","стиль","heading","h1","h2"],en:["heading","style","h1","h2","h3"]}},
-    {id:44,keys:"Ctrl + D",           type:"hotkey",
+      tags:{ru:["заголовок","стиль","heading"],en:["heading","style","h1","h2"]}},
+    {id:44,keys:"Ctrl + D",type:"hotkey",
       desc:{ru:"Диалог «Шрифт»",en:"Font dialog"},
-      tags:{ru:["шрифт","размер шрифта","font"],en:["font","font size","typeface"]}},
-    {id:45,keys:"Ctrl + F",           type:"hotkey",
+      tags:{ru:["шрифт","размер шрифта"],en:["font","font size"]}},
+    {id:45,keys:"Ctrl + F",type:"hotkey",
       desc:{ru:"Найти в документе",en:"Find in document"},
-      tags:{ru:["найти","поиск","find"],en:["find","search"]}},
-    {id:46,keys:"Ctrl + Z",           type:"hotkey",
-      desc:{ru:"Отменить действие",en:"Undo action"},
-      tags:{ru:["отменить","undo"],en:["undo","revert"]}},
+      tags:{ru:["найти","поиск"],en:["find","search"]}},
+    {id:46,keys:"Ctrl + Z",type:"hotkey",
+      desc:{ru:"Отменить действие",en:"Undo"},
+      tags:{ru:["отменить"],en:["undo"]}},
   ],
   PowerPoint:[
-    {id:50,keys:"F5",       type:"hotkey",
-      desc:{ru:"Запустить показ с начала",en:"Start slideshow from beginning"},
-      tags:{ru:["показ","запустить","слайд шоу","презентация","play"],en:["slideshow","present","play","start presentation"]}},
-    {id:51,keys:"Shift+F5", type:"hotkey",
+    {id:50,keys:"F5",type:"hotkey",
+      desc:{ru:"Запустить показ с начала",en:"Start slideshow"},
+      tags:{ru:["показ","запустить","презентация"],en:["slideshow","present","play"]}},
+    {id:51,keys:"Shift + F5",type:"hotkey",
       desc:{ru:"Показ с текущего слайда",en:"Start from current slide"},
-      tags:{ru:["показ","текущий слайд"],en:["current slide","slideshow","present"]}},
-    {id:52,keys:"Ctrl + M", type:"hotkey",
+      tags:{ru:["текущий слайд","показ"],en:["current slide","slideshow"]}},
+    {id:52,keys:"Ctrl + M",type:"hotkey",
       desc:{ru:"Добавить новый слайд",en:"Add new slide"},
-      tags:{ru:["новый слайд","добавить слайд","слайд"],en:["new slide","add slide","insert slide"]}},
-    {id:53,keys:"Ctrl + D", type:"hotkey",
+      tags:{ru:["новый слайд","добавить слайд"],en:["new slide","add slide"]}},
+    {id:53,keys:"Ctrl + D",type:"hotkey",
       desc:{ru:"Дублировать слайд / объект",en:"Duplicate slide / object"},
-      tags:{ru:["дублировать","копия слайда","duplicate"],en:["duplicate","copy slide","clone"]}},
-    {id:54,keys:"Ctrl + G", type:"hotkey",
+      tags:{ru:["дублировать","копия слайда"],en:["duplicate","copy slide"]}},
+    {id:54,keys:"Ctrl + G",type:"hotkey",
       desc:{ru:"Группировать объекты",en:"Group objects"},
-      tags:{ru:["группировать","группа","group"],en:["group","group objects"]}},
-    {id:55,keys:"Ctrl + Z", type:"hotkey",
-      desc:{ru:"Отменить действие",en:"Undo action"},
-      tags:{ru:["отменить","undo"],en:["undo","revert"]}},
+      tags:{ru:["группировать","группа"],en:["group","group objects"]}},
+    {id:55,keys:"Ctrl + Z",type:"hotkey",
+      desc:{ru:"Отменить действие",en:"Undo"},
+      tags:{ru:["отменить"],en:["undo"]}},
   ],
   "VS Code":[
-    {id:60,keys:"Ctrl + P",         type:"hotkey",
+    {id:60,keys:"Ctrl + P",type:"hotkey",
       desc:{ru:"Быстро открыть файл",en:"Quick open file"},
-      tags:{ru:["найти файл","открыть файл","quick open"],en:["open file","quick open","find file"]}},
-    {id:61,keys:"Ctrl + Shift + P", type:"hotkey",
+      tags:{ru:["найти файл","открыть файл"],en:["open file","quick open"]}},
+    {id:61,keys:"Ctrl + Shift + P",type:"hotkey",
       desc:{ru:"Командная палитра",en:"Command palette"},
-      tags:{ru:["команда","palette","меню команд"],en:["command","palette","command menu"]}},
-    {id:62,keys:"Alt + ↑/↓",       type:"hotkey",
+      tags:{ru:["команда","меню команд"],en:["command","palette"]}},
+    {id:62,keys:"Alt + ↑/↓",type:"hotkey",
       desc:{ru:"Переместить строку вверх/вниз",en:"Move line up/down"},
-      tags:{ru:["переместить строку","двигать строку","move line"],en:["move line","reorder","line up","line down"]}},
-    {id:63,keys:"Ctrl + /",         type:"hotkey",
+      tags:{ru:["переместить строку","двигать строку"],en:["move line","reorder"]}},
+    {id:63,keys:"Ctrl + /",type:"hotkey",
       desc:{ru:"Закомментировать строку",en:"Comment out line"},
-      tags:{ru:["комментарий","закомментировать","comment"],en:["comment","comment out","toggle comment"]}},
-    {id:64,keys:"Ctrl + D",         type:"hotkey",
+      tags:{ru:["комментарий","закомментировать"],en:["comment","comment out"]}},
+    {id:64,keys:"Ctrl + D",type:"hotkey",
       desc:{ru:"Выделить следующее вхождение",en:"Select next occurrence"},
-      tags:{ru:["мультикурсор","выделить слово","multi cursor"],en:["multi cursor","select word","next occurrence"]}},
-    {id:65,keys:"Ctrl + `",         type:"hotkey",
+      tags:{ru:["мультикурсор","выделить слово"],en:["multi cursor","select word"]}},
+    {id:65,keys:"Ctrl + `",type:"hotkey",
       desc:{ru:"Открыть терминал",en:"Open terminal"},
-      tags:{ru:["терминал","terminal","консоль","открыть терминал"],en:["terminal","console","open terminal"]}},
-    {id:66,keys:"Ctrl + Shift + K", type:"hotkey",
+      tags:{ru:["терминал","консоль"],en:["terminal","console"]}},
+    {id:66,keys:"Ctrl + Shift + K",type:"hotkey",
       desc:{ru:"Удалить строку",en:"Delete line"},
-      tags:{ru:["удалить строку","delete line"],en:["delete line","remove line"]}},
-    {id:67,keys:"Ctrl + B",         type:"hotkey",
+      tags:{ru:["удалить строку"],en:["delete line","remove line"]}},
+    {id:67,keys:"Ctrl + B",type:"hotkey",
       desc:{ru:"Скрыть / показать боковую панель",en:"Toggle sidebar"},
-      tags:{ru:["боковая панель","sidebar","скрыть панель"],en:["sidebar","toggle sidebar","hide panel"]}},
-    {id:68,keys:"Ctrl + Z",         type:"hotkey",
-      desc:{ru:"Отменить действие",en:"Undo action"},
-      tags:{ru:["отменить","undo"],en:["undo","revert"]}},
+      tags:{ru:["боковая панель","sidebar"],en:["sidebar","toggle sidebar"]}},
+    {id:68,keys:"Ctrl + Z",type:"hotkey",
+      desc:{ru:"Отменить действие",en:"Undo"},
+      tags:{ru:["отменить"],en:["undo"]}},
   ],
   Photoshop:[
-    {id:70,keys:"Ctrl + J",         type:"hotkey",
+    {id:70,keys:"Ctrl + J",type:"hotkey",
       desc:{ru:"Дублировать слой",en:"Duplicate layer"},
-      tags:{ru:["дублировать слой","скопировать слой","duplicate"],en:["duplicate layer","copy layer","clone layer"]}},
-    {id:71,keys:"Ctrl + T",         type:"hotkey",
+      tags:{ru:["дублировать слой","скопировать слой"],en:["duplicate layer","copy layer"]}},
+    {id:71,keys:"Ctrl + T",type:"hotkey",
       desc:{ru:"Свободная трансформация",en:"Free transform"},
-      tags:{ru:["трансформация","transform","масштаб","повернуть"],en:["transform","scale","rotate","resize"]}},
-    {id:72,keys:"[ / ]",            type:"hotkey",
-      desc:{ru:"Уменьшить / увеличить кисть",en:"Decrease / increase brush size"},
-      tags:{ru:["кисть","размер кисти","brush size"],en:["brush","brush size","resize brush"]}},
-    {id:73,keys:"Ctrl + Alt + Z",   type:"hotkey",
-      desc:{ru:"Несколько шагов назад (история)",en:"Step backward (history)"},
-      tags:{ru:["история","отменить несколько","много шагов"],en:["history","step back","multiple undo"]}},
-    {id:74,keys:"Ctrl + Shift + S", type:"hotkey",
+      tags:{ru:["трансформация","масштаб","повернуть"],en:["transform","scale","rotate"]}},
+    {id:72,keys:"[ / ]",type:"hotkey",
+      desc:{ru:"Уменьшить / увеличить кисть",en:"Decrease / increase brush"},
+      tags:{ru:["кисть","размер кисти"],en:["brush","brush size"]}},
+    {id:73,keys:"Ctrl + Alt + Z",type:"hotkey",
+      desc:{ru:"Несколько шагов назад",en:"Step backward (history)"},
+      tags:{ru:["история","отменить несколько"],en:["history","step back","multiple undo"]}},
+    {id:74,keys:"Ctrl + Shift + S",type:"hotkey",
       desc:{ru:"Сохранить как",en:"Save as"},
-      tags:{ru:["сохранить как","save as","экспорт"],en:["save as","export"]}},
-    {id:75,keys:"Ctrl+Shift+Alt+E", type:"hotkey",
-      desc:{ru:"Объединить видимые слои в новый",en:"Merge visible layers into new"},
-      tags:{ru:["объединить слои","stamp","flatten"],en:["merge layers","stamp","flatten","combine layers"]}},
+      tags:{ru:["сохранить как","экспорт"],en:["save as","export"]}},
+    {id:75,keys:"Ctrl + Shift + Alt + E",type:"hotkey",
+      desc:{ru:"Объединить видимые слои в новый",en:"Merge visible to new layer"},
+      tags:{ru:["объединить слои","stamp"],en:["merge layers","stamp","flatten"]}},
   ]
 };
 
@@ -281,23 +354,23 @@ const PROGRAMS = Object.keys(DB);
 const COLORS = {Excel:"#22c55e",Word:"#3b82f6",PowerPoint:"#f97316","VS Code":"#a78bfa",Photoshop:"#38bdf8"};
 const ICONS  = {Excel:"⊞",Word:"W",PowerPoint:"P","VS Code":"</>",Photoshop:"Ps"};
 
-// ── State ──
-let state = {query:"", progs:["Excel"], tab:"search", lang:"ru"};
+// ── App State ──
+let state = {query:"", progs:["Excel"], tab:"search"};
 
-// ── Logic ──
+// ── Helpers ──
 function extractColumns(q){
-  const parts = q.toUpperCase().split(/[\s,+иand&]+/);
+  const parts=q.toUpperCase().split(/[\s,+иand&]+/);
   const cols=[];
   for(const p of parts) if(/^[A-Z]{1,2}$/.test(p.trim())) cols.push(p.trim());
   return [...new Set(cols)];
 }
 
+function getDesc(item){ return typeof item.desc==='object'?item.desc[settings.lang]:item.desc; }
+function getTags(item){ return typeof item.tags==='object'?(item.tags[settings.lang]||[]):(item.tags||[]); }
+
 function scoreItem(query,item){
   const q=query.toLowerCase().trim(); let s=0;
-  const lang=state.lang;
-  const desc = typeof item.desc==='object' ? item.desc[lang] : item.desc;
-  const tags = typeof item.tags==='object' ? (item.tags[lang]||[]) : (item.tags||[]);
-  const fields=[desc.toLowerCase(), item.keys.toLowerCase(), ...tags];
+  const fields=[getDesc(item).toLowerCase(), item.keys.toLowerCase(), ...getTags(item)];
   for(const f of fields){
     if(f===q){s+=10;continue}
     if(f.includes(q)){s+=5;continue}
@@ -324,24 +397,21 @@ function buildChain(query,items){
   if(!base) return null;
   return cols.map((col,i)=>({
     step:i+1, col,
-    formula: base.template ? base.template.replace(/\{col\}/g,col) : (base.example||base.keys),
-    desc: typeof base.desc==='object' ? base.desc[state.lang] : base.desc,
-    program:base.program
+    formula:base.template?base.template.replace(/\{col\}/g,col):(base.example||base.keys),
+    desc:getDesc(base), program:base.program
   }));
 }
 
-// ── Copy ──
 function copyText(text,btn){
   navigator.clipboard.writeText(text).then(()=>{
+    const orig=btn.textContent;
     btn.textContent="✓";
     btn.style.color="#4ade80";
     btn.style.borderColor="rgba(34,197,94,0.5)";
     btn.style.background="rgba(34,197,94,0.2)";
     setTimeout(()=>{
-      btn.textContent="⎘";
-      btn.style.color="#64748b";
-      btn.style.borderColor="rgba(255,255,255,0.12)";
-      btn.style.background="rgba(255,255,255,0.06)";
+      btn.textContent=orig;
+      btn.style.color="";btn.style.borderColor="";btn.style.background="";
     },1400);
   });
 }
@@ -361,22 +431,103 @@ function el(tag,style,html){
   return e;
 }
 
-// ── Lang switcher ──
-function makeLangBtn(){
-  const wrap=el('div',"display:flex;gap:3px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:3px");
-  ['ru','en'].forEach(l=>{
-    const on=state.lang===l;
-    const btn=el('button',`background:${on?"rgba(99,102,241,0.25)":"transparent"};border:1px solid ${on?"rgba(99,102,241,0.4)":"transparent"};border-radius:6px;padding:4px 10px;font-size:11px;font-weight:800;color:${on?"#c7d2fe":"#475569"};cursor:pointer;transition:all 0.18s;letter-spacing:1px`);
-    btn.textContent=l.toUpperCase();
-    btn.onclick=()=>{state.lang=l;state.query="";render()};
-    wrap.appendChild(btn);
-  });
+// ── Settings tab ──
+function renderSettings(){
+  const t=T[settings.lang];
+  const wrap=el('div',"animation:fadeUp 0.35s ease both");
+
+  function section(title){
+    const d=el('p',"color:var(--text3);font-size:10px;text-transform:uppercase;letter-spacing:2px;font-weight:800;margin:24px 0 10px");
+    d.textContent=title; return d;
+  }
+
+  function settingRow(icon,title,desc,control){
+    const row=el('div',"display:flex;align-items:center;justify-content:space-between;gap:16px;background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:14px 16px;margin-bottom:8px");
+    const left=el('div',"display:flex;align-items:center;gap:12px;flex:1;min-width:0");
+    const iconEl=el('div',"font-size:18px;flex-shrink:0");
+    iconEl.textContent=icon;
+    const text=el('div',"");
+    const titleEl=el('div',"font-size:12px;font-weight:700;color:var(--text);margin-bottom:3px");
+    titleEl.textContent=title;
+    const descEl=el('div',"font-size:11px;color:var(--text2)");
+    descEl.textContent=desc;
+    text.appendChild(titleEl);
+    text.appendChild(descEl);
+    left.appendChild(iconEl);
+    left.appendChild(text);
+    row.appendChild(left);
+    row.appendChild(control);
+    return row;
+  }
+
+  function segmented(options, current, onChange){
+    const wrap=el('div',"display:flex;gap:2px;background:rgba(0,0,0,0.2);border:1px solid var(--border);border-radius:8px;padding:3px;flex-shrink:0");
+    options.forEach(({val,label})=>{
+      const on=current===val;
+      const btn=el('button',`background:${on?"rgba(99,102,241,0.3)":"transparent"};border:1px solid ${on?"rgba(99,102,241,0.5)":"transparent"};border-radius:6px;padding:5px 10px;font-size:11px;font-weight:700;color:${on?"#c7d2fe":"var(--text2)"};cursor:pointer;transition:all 0.18s;white-space:nowrap`);
+      btn.textContent=label;
+      btn.onclick=()=>{ onChange(val); };
+      wrap.appendChild(btn);
+    });
+    return wrap;
+  }
+
+  function toggle(current, onChange){
+    const on=current;
+    const t=T[settings.lang];
+    const btn=el('button',`background:${on?"rgba(34,197,94,0.15)":"rgba(255,255,255,0.04)"};border:1px solid ${on?"rgba(34,197,94,0.4)":"var(--border)"};border-radius:20px;padding:6px 14px;font-size:11px;font-weight:700;color:${on?"#4ade80":"var(--text2)"};cursor:pointer;transition:all 0.2s;display:flex;align-items:center;gap:6px;flex-shrink:0`);
+    btn.innerHTML=`<span style="width:8px;height:8px;border-radius:50%;background:${on?"#4ade80":"#475569"};display:inline-block;transition:background 0.2s"></span>${on?t.on:t.off}`;
+    btn.onclick=()=>onChange(!current);
+    return btn;
+  }
+
+  // Lang
+  wrap.appendChild(section(t.sLang));
+  wrap.appendChild(settingRow("🌐", t.sLang, t.sLangDesc,
+    segmented([{val:'ru',label:'RU'},{val:'en',label:'EN'}], settings.lang, val=>{
+      settings.lang=val; saveSettings(settings); render();
+    })
+  ));
+
+  // Theme
+  wrap.appendChild(section(t.sTheme));
+  wrap.appendChild(settingRow("🎨", t.sTheme, t.sThemeDesc,
+    segmented([{val:'dark',label:t.dark},{val:'light',label:t.light}], settings.theme, val=>{
+      settings.theme=val; saveSettings(settings); applyTheme(); render();
+    })
+  ));
+
+  // OS
+  wrap.appendChild(section(t.sOS));
+  const osRow = settingRow("💻", t.sOS,
+    `${t.sOSDesc} (${t.sDetected}: ${detectedOS})`,
+    segmented([{val:'win',label:'Windows'},{val:'mac',label:'macOS'},{val:'linux',label:'Linux'}], settings.os, val=>{
+      settings.os=val; saveSettings(settings); render();
+    })
+  );
+  wrap.appendChild(osRow);
+
+  // Preview hotkey
+  const preview=el('div',"background:rgba(99,102,241,0.06);border:1px solid rgba(99,102,241,0.15);border-radius:10px;padding:12px 16px;margin-bottom:8px;font-size:11px;color:var(--text2)");
+  const exKey = adaptKeys("Ctrl + Z");
+  preview.innerHTML=`<span style="color:var(--text3)">${settings.lang==='ru'?'Например:':'Example:'}</span> <span style="background:rgba(99,102,241,0.15);border:1px solid rgba(99,102,241,0.3);border-radius:5px;padding:2px 8px;color:#c7d2fe;font-weight:700">${exKey}</span>`;
+  wrap.appendChild(preview);
+
+  // Auto-update
+  wrap.appendChild(section(t.sUpdate));
+  wrap.appendChild(settingRow("🔔", t.sUpdate, t.sUpdateDesc,
+    toggle(settings.autoUpdate, val=>{
+      settings.autoUpdate=val; saveSettings(settings); render();
+    })
+  ));
+
+  wrap.appendChild(el('div',"text-align:center;color:var(--text3);font-size:10px;margin-top:28px;padding-bottom:8px",t.footer));
   return wrap;
 }
 
 // ── Chain card ──
 function renderChainCard(chain){
-  const t=T[state.lang];
+  const t=T[settings.lang];
   const prog=chain[0]?.program||"Excel";
   const color=COLORS[prog]||"#818cf8";
   const wrap=el('div',"position:relative;overflow:hidden;background:rgba(12,10,28,0.97);border:1px solid rgba(139,92,246,0.35);border-radius:14px;padding:18px 20px;margin-bottom:10px;animation:fadeUp 0.3s ease both");
@@ -390,20 +541,15 @@ function renderChainCard(chain){
   chain.forEach(step=>{
     const row=el('div',"display:flex;align-items:flex-start;gap:12px");
     const num=el('div',`width:28px;height:28px;border-radius:50%;flex-shrink:0;margin-top:2px;background:${color}20;border:1.5px solid ${color}60;display:flex;align-items:center;justify-content:center;font-size:12px;color:${color};font-weight:800`);
-    num.textContent=step.step;
-    row.appendChild(num);
+    num.textContent=step.step; row.appendChild(num);
     const content=el('div',"flex:1");
     const meta=el('div',"display:flex;align-items:center;gap:8px;margin-bottom:6px;flex-wrap:wrap");
     meta.innerHTML=`<span style="background:rgba(99,102,241,0.18);border:1px solid rgba(99,102,241,0.4);border-radius:6px;padding:3px 10px;font-size:12px;color:#c7d2fe;font-weight:700">${t.chainCol(step.col)}</span><span style="font-size:11px;color:#475569">${step.desc}</span>`;
     content.appendChild(meta);
     const fr=el('div',"display:flex;align-items:center;gap:8px");
     const fb=el('div',"background:rgba(14,165,233,0.1);border:1px solid rgba(14,165,233,0.3);border-radius:8px;padding:8px 14px;font-size:13px;color:#bae6fd;font-weight:700;flex:1;word-break:break-all");
-    fb.textContent=step.formula;
-    fr.appendChild(fb);
-    fr.appendChild(makeCopyBtn(step.formula));
-    content.appendChild(fr);
-    row.appendChild(content);
-    steps.appendChild(row);
+    fb.textContent=step.formula; fr.appendChild(fb); fr.appendChild(makeCopyBtn(step.formula));
+    content.appendChild(fr); row.appendChild(content); steps.appendChild(row);
   });
   wrap.appendChild(steps);
 
@@ -416,16 +562,18 @@ function renderChainCard(chain){
 
 // ── Result card ──
 function renderResultCard(item,idx,detectedCols){
-  const t=T[state.lang];
+  const t=T[settings.lang];
   const color=COLORS[item.program]||"#818cf8";
-  const desc = typeof item.desc==='object' ? item.desc[state.lang] : item.desc;
+  const desc=getDesc(item);
+  const displayKeys=adaptKeys(item.keys);
   let display=item.example||"";
   let adapted=false;
   if(item.template&&detectedCols.length>0){
     display=item.template.replace(/\{col\}/g,detectedCols[0]);
     adapted=true;
   }
-  const card=el('div',`background:rgba(12,12,22,0.92);border:1px solid rgba(255,255,255,0.06);border-left:3px solid ${color};border-radius:12px;padding:14px 18px;display:flex;align-items:flex-start;gap:14px;animation:fadeUp 0.3s ease ${idx*0.04}s both`);
+
+  const card=el('div',`background:var(--bg2);border:1px solid var(--card-border);border-left:3px solid ${color};border-radius:12px;padding:14px 18px;display:flex;align-items:flex-start;gap:14px;animation:fadeUp 0.3s ease ${idx*0.04}s both`);
 
   const progTag=el('div',`background:${color}14;border:1px solid ${color}40;border-radius:7px;padding:3px 8px;font-size:10px;color:${color};font-weight:800;text-transform:uppercase;white-space:nowrap;margin-top:2px`);
   progTag.textContent=`${ICONS[item.program]} ${item.program}`;
@@ -435,7 +583,7 @@ function renderResultCard(item,idx,detectedCols){
   const meta=el('div',"display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-bottom:5px");
 
   const keyBadge=el('span',"background:rgba(99,102,241,0.15);border:1px solid rgba(99,102,241,0.3);border-radius:6px;padding:3px 10px;font-size:13px;color:#c7d2fe;font-weight:700");
-  keyBadge.textContent=item.keys;
+  keyBadge.textContent=displayKeys;
   meta.appendChild(keyBadge);
 
   const isFormula=item.type==="formula";
@@ -443,21 +591,16 @@ function renderResultCard(item,idx,detectedCols){
   typeBadge.textContent=isFormula?t.typeFormula:t.typeHotkey;
   meta.appendChild(typeBadge);
 
-  if(adapted){
-    meta.appendChild(el('span',"font-size:10px;padding:2px 8px;border-radius:999px;background:rgba(14,165,233,0.1);border:1px solid rgba(14,165,233,0.3);color:#38bdf8",t.adapted));
-  }
+  if(adapted) meta.appendChild(el('span',"font-size:10px;padding:2px 8px;border-radius:999px;background:rgba(14,165,233,0.1);border:1px solid rgba(14,165,233,0.3);color:#38bdf8",t.adapted));
   body.appendChild(meta);
 
-  const descEl=el('p',"margin:0 0 7px;color:#64748b;font-size:12px");
-  descEl.textContent=desc;
-  body.appendChild(descEl);
+  const descEl=el('p',"margin:0 0 7px;color:var(--text2);font-size:12px");
+  descEl.textContent=desc; body.appendChild(descEl);
 
   if(display){
     const fr=el('div',"display:flex;align-items:center;gap:8px");
-    const fb=el('div',"background:rgba(0,0,0,0.4);border:1px solid rgba(255,255,255,0.07);border-radius:7px;padding:6px 12px;font-size:12px;color:#93c5fd;flex:1;word-break:break-all;font-weight:600");
-    fb.textContent=display;
-    fr.appendChild(fb);
-    fr.appendChild(makeCopyBtn(display));
+    const fb=el('div',"background:rgba(0,0,0,0.3);border:1px solid var(--border);border-radius:7px;padding:6px 12px;font-size:12px;color:#93c5fd;flex:1;word-break:break-all;font-weight:600");
+    fb.textContent=display; fr.appendChild(fb); fr.appendChild(makeCopyBtn(display));
     body.appendChild(fr);
   }
   card.appendChild(body);
@@ -466,26 +609,26 @@ function renderResultCard(item,idx,detectedCols){
 
 // ── About tab ──
 function renderAbout(){
-  const t=T[state.lang];
+  const t=T[settings.lang];
   const wrap=el('div',"animation:fadeUp 0.35s ease both");
 
   function infoRow(icon,title,body){
-    const d=el('div',"display:flex;gap:14px;background:rgba(255,255,255,0.025);border:1px solid rgba(255,255,255,0.07);border-radius:10px;padding:14px 16px;margin-bottom:8px");
-    d.innerHTML=`<span style="font-size:20px;flex-shrink:0;line-height:1;margin-top:1px">${icon}</span><div><div style="font-size:12px;font-weight:700;color:#c7d2fe;margin-bottom:5px">${title}</div><div style="font-size:12px;color:#64748b;line-height:1.65">${body}</div></div>`;
+    const d=el('div',"display:flex;gap:14px;background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:8px");
+    d.innerHTML=`<span style="font-size:20px;flex-shrink:0;line-height:1;margin-top:1px">${icon}</span><div><div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:5px">${title}</div><div style="font-size:12px;color:var(--text2);line-height:1.65">${body}</div></div>`;
     return d;
   }
   function errRow(title,fix){
     const d=el('div',"background:rgba(239,68,68,0.05);border:1px solid rgba(239,68,68,0.18);border-radius:10px;padding:14px 16px;margin-bottom:8px");
-    d.innerHTML=`<div style="font-size:12px;font-weight:700;color:#fca5a5;margin-bottom:5px">⚠ ${title}</div><div style="font-size:12px;color:#64748b;line-height:1.65">${fix}</div>`;
+    d.innerHTML=`<div style="font-size:12px;font-weight:700;color:#fca5a5;margin-bottom:5px">⚠ ${title}</div><div style="font-size:12px;color:var(--text2);line-height:1.65">${fix}</div>`;
     return d;
   }
   function heading(txt){
-    const d=el('p',"color:#334155;font-size:10px;text-transform:uppercase;letter-spacing:2px;font-weight:800;margin:24px 0 10px");
+    const d=el('p',"color:var(--text3);font-size:10px;text-transform:uppercase;letter-spacing:2px;font-weight:800;margin:24px 0 10px");
     d.textContent=txt; return d;
   }
 
   const hero=el('div',"background:linear-gradient(135deg,rgba(79,70,229,0.1),rgba(14,165,233,0.07));border:1px solid rgba(99,102,241,0.2);border-radius:16px;padding:24px;text-align:center;margin-bottom:6px");
-  hero.innerHTML=`<div style="font-size:32px;margin-bottom:10px">⌘</div><h2 style="margin:0 0 5px;font-size:20px;font-weight:900;color:#e2e8f0;letter-spacing:-0.5px">SearchCopy</h2><p style="margin:0 0 10px;color:#818cf8;font-size:10px;letter-spacing:2.5px;text-transform:uppercase">by RENDERGAMES</p><p style="margin:0;color:#475569;font-size:12px;line-height:1.6">${t.aboutHero}</p>`;
+  hero.innerHTML=`<div style="font-size:32px;margin-bottom:10px">⌘</div><h2 style="margin:0 0 5px;font-size:20px;font-weight:900;color:var(--text);letter-spacing:-0.5px">SearchCopy</h2><p style="margin:0 0 10px;color:#818cf8;font-size:10px;letter-spacing:2.5px;text-transform:uppercase">by RENDERGAMES</p><p style="margin:0;color:var(--text2);font-size:12px;line-height:1.6">${t.aboutHero}</p>`;
   wrap.appendChild(hero);
 
   wrap.appendChild(heading(t.h_howto));
@@ -496,37 +639,32 @@ function renderAbout(){
   wrap.appendChild(infoRow(t.rows[4][0],t.rows[4][1],t.rows[4][2]));
   wrap.appendChild(heading(t.h_errors));
   t.errs.forEach(r=>wrap.appendChild(errRow(r[0],r[1])));
-  wrap.appendChild(el('div',"text-align:center;color:#1e293b;font-size:10px;margin-top:28px;padding-bottom:8px",t.footer));
+  wrap.appendChild(el('div',"text-align:center;color:var(--text3);font-size:10px;margin-top:28px;padding-bottom:8px",t.footer));
   return wrap;
 }
 
 // ── Main render ──
 function render(){
-  const t=T[state.lang];
+  const t=T[settings.lang];
   const app=document.getElementById('app');
   app.innerHTML='';
 
   // Header
   const hdr=el('div',"text-align:center;margin-bottom:30px");
-  const topRow=el('div',"display:flex;justify-content:center;align-items:center;gap:12px;margin-bottom:14px;position:relative");
-  const badge=el('div',"display:inline-flex;align-items:center;gap:8px;background:rgba(99,102,241,0.1);border:1px solid rgba(99,102,241,0.22);border-radius:999px;padding:5px 16px;font-size:10px;color:#818cf8;letter-spacing:2.5px;text-transform:uppercase");
-  badge.innerHTML=`<span style="animation:pulse 2.5s infinite">●</span> RENDERGAMES`;
-  topRow.appendChild(badge);
-
-  // Lang switcher next to badge
-  const langWrap=el('div',"position:absolute;right:0;top:50%;transform:translateY(-50%)");
-  langWrap.appendChild(makeLangBtn());
-  topRow.appendChild(langWrap);
-
-  hdr.appendChild(topRow);
-  hdr.innerHTML+=`<h1 style="font-size:clamp(30px,6vw,48px);font-weight:900;margin:0 0 7px;background:linear-gradient(135deg,#f1f5f9 0%,#c7d2fe 50%,#818cf8 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:-2px;line-height:1">SearchCopy</h1><p style="color:#334155;font-size:11px;margin:0;letter-spacing:0.5px">${t.tagline}</p>`;
+  hdr.innerHTML=`
+    <div style="display:inline-flex;align-items:center;gap:8px;background:var(--badge-bg);border:1px solid var(--badge-border);border-radius:999px;padding:5px 16px;margin-bottom:14px;font-size:10px;color:#818cf8;letter-spacing:2.5px;text-transform:uppercase">
+      <span style="animation:pulse 2.5s infinite">●</span> RENDERGAMES
+    </div>
+    <h1 style="font-size:clamp(30px,6vw,48px);font-weight:900;margin:0 0 7px;background:linear-gradient(135deg,#f1f5f9 0%,#c7d2fe 50%,#818cf8 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:-2px;line-height:1">SearchCopy</h1>
+    <p style="color:var(--text3);font-size:11px;margin:0;letter-spacing:0.5px">${t.tagline}</p>
+  `;
   app.appendChild(hdr);
 
   // Tabs
-  const tabBar=el('div',"display:flex;gap:4px;background:rgba(255,255,255,0.025);border:1px solid rgba(255,255,255,0.07);border-radius:12px;padding:4px;margin-bottom:22px");
-  [{id:"search",label:t.tabSearch},{id:"about",label:t.tabAbout}].forEach(tb=>{
+  const tabBar=el('div',"display:flex;gap:4px;background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:4px;margin-bottom:22px");
+  [{id:"search",label:t.tabSearch},{id:"about",label:t.tabAbout},{id:"settings",label:t.tabSettings}].forEach(tb=>{
     const on=state.tab===tb.id;
-    const btn=el('button',`flex:1;background:${on?"rgba(99,102,241,0.18)":"transparent"};border:1px solid ${on?"rgba(99,102,241,0.35)":"transparent"};border-radius:9px;padding:9px 16px;font-size:12px;font-weight:700;color:${on?"#c7d2fe":"#475569"};cursor:pointer;transition:all 0.2s;letter-spacing:0.3px`);
+    const btn=el('button',`flex:1;background:${on?"rgba(99,102,241,0.18)":"transparent"};border:1px solid ${on?"rgba(99,102,241,0.35)":"transparent"};border-radius:9px;padding:9px 16px;font-size:12px;font-weight:700;color:${on?"#c7d2fe":"var(--text2)"};cursor:pointer;transition:all 0.2s;letter-spacing:0.3px`);
     btn.textContent=tb.label;
     btn.onclick=()=>{state.tab=tb.id;render()};
     tabBar.appendChild(btn);
@@ -534,6 +672,7 @@ function render(){
   app.appendChild(tabBar);
 
   if(state.tab==="about"){app.appendChild(renderAbout());return;}
+  if(state.tab==="settings"){app.appendChild(renderSettings());return;}
 
   // Search tab
   const sw=el('div',"animation:fadeUp 0.3s ease both");
@@ -543,7 +682,7 @@ function render(){
   PROGRAMS.forEach(p=>{
     const on=state.progs.includes(p);
     const c=COLORS[p];
-    const btn=el('button',`background:${on?c+"16":"rgba(255,255,255,0.03)"};border:1px solid ${on?c+"70":"rgba(255,255,255,0.07)"};color:${on?c:"#475569"};border-radius:999px;padding:5px 14px;font-size:11px;font-weight:700;cursor:pointer;transition:all 0.18s;display:flex;align-items:center;gap:5px`);
+    const btn=el('button',`background:${on?c+"16":"var(--bg3)"};border:1px solid ${on?c+"70":"var(--border)"};color:${on?c:"var(--text2)"};border-radius:999px;padding:5px 14px;font-size:11px;font-weight:700;cursor:pointer;transition:all 0.18s;display:flex;align-items:center;gap:5px`);
     btn.innerHTML=`<span style="font-size:10px">${ICONS[p]}</span>${p}`;
     btn.onclick=()=>{
       if(on&&state.progs.length===1) return;
@@ -561,10 +700,10 @@ function render(){
   const input=document.createElement('input');
   input.value=state.query;
   input.placeholder=t.placeholder;
-  input.style.cssText="width:100%;background:rgba(12,12,22,0.98);border:1px solid rgba(255,255,255,0.07);border-radius:14px;padding:16px 46px 16px 48px;font-size:15px;color:#e2e8f0;outline:none;font-family:inherit;transition:border 0.25s";
+  input.style.cssText="width:100%;background:var(--input-bg);border:1px solid var(--border);border-radius:14px;padding:16px 46px 16px 48px;font-size:15px;color:var(--text);outline:none;font-family:inherit;transition:border 0.25s";
   input.oninput=e=>{state.query=e.target.value;renderResults()};
   input.onfocus=()=>{iw.style.boxShadow="0 0 0 2px rgba(99,102,241,0.4),0 24px 60px rgba(0,0,0,0.55)";input.style.borderColor="rgba(99,102,241,0.55)"};
-  input.onblur=()=>{iw.style.boxShadow="0 8px 40px rgba(0,0,0,0.4)";input.style.borderColor="rgba(255,255,255,0.07)"};
+  input.onblur=()=>{iw.style.boxShadow="0 8px 40px rgba(0,0,0,0.4)";input.style.borderColor="var(--border)"};
   iw.appendChild(input);
 
   const clrBtn=el('button',"position:absolute;right:14px;top:50%;transform:translateY(-50%);background:rgba(255,255,255,0.07);border:none;color:#64748b;width:26px;height:26px;border-radius:50%;cursor:pointer;font-size:12px;display:flex;align-items:center;justify-content:center","✕");
@@ -576,13 +715,13 @@ function render(){
   // Suggestions
   const sugWrap=el('div',"margin-bottom:28px");
   sugWrap.style.display=state.query?"none":"block";
-  sugWrap.appendChild(el('p',"color:#1e293b;font-size:10px;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:8px",t.tryLabel));
+  sugWrap.appendChild(el('p',"color:var(--text3);font-size:10px;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:8px",t.tryLabel));
   const sugRow=el('div',"display:flex;flex-wrap:wrap;gap:6px");
   t.suggestions.forEach(s=>{
-    const btn=el('button',"background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:7px;padding:5px 11px;font-size:11px;color:#475569;cursor:pointer;transition:all 0.15s");
+    const btn=el('button',"background:var(--bg3);border:1px solid var(--border);border-radius:7px;padding:5px 11px;font-size:11px;color:var(--text2);cursor:pointer;transition:all 0.15s");
     btn.textContent=s;
     btn.onmouseenter=()=>{btn.style.color="#a5b4fc";btn.style.borderColor="rgba(99,102,241,0.3)"};
-    btn.onmouseleave=()=>{btn.style.color="#475569";btn.style.borderColor="rgba(255,255,255,0.06)"};
+    btn.onmouseleave=()=>{btn.style.color="";btn.style.borderColor=""};
     btn.onclick=()=>{state.query=s;render();document.querySelector('input').focus()};
     sugRow.appendChild(btn);
   });
@@ -606,7 +745,7 @@ function render(){
     if(clrBtn) clrBtn.style.display=q?"flex":"none";
 
     if(chain||results.length>0){
-      const label=el('p',"color:#1e293b;font-size:10px;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:12px");
+      const label=el('p',"color:var(--text3);font-size:10px;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:12px");
       label.textContent=chain?t.foundChain(results.length):t.found(results.length);
       rw.appendChild(label);
       if(chain) rw.appendChild(renderChainCard(chain));
@@ -614,48 +753,36 @@ function render(){
       results.forEach((item,i)=>list.appendChild(renderResultCard(item,i,cols)));
       rw.appendChild(list);
     } else if(q.trim().length>1){
-      const empty=el('div',"text-align:center;padding:60px 20px;color:#1e293b");
-      empty.innerHTML=`<div style="font-size:36px;margin-bottom:12px;opacity:0.4">⌕</div><p style="margin:0;font-size:13px">${t.notFound(q)}</p><p style="margin:6px 0 0;font-size:11px;color:#0f172a">${t.notFoundHint}</p>`;
+      const empty=el('div',"text-align:center;padding:60px 20px;color:var(--text3)");
+      empty.innerHTML=`<div style="font-size:36px;margin-bottom:12px;opacity:0.4">⌕</div><p style="margin:0;font-size:13px">${t.notFound(q)}</p><p style="margin:6px 0 0;font-size:11px;color:var(--text3)">${t.notFoundHint}</p>`;
       rw.appendChild(empty);
     }
   }
 }
 
-render();
-
 // ── Auto-updater ──
-async function checkForUpdates() {
-  try {
-    const { check } = await import('@tauri-apps/plugin-updater');
-    const { relaunch } = await import('@tauri-apps/plugin-process');
+async function checkForUpdates(){
+  if(!settings.autoUpdate) return;
+  try{
+    const {check} = await import('@tauri-apps/plugin-updater');
+    const {relaunch} = await import('@tauri-apps/plugin-process');
     const update = await check();
-    if (!update) return;
-
-    const banner = document.createElement('div');
-    banner.style.cssText = 'position:fixed;bottom:60px;right:20px;background:rgba(12,10,28,0.97);border:1px solid rgba(99,102,241,0.4);border-radius:12px;padding:14px 18px;z-index:999;display:flex;align-items:center;gap:14px;backdrop-filter:blur(20px);box-shadow:0 8px 40px rgba(0,0,0,0.6);animation:fadeUp 0.4s ease both;max-width:320px';
-    banner.innerHTML = `
-      <div style="flex:1">
-        <div style="font-size:11px;font-weight:800;color:#c7d2fe;margin-bottom:3px">🔔 Новая версия ${update.version}</div>
-        <div style="font-size:10px;color:#475569">${update.body || 'Доступно обновление'}</div>
-      </div>
-      <button id="install-btn" style="background:linear-gradient(135deg,#4f46e5,#7c3aed);border:none;border-radius:8px;padding:7px 14px;font-size:11px;font-weight:800;color:#fff;cursor:pointer;white-space:nowrap;font-family:inherit">Установить</button>
-    `;
+    if(!update) return;
+    const t=T[settings.lang];
+    const banner=el('div',"position:fixed;bottom:60px;right:20px;background:rgba(12,10,28,0.97);border:1px solid rgba(99,102,241,0.4);border-radius:12px;padding:14px 18px;z-index:999;display:flex;align-items:center;gap:14px;backdrop-filter:blur(20px);box-shadow:0 8px 40px rgba(0,0,0,0.6);animation:fadeUp 0.4s ease both;max-width:320px");
+    banner.innerHTML=`<div style="flex:1"><div style="font-size:11px;font-weight:800;color:#c7d2fe;margin-bottom:3px">${t.updateBanner(update.version)}</div><div style="font-size:10px;color:#475569">${update.body||t.updateBody}</div></div><button id="install-btn" style="background:linear-gradient(135deg,#4f46e5,#7c3aed);border:none;border-radius:8px;padding:7px 14px;font-size:11px;font-weight:800;color:#fff;cursor:pointer;white-space:nowrap;font-family:inherit">${t.install}</button>`;
     document.body.appendChild(banner);
-
-    document.getElementById('install-btn').onclick = async () => {
-      document.getElementById('install-btn').textContent = '⏳';
+    document.getElementById('install-btn').onclick=async()=>{
+      document.getElementById('install-btn').textContent=t.installing;
       await update.downloadAndInstall();
       await relaunch();
     };
-  } catch(e) {
-    console.log('Updater:', e);
-  }
+  }catch(e){ console.log('Updater:',e); }
 }
 
-if (window.__TAURI__) {
-  setTimeout(checkForUpdates, 2000);
-}
+if(window.__TAURI__) setTimeout(checkForUpdates, 2000);
 
+render();
 </script>
 </body>
 </html>

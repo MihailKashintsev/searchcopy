@@ -347,7 +347,7 @@ function AboutTab() {
       <ErrRow title="Формула выглядит странно" fix='Если в запросе нет конкретного столбца — подставляется стандартный пример. Просто замени "A:A" на нужный столбец.' />
       <ErrRow title='Кнопка "Копировать" не работает' fix="Браузер мог заблокировать доступ к буферу. В десктопной версии (.dmg / .exe) этой проблемы нет." />
 
-      <div style={{ textAlign:"center", color:"#1e293b", fontSize:"10px", marginTop:"28px", paddingBottom:"8px" }}>RENDERGAMES © 2025</div>
+      <div style={{ textAlign:"center", color:"#1e293b", fontSize:"10px", marginTop:"28px", paddingBottom:"8px" }}>RENDERGAMES © 2026</div>
     </div>
   );
 }
