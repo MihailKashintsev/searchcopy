@@ -1,6 +1,6 @@
 {
   "productName": "SearchCopy",
-  "version": "1.2.2",
+  "version": "1.2.3",
   "identifier": "com.rendergames.searchcopy",
   "build": {
     "frontendDist": "../ui"
