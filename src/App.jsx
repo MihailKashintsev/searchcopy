@@ -379,7 +379,7 @@ export default function App() {
   const suggestions = ["посчитай столбец G и B","найти значение","удалить строку","сумма столбца C","добавить слайд","терминал"];
 
   return (
-    <div style={{ minHeight:"100vh", background:"#070710", fontFamily:"'JetBrains Mono',monospace", color:"#e2e8f0", position:"relative", overflow:"hidden" }}>
+    <div style={{ minHeight:"100vh", background:"#070710", fontFamily:"ui-monospace,'SF Mono',Menlo,monospace", color:"#e2e8f0", position:"relative", overflow:"hidden" }}>
 
       {/* Ambient glow */}
       <div style={{ position:"fixed", top:"-250px", left:"50%", transform:"translateX(-50%)", width:"900px", height:"500px", background:"radial-gradient(ellipse,rgba(79,70,229,0.13) 0%,transparent 65%)", pointerEvents:"none", zIndex:0 }} />
