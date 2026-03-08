@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>SearchCopy — RENDERGAMES</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{min-height:100vh;background:#070710;font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;color:#e2e8f0;overflow-x:hidden}
+input{font-family:inherit}
+button{font-family:inherit;cursor:pointer}
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-thumb{background:rgba(99,102,241,0.3);border-radius:4px}
+input::placeholder{color:#1e293b}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.3}}
+.fade{animation:fadeUp 0.3s ease both}
+.glow1{position:fixed;top:-250px;left:50%;transform:translateX(-50%);width:900px;height:500px;background:radial-gradient(ellipse,rgba(79,70,229,0.13) 0%,transparent 65%);pointer-events:none;z-index:0}
+.glow2{position:fixed;bottom:-150px;right:-80px;width:450px;height:350px;background:radial-gradient(ellipse,rgba(14,165,233,0.07) 0%,transparent 70%);pointer-events:none;z-index:0}
+.wrap{position:relative;z-index:1;max-width:760px;margin:0 auto;padding:40px 20px 100px}
+</style>
+</head>
+<body>
+<div class="glow1"></div>
+<div class="glow2"></div>
+<div class="wrap" id="app"></div>
+<div id="version-badge" style="position:fixed;bottom:18px;right:20px;background:rgba(7,7,16,0.92);border:1px solid rgba(99,102,241,0.18);border-radius:8px;padding:5px 12px;font-size:10px;color:#1e293b;backdrop-filter:blur(12px);z-index:100;display:flex;align-items:center;gap:6px;letter-spacing:0.5px">
+  <span style="color:#4f46e5">◆</span> SearchCopy v<span id="vnum">1.0.0</span>
+</div>
+
+<script>
+// ── Version (auto-replaced by release.sh) ──
+const VERSION = "1.0.0";
+document.getElementById('vnum').textContent = VERSION;
+
+// ── DB ──
+const DB = {
+  Excel:[
+    {id:1, keys:"SUM",        type:"formula",template:"=SUM({col}:{col})",          example:"=SUM(A:A)",          desc:"Сумма столбца",                   tags:["сумма","посчитать","столбец","итого","сложить","подсчитать"]},
+    {id:2, keys:"AVERAGE",    type:"formula",template:"=AVERAGE({col}:{col})",       example:"=AVERAGE(A:A)",       desc:"Среднее значение",                tags:["среднее","average","средний"]},
+    {id:3, keys:"VLOOKUP",    type:"formula",template:"=VLOOKUP({col}2,B:C,2,0)",   example:"=VLOOKUP(A2,B:C,2,0)",desc:"Поиск значения по столбцу",       tags:["найти","поиск","vlookup","подтянуть","справочник"]},
+    {id:4, keys:"IF",         type:"formula",template:'=IF({col}1>0,"Да","Нет")',   example:'=IF(A1>0,"Да","Нет")',desc:"Логическое условие",              tags:["если","условие","if","логика","проверить"]},
+    {id:5, keys:"COUNTIF",    type:"formula",template:'=COUNTIF({col}:{col},"*")',  example:'=COUNTIF(A:A,"да")',  desc:"Подсчёт ячеек по условию",        tags:["посчитать","количество","countif","сколько раз"]},
+    {id:6, keys:"SUMIF",      type:"formula",template:'=SUMIF({col}:{col},"условие",B:B)',example:'=SUMIF(A:A,"да",B:B)',desc:"Сумма по условию",          tags:["сумма с условием","sumif","выборочная сумма"]},
+    {id:7, keys:"MAX / MIN",  type:"formula",template:"=MAX({col}:{col})",           example:"=MAX(A:A)",           desc:"Максимальное значение",           tags:["максимум","минимум","max","min","наибольший"]},
+    {id:8, keys:"ROUND",      type:"formula",template:"=ROUND({col}1,2)",            example:"=ROUND(A1,2)",        desc:"Округление числа",                tags:["округлить","round","округление"]},
+    {id:9, keys:"IFERROR",    type:"formula",template:'=IFERROR({col}1,"—")',        example:'=IFERROR(A1,"—")',    desc:"Скрыть ошибку в формуле",         tags:["ошибка","скрыть ошибку","iferror"]},
+    {id:10,keys:"INDEX+MATCH",type:"formula",template:"=INDEX(B:B,MATCH({col}2,A:A,0))",example:"=INDEX(B:B,MATCH(A2,A:A,0))",desc:"Гибкий поиск (лучше VLOOKUP)",tags:["найти","поиск","index match","гибкий поиск"]},
+    {id:11,keys:"CONCATENATE",type:"formula",template:'={col}1&" "&{col}2',         example:'=A1&" "&B1',          desc:"Объединить текст из ячеек",       tags:["объединить","склеить","текст","соединить"]},
+    {id:12,keys:"TODAY",      type:"formula",template:"=TODAY()",                    example:"=TODAY()",            desc:"Текущая дата",                    tags:["дата","сегодня","today","текущая дата"]},
+    {id:13,keys:"LEN",        type:"formula",template:"=LEN({col}1)",                example:"=LEN(A1)",            desc:"Длина текста в ячейке",           tags:["длина","символы","len","текст"]},
+    {id:20,keys:"Alt + =",           type:"hotkey",desc:"Автосумма выделенного диапазона",tags:["автосумма","сумма","autosum","быстрая сумма"]},
+    {id:21,keys:"Ctrl + Shift + L",  type:"hotkey",desc:"Включить / выключить фильтр",    tags:["фильтр","filter","включить фильтр"]},
+    {id:22,keys:"Ctrl + T",          type:"hotkey",desc:"Создать умную таблицу",           tags:["таблица","умная таблица","создать таблицу"]},
+    {id:23,keys:"F4",                type:"hotkey",desc:"Переключить тип ссылки ($A$1)",   tags:["закрепить","абсолютная ссылка","$","fix"]},
+    {id:24,keys:"Ctrl + 1",          type:"hotkey",desc:"Открыть «Формат ячеек»",          tags:["формат","формат ячеек","форматировать"]},
+    {id:25,keys:"Ctrl + Shift + +",  type:"hotkey",desc:"Вставить строку / столбец",       tags:["добавить строку","вставить строку","новая строка"]},
+    {id:26,keys:"Ctrl + -",          type:"hotkey",desc:"Удалить строку / столбец",        tags:["удалить строку","удалить столбец"]},
+    {id:27,keys:"Ctrl + F",          type:"hotkey",desc:"Найти в документе",               tags:["найти","поиск","find"]},
+    {id:28,keys:"Ctrl + H",          type:"hotkey",desc:"Найти и заменить",                tags:["заменить","replace","найти и заменить"]},
+    {id:29,keys:"Ctrl + Z",          type:"hotkey",desc:"Отменить действие",               tags:["отменить","undo","назад"]},
+    {id:30,keys:"Ctrl + S",          type:"hotkey",desc:"Сохранить файл",                  tags:["сохранить","save"]},
+  ],
+  Word:[
+    {id:40,keys:"Ctrl + B / I / U",   type:"hotkey",desc:"Жирный / Курсив / Подчёркивание",tags:["жирный","курсив","подчеркнуть","bold","форматирование"]},
+    {id:41,keys:"Ctrl + Enter",        type:"hotkey",desc:"Разрыв страницы",                tags:["новая страница","разрыв страницы"]},
+    {id:42,keys:"Ctrl + L/E/R/J",      type:"hotkey",desc:"Выравнивание текста",            tags:["выравнивание","по центру","по правому","justify"]},
+    {id:43,keys:"Ctrl + Alt + 1/2/3",  type:"hotkey",desc:"Стиль Заголовок 1/2/3",          tags:["заголовок","стиль","heading","h1","h2"]},
+    {id:44,keys:"Ctrl + D",            type:"hotkey",desc:"Диалог «Шрифт»",                 tags:["шрифт","размер шрифта","font"]},
+    {id:45,keys:"Ctrl + F",            type:"hotkey",desc:"Найти в документе",              tags:["найти","поиск","find"]},
+    {id:46,keys:"Ctrl + Z",            type:"hotkey",desc:"Отменить действие",              tags:["отменить","undo"]},
+  ],
+  PowerPoint:[
+    {id:50,keys:"F5",        type:"hotkey",desc:"Запустить показ с начала",      tags:["показ","запустить","слайд шоу","презентация","play"]},
+    {id:51,keys:"Shift+F5",  type:"hotkey",desc:"Показ с текущего слайда",       tags:["показ","текущий слайд"]},
+    {id:52,keys:"Ctrl + M",  type:"hotkey",desc:"Добавить новый слайд",          tags:["новый слайд","добавить слайд","слайд"]},
+    {id:53,keys:"Ctrl + D",  type:"hotkey",desc:"Дублировать слайд / объект",    tags:["дублировать","копия слайда","duplicate"]},
+    {id:54,keys:"Ctrl + G",  type:"hotkey",desc:"Группировать объекты",          tags:["группировать","группа","group"]},
+    {id:55,keys:"Ctrl + Z",  type:"hotkey",desc:"Отменить действие",             tags:["отменить","undo"]},
+  ],
+  "VS Code":[
+    {id:60,keys:"Ctrl + P",         type:"hotkey",desc:"Быстро открыть файл",           tags:["найти файл","открыть файл","quick open"]},
+    {id:61,keys:"Ctrl + Shift + P", type:"hotkey",desc:"Командная палитра",              tags:["команда","palette","меню команд"]},
+    {id:62,keys:"Alt + ↑/↓",       type:"hotkey",desc:"Переместить строку вверх/вниз",  tags:["переместить строку","двигать строку","move line"]},
+    {id:63,keys:"Ctrl + /",         type:"hotkey",desc:"Закомментировать строку",        tags:["комментарий","закомментировать","comment"]},
+    {id:64,keys:"Ctrl + D",         type:"hotkey",desc:"Выделить следующее вхождение",   tags:["мультикурсор","выделить слово","multi cursor"]},
+    {id:65,keys:"Ctrl + `",         type:"hotkey",desc:"Открыть терминал",               tags:["терминал","terminal","консоль","открыть терминал"]},
+    {id:66,keys:"Ctrl + Shift + K", type:"hotkey",desc:"Удалить строку",                 tags:["удалить строку","delete line"]},
+    {id:67,keys:"Ctrl + B",         type:"hotkey",desc:"Скрыть / показать боковую панель",tags:["боковая панель","sidebar","скрыть панель"]},
+    {id:68,keys:"Ctrl + Z",         type:"hotkey",desc:"Отменить действие",              tags:["отменить","undo"]},
+  ],
+  Photoshop:[
+    {id:70,keys:"Ctrl + J",            type:"hotkey",desc:"Дублировать слой",                tags:["дублировать слой","скопировать слой","duplicate"]},
+    {id:71,keys:"Ctrl + T",            type:"hotkey",desc:"Свободная трансформация",         tags:["трансформация","transform","масштаб","повернуть"]},
+    {id:72,keys:"[ / ]",               type:"hotkey",desc:"Уменьшить / увеличить кисть",     tags:["кисть","размер кисти","brush size"]},
+    {id:73,keys:"Ctrl + Alt + Z",      type:"hotkey",desc:"Несколько шагов назад (история)", tags:["история","отменить несколько","много шагов"]},
+    {id:74,keys:"Ctrl + Shift + S",    type:"hotkey",desc:"Сохранить как",                   tags:["сохранить как","save as","экспорт"]},
+    {id:75,keys:"Ctrl+Shift+Alt+E",    type:"hotkey",desc:"Объединить видимые слои в новый", tags:["объединить слои","stamp","flatten"]},
+  ]
+};
+
+const PROGRAMS = Object.keys(DB);
+const COLORS = {Excel:"#22c55e",Word:"#3b82f6",PowerPoint:"#f97316","VS Code":"#a78bfa",Photoshop:"#38bdf8"};
+const ICONS  = {Excel:"⊞",Word:"W",PowerPoint:"P","VS Code":"</>",Photoshop:"Ps"};
+const SUGGESTIONS = ["посчитай столбец G и B","найти значение","удалить строку","сумма столбца C","добавить слайд","терминал"];
+
+// ── State ──
+let state = {query:"", progs:["Excel"], tab:"search"};
+
+// ── Logic ──
+function extractColumns(q){
+  const parts = q.toUpperCase().split(/[\s,+иand&]+/);
+  const cols=[];
+  for(const p of parts) if(/^[A-Z]{1,2}$/.test(p.trim())) cols.push(p.trim());
+  return [...new Set(cols)];
+}
+
+function scoreItem(query,item){
+  const q=query.toLowerCase().trim(); let s=0;
+  const fields=[item.desc.toLowerCase(),item.keys.toLowerCase(),...(item.tags||[])];
+  for(const f of fields){
+    if(f===q){s+=10;continue}
+    if(f.includes(q)){s+=5;continue}
+    for(const w of q.split(/[\s,]+/)) if(w.length>2&&f.includes(w)) s+=2;
+  }
+  return s;
+}
+
+function doSearch(query,progs){
+  if(query.trim().length<2) return [];
+  const out=[];
+  for(const prog of progs)
+    for(const item of DB[prog]||[]){
+      const s=scoreItem(query,item);
+      if(s>0) out.push({...item,program:prog,score:s});
+    }
+  return out.sort((a,b)=>b.score-a.score).slice(0,14);
+}
+
+function buildChain(query,items){
+  const cols=extractColumns(query);
+  if(cols.length<2) return null;
+  const base=items.find(i=>i.template)||items[0];
+  if(!base) return null;
+  return cols.map((col,i)=>({
+    step:i+1, col,
+    formula: base.template ? base.template.replace(/\{col\}/g,col) : (base.example||base.keys),
+    desc:base.desc, program:base.program
+  }));
+}
+
+// ── Copy ──
+function copyText(text, btn){
+  navigator.clipboard.writeText(text).then(()=>{
+    btn.textContent="✓";
+    btn.style.color="#4ade80";
+    btn.style.borderColor="rgba(34,197,94,0.5)";
+    btn.style.background="rgba(34,197,94,0.2)";
+    setTimeout(()=>{
+      btn.textContent="⎘";
+      btn.style.color="#64748b";
+      btn.style.borderColor="rgba(255,255,255,0.12)";
+      btn.style.background="rgba(255,255,255,0.06)";
+    },1400);
+  });
+}
+
+function makeCopyBtn(text){
+  const btn=document.createElement('button');
+  btn.textContent="⎘";
+  btn.style.cssText="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);color:#64748b;border-radius:7px;padding:5px 11px;font-size:11px;cursor:pointer;font-weight:700;transition:all 0.18s;flex-shrink:0;font-family:inherit";
+  btn.onclick=()=>copyText(text,btn);
+  return btn;
+}
+
+// ── Render helpers ──
+function el(tag,style,html){
+  const e=document.createElement(tag);
+  if(style) e.style.cssText=style;
+  if(html) e.innerHTML=html;
+  return e;
+}
+
+function renderChainCard(chain){
+  const prog=chain[0]?.program||"Excel";
+  const color=COLORS[prog]||"#818cf8";
+  const wrap=el('div',"position:relative;overflow:hidden;background:rgba(12,10,28,0.97);border:1px solid rgba(139,92,246,0.35);border-radius:14px;padding:18px 20px;margin-bottom:10px;animation:fadeUp 0.3s ease both");
+  const bar=el('div',"position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,#7c3aed,#4f46e5,#0ea5e9)");
+  wrap.appendChild(bar);
+
+  const hdr=el('div',"display:flex;align-items:center;gap:10px;margin-bottom:16px");
+  hdr.innerHTML=`<div style="background:linear-gradient(135deg,rgba(124,58,237,0.25),rgba(79,70,229,0.25));border:1px solid rgba(139,92,246,0.5);border-radius:8px;padding:4px 12px;font-size:10px;color:#c4b5fd;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;display:flex;align-items:center;gap:6px"><span>⛓</span> Цепочка действий</div><span style="font-size:11px;color:#475569">${chain.length} шага</span>`;
+  wrap.appendChild(hdr);
+
+  const steps=el('div',"display:flex;flex-direction:column;gap:10px");
+  chain.forEach(step=>{
+    const row=el('div',"display:flex;align-items:flex-start;gap:12px");
+    const num=el('div',`width:28px;height:28px;border-radius:50%;flex-shrink:0;margin-top:2px;background:${color}20;border:1.5px solid ${color}60;display:flex;align-items:center;justify-content:center;font-size:12px;color:${color};font-weight:800`);
+    num.textContent=step.step;
+    row.appendChild(num);
+
+    const content=el('div',"flex:1");
+    const meta=el('div',"display:flex;align-items:center;gap:8px;margin-bottom:6px;flex-wrap:wrap");
+    meta.innerHTML=`<span style="background:rgba(99,102,241,0.18);border:1px solid rgba(99,102,241,0.4);border-radius:6px;padding:3px 10px;font-size:12px;color:#c7d2fe;font-weight:700">столбец ${step.col}</span><span style="font-size:11px;color:#475569">${step.desc}</span>`;
+    content.appendChild(meta);
+
+    const formulaRow=el('div',"display:flex;align-items:center;gap:8px");
+    const formulaBox=el('div',"background:rgba(14,165,233,0.1);border:1px solid rgba(14,165,233,0.3);border-radius:8px;padding:8px 14px;font-size:13px;color:#bae6fd;font-weight:700;flex:1;word-break:break-all;letter-spacing:0.3px");
+    formulaBox.textContent=step.formula;
+    formulaRow.appendChild(formulaBox);
+    formulaRow.appendChild(makeCopyBtn(step.formula));
+    content.appendChild(formulaRow);
+    row.appendChild(content);
+    steps.appendChild(row);
+  });
+  wrap.appendChild(steps);
+
+  const footer=el('div',"margin-top:14px;padding-top:12px;border-top:1px solid rgba(255,255,255,0.05);display:flex;justify-content:space-between;align-items:center");
+  footer.appendChild(el('span',"font-size:10px;color:#334155","Скопировать все формулы"));
+  footer.appendChild(makeCopyBtn(chain.map(s=>s.formula).join('\n')));
+  wrap.appendChild(footer);
+  return wrap;
+}
+
+function renderResultCard(item,idx,detectedCols){
+  const color=COLORS[item.program]||"#818cf8";
+  let display=item.example||"";
+  let adapted=false;
+  if(item.template&&detectedCols.length>0){
+    display=item.template.replace(/\{col\}/g,detectedCols[0]);
+    adapted=true;
+  }
+  const card=el('div',`background:rgba(12,12,22,0.92);border:1px solid rgba(255,255,255,0.06);border-left:3px solid ${color};border-radius:12px;padding:14px 18px;display:flex;align-items:flex-start;gap:14px;animation:fadeUp 0.3s ease ${idx*0.04}s both`);
+
+  const progTag=el('div',`background:${color}14;border:1px solid ${color}40;border-radius:7px;padding:3px 8px;font-size:10px;color:${color};font-weight:800;text-transform:uppercase;white-space:nowrap;margin-top:2px;letter-spacing:0.3px`);
+  progTag.textContent=`${ICONS[item.program]} ${item.program}`;
+  card.appendChild(progTag);
+
+  const body=el('div',"flex:1;min-width:0");
+  const meta=el('div',"display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-bottom:5px");
+
+  const keyBadge=el('span',"background:rgba(99,102,241,0.15);border:1px solid rgba(99,102,241,0.3);border-radius:6px;padding:3px 10px;font-size:13px;color:#c7d2fe;font-weight:700");
+  keyBadge.textContent=item.keys;
+  meta.appendChild(keyBadge);
+
+  const isFormula=item.type==="formula";
+  const typeBadge=el('span',`font-size:10px;padding:2px 8px;border-radius:999px;background:${isFormula?"rgba(34,197,94,0.1)":"rgba(251,191,36,0.1)"};border:1px solid ${isFormula?"rgba(34,197,94,0.25)":"rgba(251,191,36,0.25)"};color:${isFormula?"#4ade80":"#fbbf24"}`);
+  typeBadge.textContent=isFormula?"📊 Формула":"⌨️ Клавиша";
+  meta.appendChild(typeBadge);
+
+  if(adapted){
+    const ab=el('span',"font-size:10px;padding:2px 8px;border-radius:999px;background:rgba(14,165,233,0.1);border:1px solid rgba(14,165,233,0.3);color:#38bdf8","✦ Адаптировано");
+    meta.appendChild(ab);
+  }
+  body.appendChild(meta);
+
+  const desc=el('p',"margin:0 0 7px;color:#64748b;font-size:12px");
+  desc.textContent=item.desc;
+  body.appendChild(desc);
+
+  if(display){
+    const fr=el('div',"display:flex;align-items:center;gap:8px");
+    const fb=el('div',"background:rgba(0,0,0,0.4);border:1px solid rgba(255,255,255,0.07);border-radius:7px;padding:6px 12px;font-size:12px;color:#93c5fd;flex:1;word-break:break-all;font-weight:600");
+    fb.textContent=display;
+    fr.appendChild(fb);
+    fr.appendChild(makeCopyBtn(display));
+    body.appendChild(fr);
+  }
+  card.appendChild(body);
+  return card;
+}
+
+function renderAbout(){
+  const wrap=el('div',"animation:fadeUp 0.35s ease both");
+
+  function infoRow(icon,title,body){
+    const d=el('div',"display:flex;gap:14px;background:rgba(255,255,255,0.025);border:1px solid rgba(255,255,255,0.07);border-radius:10px;padding:14px 16px;margin-bottom:8px");
+    d.innerHTML=`<span style="font-size:20px;flex-shrink:0;line-height:1;margin-top:1px">${icon}</span><div><div style="font-size:12px;font-weight:700;color:#c7d2fe;margin-bottom:5px">${title}</div><div style="font-size:12px;color:#64748b;line-height:1.65">${body}</div></div>`;
+    return d;
+  }
+  function errRow(title,fix){
+    const d=el('div',"background:rgba(239,68,68,0.05);border:1px solid rgba(239,68,68,0.18);border-radius:10px;padding:14px 16px;margin-bottom:8px");
+    d.innerHTML=`<div style="font-size:12px;font-weight:700;color:#fca5a5;margin-bottom:5px">⚠ ${title}</div><div style="font-size:12px;color:#64748b;line-height:1.65">${fix}</div>`;
+    return d;
+  }
+  function heading(t){
+    const d=el('p',"color:#334155;font-size:10px;text-transform:uppercase;letter-spacing:2px;font-weight:800;margin:24px 0 10px");
+    d.textContent=t; return d;
+  }
+
+  const hero=el('div',"background:linear-gradient(135deg,rgba(79,70,229,0.1),rgba(14,165,233,0.07));border:1px solid rgba(99,102,241,0.2);border-radius:16px;padding:24px;text-align:center;margin-bottom:6px");
+  hero.innerHTML=`<div style="font-size:32px;margin-bottom:10px">⌘</div><h2 style="margin:0 0 5px;font-size:20px;font-weight:900;color:#e2e8f0;letter-spacing:-0.5px">SearchCopy</h2><p style="margin:0 0 10px;color:#818cf8;font-size:10px;letter-spacing:2.5px;text-transform:uppercase">by RENDERGAMES</p><p style="margin:0;color:#475569;font-size:12px;line-height:1.6">Ищи горячие клавиши и формулы на русском — просто напиши что хочешь сделать.</p>`;
+  wrap.appendChild(hero);
+
+  wrap.appendChild(heading("Как пользоваться поиском"));
+  wrap.appendChild(infoRow("🔍","Пиши по-русски, как обычно","Введи в строку поиска что хочешь сделать: «посчитать сумму», «удалить строку», «найти значение». Приложение само найдёт нужные формулы и горячие клавиши."));
+  wrap.appendChild(infoRow("⛓","Цепочки действий","Укажи несколько столбцов — получишь цепочку. Например: «посчитай столбец G и B» выдаст =SUM(G:G) и =SUM(B:B) по отдельности."));
+  wrap.appendChild(infoRow("✦","Адаптация под твои столбцы","Напиши «сумма столбца C» — формула подстроится как =SUM(C:C). Такие результаты помечены тегом «Адаптировано»."));
+
+  wrap.appendChild(heading("Фильтры по программам"));
+  wrap.appendChild(infoRow("🏷","Кнопки над строкой поиска","Выбирай нужные программы — поиск ведётся только по ним. Минимум одна всегда активна. По умолчанию — Excel."));
+
+  wrap.appendChild(heading("Обновления"));
+  wrap.appendChild(infoRow("🔔","Автообновление","Когда выйдет новая версия — в правом нижнем углу появится баннер. Нажми «Установить» — приложение обновится и перезапустится само."));
+
+  wrap.appendChild(heading("Частые ошибки"));
+  wrap.appendChild(errRow("Ничего не найдено","Попробуй переформулировать: вместо «calc» пиши «посчитать». Убедись, что нужная программа включена в фильтрах."));
+  wrap.appendChild(errRow("Формула выглядит странно","Если в запросе нет конкретного столбца — подставляется стандартный пример. Просто замени A:A на нужный столбец."));
+
+  const copy=el('div',"text-align:center;color:#1e293b;font-size:10px;margin-top:28px;padding-bottom:8px","RENDERGAMES © 2025");
+  wrap.appendChild(copy);
+  return wrap;
+}
+
+// ── Main render ──
+function render(){
+  const app=document.getElementById('app');
+  app.innerHTML='';
+
+  // Header
+  const hdr=el('div',"text-align:center;margin-bottom:30px");
+  hdr.innerHTML=`
+    <div style="display:inline-flex;align-items:center;gap:8px;background:rgba(99,102,241,0.1);border:1px solid rgba(99,102,241,0.22);border-radius:999px;padding:5px 16px;margin-bottom:14px;font-size:10px;color:#818cf8;letter-spacing:2.5px;text-transform:uppercase">
+      <span style="animation:pulse 2.5s infinite">●</span> RENDERGAMES
+    </div>
+    <h1 style="font-size:clamp(30px,6vw,48px);font-weight:900;margin:0 0 7px;background:linear-gradient(135deg,#f1f5f9 0%,#c7d2fe 50%,#818cf8 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:-2px;line-height:1">SearchCopy</h1>
+    <p style="color:#334155;font-size:11px;margin:0;letter-spacing:0.5px">Горячие клавиши · Формулы · Цепочки действий</p>
+  `;
+  app.appendChild(hdr);
+
+  // Tabs
+  const tabBar=el('div',"display:flex;gap:4px;background:rgba(255,255,255,0.025);border:1px solid rgba(255,255,255,0.07);border-radius:12px;padding:4px;margin-bottom:22px");
+  [{id:"search",label:"⌘ Поиск"},{id:"about",label:"◎ О приложении"}].forEach(t=>{
+    const on=state.tab===t.id;
+    const btn=el('button',`flex:1;background:${on?"rgba(99,102,241,0.18)":"transparent"};border:1px solid ${on?"rgba(99,102,241,0.35)":"transparent"};border-radius:9px;padding:9px 16px;font-size:12px;font-weight:700;color:${on?"#c7d2fe":"#475569"};cursor:pointer;transition:all 0.2s;letter-spacing:0.3px`);
+    btn.textContent=t.label;
+    btn.onclick=()=>{state.tab=t.id;render()};
+    tabBar.appendChild(btn);
+  });
+  app.appendChild(tabBar);
+
+  if(state.tab==="about"){
+    app.appendChild(renderAbout());
+    return;
+  }
+
+  // Search tab
+  const searchWrap=el('div',"animation:fadeUp 0.3s ease both");
+
+  // Program filters
+  const filters=el('div',"display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-bottom:18px");
+  PROGRAMS.forEach(p=>{
+    const on=state.progs.includes(p);
+    const c=COLORS[p];
+    const btn=el('button',`background:${on?c+"16":"rgba(255,255,255,0.03)"};border:1px solid ${on?c+"70":"rgba(255,255,255,0.07)"};color:${on?c:"#475569"};border-radius:999px;padding:5px 14px;font-size:11px;font-weight:700;cursor:pointer;transition:all 0.18s;display:flex;align-items:center;gap:5px;letter-spacing:0.3px`);
+    btn.innerHTML=`<span style="font-size:10px">${ICONS[p]}</span>${p}`;
+    btn.onclick=()=>{
+      if(on && state.progs.length===1) return;
+      state.progs=on?state.progs.filter(x=>x!==p):[...state.progs,p];
+      render();
+    };
+    filters.appendChild(btn);
+  });
+  searchWrap.appendChild(filters);
+
+  // Search input
+  const inputWrap=el('div',"position:relative;margin-bottom:16px;border-radius:14px;box-shadow:0 8px 40px rgba(0,0,0,0.4);transition:box-shadow 0.3s");
+  const icon=el('span',"position:absolute;left:18px;top:50%;transform:translateY(-50%);font-size:17px;color:#4f46e5;pointer-events:none;font-weight:700","⌘");
+  inputWrap.appendChild(icon);
+
+  const input=document.createElement('input');
+  input.value=state.query;
+  input.placeholder='Например: "посчитай столбец G и B"...';
+  input.style.cssText="width:100%;background:rgba(12,12,22,0.98);border:1px solid rgba(255,255,255,0.07);border-radius:14px;padding:16px 46px 16px 48px;font-size:15px;color:#e2e8f0;outline:none;font-family:inherit;transition:border 0.25s";
+  input.oninput=e=>{state.query=e.target.value;renderResults()};
+  input.onfocus=()=>{inputWrap.style.boxShadow="0 0 0 2px rgba(99,102,241,0.4),0 24px 60px rgba(0,0,0,0.55)";input.style.borderColor="rgba(99,102,241,0.55)"};
+  input.onblur=()=>{inputWrap.style.boxShadow="0 8px 40px rgba(0,0,0,0.4)";input.style.borderColor="rgba(255,255,255,0.07)"};
+  inputWrap.appendChild(input);
+
+  const clearBtn=el('button',"position:absolute;right:14px;top:50%;transform:translateY(-50%);background:rgba(255,255,255,0.07);border:none;color:#64748b;width:26px;height:26px;border-radius:50%;cursor:pointer;font-size:12px","✕");
+  clearBtn.style.display=state.query?"flex":"none";
+  clearBtn.style.alignItems="center";
+  clearBtn.style.justifyContent="center";
+  clearBtn.onclick=()=>{state.query="";render()};
+  inputWrap.appendChild(clearBtn);
+  searchWrap.appendChild(inputWrap);
+
+  // Suggestions
+  const suggestWrap=el('div',"margin-bottom:28px");
+  suggestWrap.style.display=state.query?"none":"block";
+  const suggestLabel=el('p',"color:#1e293b;font-size:10px;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:8px","Попробуй:");
+  suggestWrap.appendChild(suggestLabel);
+  const suggestRow=el('div',"display:flex;flex-wrap:wrap;gap:6px");
+  SUGGESTIONS.forEach(s=>{
+    const btn=el('button',"background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:7px;padding:5px 11px;font-size:11px;color:#475569;cursor:pointer;transition:all 0.15s");
+    btn.textContent=s;
+    btn.onmouseenter=()=>{btn.style.color="#a5b4fc";btn.style.borderColor="rgba(99,102,241,0.3)"};
+    btn.onmouseleave=()=>{btn.style.color="#475569";btn.style.borderColor="rgba(255,255,255,0.06)"};
+    btn.onclick=()=>{state.query=s;render();document.querySelector('input').focus()};
+    suggestRow.appendChild(btn);
+  });
+  suggestWrap.appendChild(suggestRow);
+  searchWrap.appendChild(suggestWrap);
+
+  // Results container
+  const resultsWrap=el('div',"");
+  resultsWrap.id="results-wrap";
+  searchWrap.appendChild(resultsWrap);
+
+  app.appendChild(searchWrap);
+  renderResults();
+
+  function renderResults(){
+    const rw=document.getElementById('results-wrap');
+    if(!rw) return;
+    rw.innerHTML='';
+    const q=state.query;
+    const results=doSearch(q,state.progs);
+    const chain=buildChain(q,results);
+    const cols=extractColumns(q);
+
+    if(suggestWrap) suggestWrap.style.display=q?"none":"block";
+    if(clearBtn) clearBtn.style.display=q?"flex":"none";
+
+    if(chain||results.length>0){
+      const label=el('p',"color:#1e293b;font-size:10px;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:12px");
+      label.textContent=chain?`Цепочка + ${results.length} результатов`:`Найдено: ${results.length}`;
+      rw.appendChild(label);
+      if(chain) rw.appendChild(renderChainCard(chain));
+      const list=el('div',"display:flex;flex-direction:column;gap:8px");
+      results.forEach((item,i)=>list.appendChild(renderResultCard(item,i,cols)));
+      rw.appendChild(list);
+    } else if(q.trim().length>1){
+      const empty=el('div',"text-align:center;padding:60px 20px;color:#1e293b");
+      empty.innerHTML=`<div style="font-size:36px;margin-bottom:12px;opacity:0.4">⌕</div><p style="margin:0;font-size:13px">Ничего не найдено по «${q}»</p><p style="margin:6px 0 0;font-size:11px;color:#0f172a">Попробуй другие слова или включи больше программ</p>`;
+      rw.appendChild(empty);
+    }
+  }
+}
+
+render();
+</script>
+</body>
+</html>
