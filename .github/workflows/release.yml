@@ -125,12 +125,18 @@ jobs:
       - name: Init Tauri Android
         run: npm run tauri android init
 
+      - name: Find APK path
+        run: find src-tauri/gen/android -name "*.apk" 2>/dev/null || echo "No APK found"
+
       - name: Build Android APK
         env:
           NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
         run: npm run tauri android build --apk --debug --debug
 
+      - name: Find APK
+        run: find src-tauri/gen/android -name "*.apk" | tee /tmp/apk_list.txt
+
       - name: Upload APK to Release
         uses: softprops/action-gh-release@v2
         with:
-          files: src-tauri/gen/android/app/build/outputs/apk/universal/debug/*.apk
+          files: src-tauri/gen/android/app/build/outputs/apk/**/*.apk
