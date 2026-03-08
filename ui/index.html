@@ -1024,6 +1024,21 @@ async function checkForUpdates(){
 setTimeout(checkForUpdates,3000);
 setInterval(checkForUpdates,30*60*1000);
 
+// ── Open URL in system browser (Tauri-safe) ──
+async function openInBrowser(url){
+  try{
+    const invoke=window.__TAURI__?.core?.invoke||window.__TAURI__?.tauri?.invoke;
+    if(invoke){
+      // Try opener plugin first
+      try{ await invoke('plugin:opener|open-url',{url}); return; }catch{}
+      // Fallback: shell open
+      try{ await invoke('plugin:shell|open',{path:url}); return; }catch{}
+    }
+  }catch{}
+  // Last resort
+  window.open(url,'_blank');
+}
+
 // ── Silent installer ──
 async function runSilentInstall(url, fileName, version){
   const isMac=/Mac/.test(navigator.platform);
@@ -1067,7 +1082,7 @@ async function runSilentInstall(url, fileName, version){
       // No Tauri — just open URL in browser
       setStatus('Открываю загрузку в браузере…');
       setProgress(30);
-      setTimeout(()=>{overlay.remove();window.open(url,'_blank')},1200);
+      setTimeout(()=>{overlay.remove();openInBrowser(url);},1200);
       return;
     }
 
@@ -1145,7 +1160,7 @@ async function runSilentInstall(url, fileName, version){
       cancel.textContent='Скачать вручную ↗';
       cancel.style.color='#c7d2fe';
       cancel.style.borderColor='rgba(99,102,241,0.4)';
-      cancel.onclick=()=>{ overlay.remove(); window.open(url,'_blank'); };
+      cancel.onclick=()=>{ overlay.remove(); openInBrowser(url); };
     }
   }
 }
