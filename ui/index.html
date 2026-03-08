@@ -52,8 +52,17 @@ input::placeholder,textarea::placeholder{color:var(--text3)}
   <span style="color:#4f46e5">◆</span> SearchCopy v<span id="vnum">1.0.0</span>
 </div>
 <script>
-const VERSION="1.0.0";
-document.getElementById('vnum').textContent=VERSION;
+// VERSION — читается из Tauri автоматически, фоллбек для браузера
+let VERSION="1.0.0";
+(async()=>{
+  try{
+    const invoke=window.__TAURI__?.core?.invoke||window.__TAURI__?.tauri?.invoke;
+    if(invoke){
+      const v=await invoke('plugin:app|version');
+      if(v){VERSION=v;document.getElementById('vnum').textContent=v;}
+    }
+  }catch{}
+})();
 
 function detectOS(){
   const p=navigator.platform||navigator.userAgent;
@@ -578,8 +587,14 @@ async function doAiSearch(query){
       try{items=JSON.parse(text.replace(/```json|```/g,'').trim())}catch{items=[]}
 
     } else if(provider==='giga'){
-      // Step 1: get access token via OAuth
-      const tokenRes=await fetch('https://ngw.devices.sberbank.ru:9443/api/v2/oauth',{
+      // GigaChat использует Sber-сертификат — нельзя вызывать через браузерный fetch (CORS+SSL)
+      // Используем tauri-plugin-http который работает через Rust (нет CORS, нет SSL-проверки)
+      const invoke=window.__TAURI__?.core?.invoke||window.__TAURI__?.tauri?.invoke;
+      if(!invoke) throw new Error('Tauri недоступен — GigaChat работает только в десктоп-приложении');
+
+      // Step 1: OAuth токен через Rust HTTP клиент
+      const tokenData=await invoke('plugin:http|fetch',{
+        url:'https://ngw.devices.sberbank.ru:9443/api/v2/oauth',
         method:'POST',
         headers:{
           'Content-Type':'application/x-www-form-urlencoded',
@@ -587,17 +602,22 @@ async function doAiSearch(query){
           'Authorization':'Basic '+settings.gigaKey,
           'RqUID':crypto.randomUUID()
         },
-        body:'scope=GIGACHAT_API_PERS'
+        body:{type:'Text',value:'scope=GIGACHAT_API_PERS'},
+        options:{dangerouslyBypassCertVerification:true}
       });
-      if(!tokenRes.ok)throw new Error('GigaChat auth error '+tokenRes.status);
-      const tokenData=await tokenRes.json();
-      const accessToken=tokenData.access_token;
+      if(tokenData.status!==200) throw new Error('GigaChat auth error '+tokenData.status);
+      const tokenJson=JSON.parse(tokenData.data);
+      const accessToken=tokenJson.access_token;
 
-      // Step 2: call GigaChat
-      const gigaRes=await fetch('https://gigachat.devices.sberbank.ru/api/v1/chat/completions',{
+      // Step 2: Chat completions
+      const gigaData=await invoke('plugin:http|fetch',{
+        url:'https://gigachat.devices.sberbank.ru/api/v1/chat/completions',
         method:'POST',
-        headers:{'Content-Type':'application/json','Authorization':'Bearer '+accessToken},
-        body:JSON.stringify({
+        headers:{
+          'Content-Type':'application/json',
+          'Authorization':'Bearer '+accessToken
+        },
+        body:{type:'Json',value:{
           model:'GigaChat',
           messages:[
             {role:'system',content:systemPrompt},
@@ -605,11 +625,12 @@ async function doAiSearch(query){
           ],
           max_tokens:800,
           temperature:0.3
-        })
+        }},
+        options:{dangerouslyBypassCertVerification:true}
       });
-      if(!gigaRes.ok)throw new Error('GigaChat error '+gigaRes.status);
-      const gigaData=await gigaRes.json();
-      const text=gigaData.choices?.[0]?.message?.content||'[]';
+      if(gigaData.status!==200) throw new Error('GigaChat error '+gigaData.status);
+      const gigaJson=JSON.parse(gigaData.data);
+      const text=gigaJson.choices?.[0]?.message?.content||'[]';
       try{items=JSON.parse(text.replace(/```json|```/g,'').trim())}catch{items=[]}
     }
 
