@@ -7,22 +7,69 @@
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --bg:#070710;--bg2:rgba(12,12,22,0.92);--bg3:rgba(255,255,255,0.025);
-  --border:rgba(255,255,255,0.07);--text:#e2e8f0;--text2:#64748b;--text3:#334155;
-  --accent:#4f46e5;--accent2:#818cf8;--accent3:#c7d2fe;
-  --card-border:rgba(255,255,255,0.06);--input-bg:rgba(12,12,22,0.98);
-  --badge-bg:rgba(99,102,241,0.1);--badge-border:rgba(99,102,241,0.22);
+  --bg:#070710;
+  --bg2:rgba(20,18,35,0.98);
+  --bg3:rgba(255,255,255,0.025);
+  --bg4:rgba(0,0,0,0.4);
+  --border:rgba(255,255,255,0.07);
+  --border2:rgba(255,255,255,0.12);
+  --text:#e2e8f0;
+  --text2:#64748b;
+  --text3:#334155;
+  --text4:#1e293b;
+  --input-bg:rgba(12,12,22,0.98);
+  --card-bg:rgba(12,12,22,0.92);
+  --chain-bg:rgba(12,10,28,0.97);
+  --formula-bg:rgba(14,165,233,0.1);
+  --formula-border:rgba(14,165,233,0.3);
+  --formula-color:#bae6fd;
+  --code-bg:rgba(0,0,0,0.4);
+  --code-border:rgba(255,255,255,0.07);
+  --code-color:#93c5fd;
+  --copy-bg:rgba(255,255,255,0.06);
+  --copy-border:rgba(255,255,255,0.12);
+  --copy-color:#64748b;
+  --badge-bg:rgba(99,102,241,0.1);
+  --badge-border:rgba(99,102,241,0.22);
+  --seg-bg:rgba(0,0,0,0.2);
+  --toggle-off-bg:rgba(255,255,255,0.04);
+  --empty-color:#1e293b;
+  --shadow:0 8px 40px rgba(0,0,0,0.4);
+  --shadow-focus:0 0 0 2px rgba(99,102,241,0.4),0 24px 60px rgba(0,0,0,0.55);
 }
 .light{
-  --bg:#f1f5f9;--bg2:#ffffff;--bg3:rgba(0,0,0,0.03);
-  --border:rgba(0,0,0,0.08);--text:#0f172a;--text2:#64748b;--text3:#94a3b8;
-  --accent:#4f46e5;--accent2:#6366f1;--accent3:#4338ca;
-  --card-border:rgba(0,0,0,0.06);--input-bg:#ffffff;
-  --badge-bg:rgba(99,102,241,0.08);--badge-border:rgba(99,102,241,0.2);
+  --bg:#f0f4ff;
+  --bg2:#ffffff;
+  --bg3:rgba(0,0,0,0.03);
+  --bg4:rgba(0,0,0,0.04);
+  --border:rgba(0,0,0,0.09);
+  --border2:rgba(0,0,0,0.15);
+  --text:#0f172a;
+  --text2:#475569;
+  --text3:#94a3b8;
+  --text4:#cbd5e1;
+  --input-bg:#ffffff;
+  --card-bg:#ffffff;
+  --chain-bg:#f8f7ff;
+  --formula-bg:rgba(14,165,233,0.07);
+  --formula-border:rgba(14,165,233,0.25);
+  --formula-color:#0369a1;
+  --code-bg:rgba(99,102,241,0.04);
+  --code-border:rgba(99,102,241,0.15);
+  --code-color:#4338ca;
+  --copy-bg:rgba(0,0,0,0.04);
+  --copy-border:rgba(0,0,0,0.1);
+  --copy-color:#64748b;
+  --badge-bg:rgba(99,102,241,0.08);
+  --badge-border:rgba(99,102,241,0.2);
+  --seg-bg:rgba(0,0,0,0.05);
+  --toggle-off-bg:rgba(0,0,0,0.04);
+  --empty-color:#94a3b8;
+  --shadow:0 4px 20px rgba(0,0,0,0.08);
+  --shadow-focus:0 0 0 2px rgba(99,102,241,0.3),0 8px 30px rgba(0,0,0,0.12);
 }
 body{min-height:100vh;background:var(--bg);font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;color:var(--text);overflow-x:hidden;transition:background 0.3s,color 0.3s}
-input,button{font-family:inherit}
-button{cursor:pointer}
+input,button{font-family:inherit}button{cursor:pointer}
 ::-webkit-scrollbar{width:4px}
 ::-webkit-scrollbar-thumb{background:rgba(99,102,241,0.3);border-radius:4px}
 input::placeholder{color:var(--text3)}
@@ -30,231 +77,247 @@ input::placeholder{color:var(--text3)}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.3}}
 .glow1{position:fixed;top:-250px;left:50%;transform:translateX(-50%);width:900px;height:500px;background:radial-gradient(ellipse,rgba(79,70,229,0.13) 0%,transparent 65%);pointer-events:none;z-index:0}
 .glow2{position:fixed;bottom:-150px;right:-80px;width:450px;height:350px;background:radial-gradient(ellipse,rgba(14,165,233,0.07) 0%,transparent 70%);pointer-events:none;z-index:0}
-.light .glow1,.light .glow2{opacity:0.4}
+.light .glow1{background:radial-gradient(ellipse,rgba(99,102,241,0.06) 0%,transparent 65%)}
+.light .glow2{background:radial-gradient(ellipse,rgba(14,165,233,0.04) 0%,transparent 70%)}
 .wrap{position:relative;z-index:1;max-width:760px;margin:0 auto;padding:40px 20px 100px}
 </style>
 </head>
 <body>
-<div class="glow1"></div>
-<div class="glow2"></div>
+<div class="glow1"></div><div class="glow2"></div>
 <div class="wrap" id="app"></div>
 <div id="version-badge" style="position:fixed;bottom:18px;right:20px;background:var(--bg);border:1px solid rgba(99,102,241,0.18);border-radius:8px;padding:5px 12px;font-size:10px;color:var(--text3);backdrop-filter:blur(12px);z-index:100;display:flex;align-items:center;gap:6px;letter-spacing:0.5px">
   <span style="color:#4f46e5">◆</span> SearchCopy v<span id="vnum">1.0.0</span>
 </div>
 
 <script>
-const VERSION = "1.2.3";
-document.getElementById('vnum').textContent = VERSION;
+const VERSION="1.0.0";
+document.getElementById('vnum').textContent=VERSION;
 
-// ── Detect OS ──
 function detectOS(){
-  const p = navigator.platform || navigator.userAgent;
+  const p=navigator.platform||navigator.userAgent;
   if(/Mac/.test(p)) return 'mac';
-  if(/Win/.test(p)) return 'win';
   if(/Linux|Android/.test(p)) return 'linux';
   return 'win';
 }
+const detectedOS=detectOS();
 
-// ── Settings ──
-const SETTINGS_KEY = 'sc_settings';
-function loadSettings(){
-  try{ return JSON.parse(localStorage.getItem(SETTINGS_KEY)||'{}'); }catch{ return {}; }
-}
-function saveSettings(s){ localStorage.setItem(SETTINGS_KEY, JSON.stringify(s)); }
+const SETTINGS_KEY='sc_settings_v2';
+function loadSettings(){try{return JSON.parse(localStorage.getItem(SETTINGS_KEY)||'{}')}catch{return{}}}
+function saveSettings(s){localStorage.setItem(SETTINGS_KEY,JSON.stringify(s))}
 
-const detectedOS = detectOS();
-let settings = {
-  lang: 'ru',
-  theme: 'dark',
-  os: detectedOS,
-  autoUpdate: true,
-  ...loadSettings()
-};
-
-function applyTheme(){
-  document.body.classList.toggle('light', settings.theme === 'light');
-}
+let settings={lang:'ru',theme:'dark',os:detectedOS,autoUpdate:true,...loadSettings()};
+function applyTheme(){document.body.classList.toggle('light',settings.theme==='light')}
 applyTheme();
 
-// ── OS key adapter ──
 function adaptKeys(keys){
-  if(settings.os === 'mac'){
-    return keys
-      .replace(/Ctrl/g, '⌘ Cmd')
-      .replace(/Alt/g, '⌥ Alt')
-      .replace(/Shift/g, '⇧ Shift');
+  if(settings.os==='mac'){
+    return keys.replace(/\bCtrl\b/g,'⌘ Cmd').replace(/\bAlt\b/g,'⌥ Option').replace(/\bShift\b/g,'⇧ Shift');
   }
   return keys;
 }
 
 // ── Translations ──
-const T = {
+const T={
   ru:{
     tagline:"Горячие клавиши · Формулы · Цепочки действий",
-    tabSearch:"⌘ Поиск", tabAbout:"◎ О приложении", tabSettings:"⚙ Настройки",
+    tabSearch:"⌘ Поиск",tabAbout:"◎ О приложении",tabSettings:"⚙ Настройки",
     tryLabel:"Попробуй:",
-    suggestions:["посчитай столбец G и B","найти значение","удалить строку","сумма столбца C","добавить слайд","терминал"],
-    placeholder:'Например: "посчитай столбец G и B"...',
-    chainTitle:"⛓ Цепочка действий",
-    chainSteps:n=>`${n} шага`,
-    chainCol:c=>`столбец ${c}`,
+    suggestions:["сумма столбца G и B","найти значение в таблице","удалить строку","склеить ячейки","добавить слайд","открыть терминал"],
+    placeholder:'Например: "сумма столбца G и B"...',
+    chainTitle:"⛓ Цепочка действий",chainSteps:n=>`${n} шага`,chainCol:c=>`столбец ${c}`,
     chainCopyAll:"Скопировать все формулы",
-    typeFormula:"📊 Формула", typeHotkey:"⌨️ Клавиша", adapted:"✦ Адаптировано",
-    foundChain:n=>`Цепочка + ${n} результатов`,
-    found:n=>`Найдено: ${n}`,
+    typeFormula:"📊 Формула",typeHotkey:"⌨️ Клавиша",adapted:"✦ Адаптировано",
+    complex:"🔬 Сложная",
+    foundChain:n=>`Цепочка + ${n} результатов`,found:n=>`Найдено: ${n}`,
     notFound:q=>`Ничего не найдено по «${q}»`,
     notFoundHint:"Попробуй другие слова или включи больше программ",
     aboutHero:"Ищи горячие клавиши и формулы на русском — просто напиши что хочешь сделать.",
-    h_howto:"Как пользоваться поиском", h_filters:"Фильтры по программам",
-    h_updates:"Обновления", h_errors:"Частые ошибки",
+    h_howto:"Как пользоваться",h_filters:"Фильтры",h_updates:"Обновления",h_errors:"Частые ошибки",
     rows:[
-      ["🔍","Пиши по-русски, как обычно","Введи в строку поиска что хочешь сделать: «посчитать сумму», «удалить строку», «найти значение». Приложение само найдёт нужные формулы и горячие клавиши."],
-      ["⛓","Цепочки действий","Укажи несколько столбцов — получишь цепочку. Например: «посчитай столбец G и B» выдаст =SUM(G:G) и =SUM(B:B) по отдельности."],
-      ["✦","Адаптация под твои столбцы","Напиши «сумма столбца C» — формула подстроится как =SUM(C:C). Такие результаты помечены тегом «Адаптировано»."],
-      ["🏷","Кнопки над строкой поиска","Выбирай нужные программы — поиск ведётся только по ним. Минимум одна всегда активна."],
-      ["🔔","Автообновление","Когда выйдет новая версия — появится баннер. Нажми «Установить» — приложение обновится и перезапустится само."],
+      ["🔍","Пиши как обычно","Введи что хочешь сделать: «посчитать сумму», «удалить строку». Поиск найдёт формулы и горячие клавиши."],
+      ["⛓","Цепочки","Укажи несколько столбцов — получишь цепочку: «сумма G и B» выдаст =SUM(G:G) и =SUM(B:B)."],
+      ["✦","Адаптация","«Сумма столбца C» → =SUM(C:C). Результаты помечены тегом «Адаптировано»."],
+      ["🏷","Фильтры программ","Выбирай нужные программы над строкой поиска."],
+      ["🔔","Автообновление","Новая версия — баннер внизу. Нажми «Установить»."],
     ],
     errs:[
-      ["Ничего не найдено","Попробуй переформулировать. Убедись, что нужная программа включена в фильтрах."],
-      ["Формула выглядит странно","Если в запросе нет конкретного столбца — подставляется стандартный пример. Просто замени A:A на нужный столбец."],
+      ["Ничего не найдено","Попробуй переформулировать. Убедись, что нужная программа включена."],
+      ["Формула выглядит странно","Замени A:A или A2 на нужный столбец/ячейку."],
     ],
     footer:"RENDERGAMES © 2025",
-    // Settings
-    sTitle:"Настройки",
-    sLang:"Язык интерфейса", sTheme:"Тема оформления", sOS:"Платформа клавиатуры", sUpdate:"Автообновление",
-    sLangDesc:"Язык отображения и поиска",
-    sThemeDesc:"Светлая или тёмная тема",
-    sOSDesc:"Под какую ОС адаптировать горячие клавиши",
-    sUpdateDesc:"Проверять обновления при запуске",
-    sDetected:"определено автоматически",
-    dark:"Тёмная", light:"Светлая",
-    on:"Включено", off:"Выключено",
-    updateBanner:v=>`🔔 Новая версия ${v}`,
-    updateBody:"Доступно обновление",
-    install:"Установить",
-    installing:"⏳",
+    sTitle:"Настройки",sLang:"Язык",sTheme:"Тема",sOS:"Платформа клавиш",sUpdate:"Автообновление",
+    sLangDesc:"Язык отображения и поиска",sThemeDesc:"Светлая или тёмная тема",
+    sOSDesc:"Адаптация горячих клавиш",sUpdateDesc:"Показывать баннер при выходе новой версии",
+    sDetected:"определено",dark:"Тёмная",light:"Светлая",on:"Вкл",off:"Выкл",
+    updateBanner:v=>`🔔 Новая версия ${v}`,updateBody:"Доступно обновление",install:"Установить",installing:"⏳",
   },
   en:{
     tagline:"Hotkeys · Formulas · Action Chains",
-    tabSearch:"⌘ Search", tabAbout:"◎ About", tabSettings:"⚙ Settings",
+    tabSearch:"⌘ Search",tabAbout:"◎ About",tabSettings:"⚙ Settings",
     tryLabel:"Try:",
-    suggestions:["sum column G and B","find value","delete row","column C sum","add slide","terminal"],
+    suggestions:["sum column G and B","find value in table","delete row","merge cells","add slide","open terminal"],
     placeholder:'e.g. "sum column G and B"...',
-    chainTitle:"⛓ Action Chain",
-    chainSteps:n=>`${n} steps`,
-    chainCol:c=>`column ${c}`,
+    chainTitle:"⛓ Action Chain",chainSteps:n=>`${n} steps`,chainCol:c=>`column ${c}`,
     chainCopyAll:"Copy all formulas",
-    typeFormula:"📊 Formula", typeHotkey:"⌨️ Hotkey", adapted:"✦ Adapted",
-    foundChain:n=>`Chain + ${n} results`,
-    found:n=>`Found: ${n}`,
+    typeFormula:"📊 Formula",typeHotkey:"⌨️ Hotkey",adapted:"✦ Adapted",
+    complex:"🔬 Complex",
+    foundChain:n=>`Chain + ${n} results`,found:n=>`Found: ${n}`,
     notFound:q=>`Nothing found for "${q}"`,
     notFoundHint:"Try different words or enable more programs",
     aboutHero:"Find hotkeys and formulas in plain English — just type what you want to do.",
-    h_howto:"How to use search", h_filters:"Program filters",
-    h_updates:"Updates", h_errors:"Common issues",
+    h_howto:"How to use",h_filters:"Filters",h_updates:"Updates",h_errors:"Common issues",
     rows:[
-      ["🔍","Type naturally","Enter what you want to do: 'sum a column', 'delete row', 'find value'. The app will find the right formulas and hotkeys automatically."],
-      ["⛓","Action chains","Specify multiple columns to get a chain. For example: 'sum column G and B' returns =SUM(G:G) and =SUM(B:B) separately."],
-      ["✦","Adapted to your columns","Type 'sum column C' and the formula adapts to =SUM(C:C). These results are marked with the 'Adapted' tag."],
-      ["🏷","Buttons above search bar","Select the programs you need — search only runs through them. At least one must stay active."],
-      ["🔔","Auto-update","When a new version is released, a banner appears. Click 'Install' — the app updates and restarts automatically."],
+      ["🔍","Type naturally","Enter what you want to do. The app finds formulas and hotkeys automatically."],
+      ["⛓","Chains","Specify multiple columns: 'sum G and B' returns =SUM(G:G) and =SUM(B:B)."],
+      ["✦","Adapted","'Sum column C' → =SUM(C:C). Results are marked 'Adapted'."],
+      ["🏷","Program filters","Select programs above the search bar."],
+      ["🔔","Auto-update","New version shows a banner. Click Install."],
     ],
     errs:[
-      ["Nothing found","Try rephrasing. Make sure the right program is enabled in filters."],
-      ["Formula looks wrong","If no column is specified in the query, a default example is shown. Just replace A:A with your column."],
+      ["Nothing found","Try rephrasing. Make sure the right program is enabled."],
+      ["Formula looks wrong","Replace A:A or A2 with your column/cell."],
     ],
     footer:"RENDERGAMES © 2025",
-    sTitle:"Settings",
-    sLang:"Interface language", sTheme:"Appearance", sOS:"Keyboard platform", sUpdate:"Auto-update",
-    sLangDesc:"Language for display and search",
-    sThemeDesc:"Light or dark theme",
-    sOSDesc:"Which OS to adapt hotkeys for",
-    sUpdateDesc:"Check for updates on launch",
-    sDetected:"auto-detected",
-    dark:"Dark", light:"Light",
-    on:"On", off:"Off",
-    updateBanner:v=>`🔔 New version ${v}`,
-    updateBody:"Update available",
-    install:"Install",
-    installing:"⏳",
+    sTitle:"Settings",sLang:"Language",sTheme:"Theme",sOS:"Keyboard platform",sUpdate:"Auto-update",
+    sLangDesc:"Display and search language",sThemeDesc:"Light or dark theme",
+    sOSDesc:"Adapt hotkeys for your OS",sUpdateDesc:"Show banner when new version is available",
+    sDetected:"detected",dark:"Dark",light:"Light",on:"On",off:"Off",
+    updateBanner:v=>`🔔 New version ${v}`,updateBody:"Update available",install:"Install",installing:"⏳",
   }
 };
 
 // ── DB ──
-const DB = {
+const DB={
   Excel:[
-    {id:1, keys:"Ctrl + SUM",   keysDisplay:"SUM", type:"formula",template:"=SUM({col}:{col})",example:"=SUM(A:A)",
+    // ── Формулы базовые ──
+    {id:1,keys:"SUM",type:"formula",template:"=SUM({col}:{col})",example:"=SUM(A:A)",
       desc:{ru:"Сумма столбца",en:"Sum of a column"},
-      tags:{ru:["сумма","посчитать","столбец","итого","сложить"],en:["sum","total","column","add up","calculate"]}},
-    {id:2, keys:"AVERAGE", keysDisplay:"AVERAGE", type:"formula",template:"=AVERAGE({col}:{col})",example:"=AVERAGE(A:A)",
-      desc:{ru:"Среднее значение",en:"Average value"},
-      tags:{ru:["среднее","average","средний"],en:["average","mean","avg"]}},
-    {id:3, keys:"VLOOKUP", keysDisplay:"VLOOKUP", type:"formula",template:"=VLOOKUP({col}2,B:C,2,0)",example:"=VLOOKUP(A2,B:C,2,0)",
-      desc:{ru:"Поиск значения по столбцу",en:"Look up value by column"},
-      tags:{ru:["найти","поиск","vlookup","подтянуть"],en:["find","search","vlookup","lookup"]}},
-    {id:4, keys:"IF", keysDisplay:"IF", type:"formula",template:'=IF({col}1>0,"Да","Нет")',example:'=IF(A1>0,"Yes","No")',
+      tags:{ru:["сумма","посчитать","столбец","итого","сложить","подсчитать","суммировать"],en:["sum","total","column","add up","calculate"]}},
+    {id:2,keys:"AVERAGE",type:"formula",template:"=AVERAGE({col}:{col})",example:"=AVERAGE(A:A)",
+      desc:{ru:"Среднее значение столбца",en:"Average of a column"},
+      tags:{ru:["среднее","среднее значение","средний"],en:["average","mean","avg"]}},
+    {id:3,keys:"VLOOKUP / ВПР",type:"formula",template:"=VLOOKUP({col}2,B:C,2,0)",example:"=VLOOKUP(A2,B:C,2,0)",
+      desc:{ru:"Поиск значения в таблице (ВПР)",en:"Look up value in table"},
+      tags:{ru:["впр","vlookup","найти","поиск","подтянуть","справочник","значение по таблице","искомое значение"],en:["vlookup","find","search","lookup","reference table"]}},
+    {id:4,keys:"IF / ЕСЛИ",type:"formula",template:'=IF({col}1>0,"Да","Нет")',example:'=IF(A1>0,"Да","Нет")',
       desc:{ru:"Логическое условие",en:"Logical condition"},
-      tags:{ru:["если","условие","if","логика"],en:["if","condition","logic","check"]}},
-    {id:5, keys:"COUNTIF", keysDisplay:"COUNTIF", type:"formula",template:'=COUNTIF({col}:{col},"*")',example:'=COUNTIF(A:A,"yes")',
-      desc:{ru:"Подсчёт ячеек по условию",en:"Count cells by condition"},
-      tags:{ru:["посчитать","количество","countif","сколько"],en:["count","countif","how many"]}},
-    {id:6, keys:"SUMIF", keysDisplay:"SUMIF", type:"formula",template:'=SUMIF({col}:{col},"cond",B:B)',example:'=SUMIF(A:A,"yes",B:B)',
+      tags:{ru:["если","условие","если то","логика","проверить","иначе"],en:["if","condition","logic","check","else"]}},
+    {id:5,keys:"COUNTIF / СЧЁТЕСЛИ",type:"formula",template:'=COUNTIF({col}:{col},"условие")',example:'=COUNTIF(A:A,"да")',
+      desc:{ru:"Подсчёт ячеек по условию",en:"Count cells matching condition"},
+      tags:{ru:["посчитать","количество","countif","счётесли","сколько раз","сколько ячеек"],en:["count","countif","how many","occurrences"]}},
+    {id:6,keys:"SUMIF / СУММЕСЛИ",type:"formula",template:'=SUMIF({col}:{col},"условие",B:B)',example:'=SUMIF(A:A,"да",B:B)',
       desc:{ru:"Сумма по условию",en:"Sum by condition"},
-      tags:{ru:["сумма с условием","sumif"],en:["sum if","conditional sum","sumif"]}},
-    {id:7, keys:"MAX / MIN", keysDisplay:"MAX / MIN", type:"formula",template:"=MAX({col}:{col})",example:"=MAX(A:A)",
-      desc:{ru:"Максимальное / минимальное",en:"Maximum / minimum value"},
-      tags:{ru:["максимум","минимум","max","min"],en:["max","min","maximum","minimum","largest"]}},
-    {id:8, keys:"ROUND", keysDisplay:"ROUND", type:"formula",template:"=ROUND({col}1,2)",example:"=ROUND(A1,2)",
+      tags:{ru:["сумма с условием","суммесли","sumif","выборочная сумма"],en:["sum if","conditional sum","sumif"]}},
+    {id:7,keys:"MAX / MIN",type:"formula",template:"=MAX({col}:{col})",example:"=MAX(A:A)",
+      desc:{ru:"Максимум / минимум",en:"Maximum / minimum"},
+      tags:{ru:["максимум","минимум","max","min","наибольший","наименьший"],en:["max","min","maximum","minimum","largest"]}},
+    {id:8,keys:"ROUND / ОКРУГЛ",type:"formula",template:"=ROUND({col}1,2)",example:"=ROUND(A1,2)",
       desc:{ru:"Округление числа",en:"Round a number"},
-      tags:{ru:["округлить","round"],en:["round","decimal","rounding"]}},
-    {id:9, keys:"IFERROR", keysDisplay:"IFERROR", type:"formula",template:'=IFERROR({col}1,"—")',example:'=IFERROR(A1,"—")',
-      desc:{ru:"Скрыть ошибку в формуле",en:"Hide formula error"},
-      tags:{ru:["ошибка","скрыть ошибку","iferror"],en:["error","hide error","iferror"]}},
-    {id:10,keys:"INDEX+MATCH",keysDisplay:"INDEX+MATCH",type:"formula",template:"=INDEX(B:B,MATCH({col}2,A:A,0))",example:"=INDEX(B:B,MATCH(A2,A:A,0))",
-      desc:{ru:"Гибкий поиск (лучше VLOOKUP)",en:"Flexible lookup (better than VLOOKUP)"},
-      tags:{ru:["найти","поиск","index match"],en:["find","lookup","index match"]}},
-    {id:11,keys:"CONCATENATE",keysDisplay:"CONCATENATE",type:"formula",template:'={col}1&" "&{col}2',example:'=A1&" "&B1',
-      desc:{ru:"Объединить текст из ячеек",en:"Merge text from cells"},
-      tags:{ru:["объединить","склеить","текст"],en:["merge","join","concatenate","combine"]}},
-    {id:12,keys:"TODAY",keysDisplay:"TODAY",type:"formula",template:"=TODAY()",example:"=TODAY()",
+      tags:{ru:["округлить","округление","round","округл"],en:["round","decimal","rounding"]}},
+    {id:9,keys:"IFERROR / ЕСЛИОШИБКА",type:"formula",template:'=IFERROR({col}1,"—")',example:'=IFERROR(A1,"—")',
+      desc:{ru:"Скрыть ошибку формулы",en:"Suppress formula error"},
+      tags:{ru:["ошибка","скрыть ошибку","iferror","еслиошибка"],en:["error","hide error","iferror"]}},
+    {id:10,keys:"INDEX+MATCH",type:"formula",template:"=INDEX(B:B,MATCH({col}2,A:A,0))",example:"=INDEX(B:B,MATCH(A2,A:A,0))",
+      desc:{ru:"Гибкий поиск (лучше ВПР)",en:"Flexible lookup (better than VLOOKUP)"},
+      tags:{ru:["найти","поиск","index match","гибкий поиск","индекс поискпоз"],en:["find","lookup","index match","flexible"]}},
+    {id:11,keys:"CONCATENATE / СЦЕПИТЬ",type:"formula",template:'={col}1&" "&{col}2',example:'=A1&" "&B1',
+      desc:{ru:"Склеить текст из ячеек",en:"Merge text from cells"},
+      tags:{ru:["объединить","склеить","текст","сцепить","сцепитъ","concatenate","соединить ячейки","прикрепить","приклеить","сложить текст"],en:["merge","join","concatenate","combine text","concat"]}},
+    {id:12,keys:"TODAY / СЕГОДНЯ",type:"formula",template:"=TODAY()",example:"=TODAY()",
       desc:{ru:"Текущая дата",en:"Current date"},
-      tags:{ru:["дата","сегодня","today"],en:["date","today","current date"]}},
-    {id:13,keys:"LEN",keysDisplay:"LEN",type:"formula",template:"=LEN({col}1)",example:"=LEN(A1)",
+      tags:{ru:["дата","сегодня","today","текущая дата","сегодняшняя дата"],en:["date","today","current date"]}},
+    {id:13,keys:"LEN / ДЛСТР",type:"formula",template:"=LEN({col}1)",example:"=LEN(A1)",
       desc:{ru:"Длина текста в ячейке",en:"Text length in cell"},
-      tags:{ru:["длина","символы","len"],en:["length","characters","len"]}},
-    {id:20,keys:"Alt + =",type:"hotkey",
-      desc:{ru:"Автосумма",en:"AutoSum"},
-      tags:{ru:["автосумма","сумма","быстрая сумма"],en:["autosum","sum","quick sum"]}},
-    {id:21,keys:"Ctrl + Shift + L",type:"hotkey",
-      desc:{ru:"Включить / выключить фильтр",en:"Toggle filter"},
+      tags:{ru:["длина","символы","len","длстр","количество символов"],en:["length","characters","len"]}},
+    {id:14,keys:"TEXT / ТЕКСТ",type:"formula",template:'=TEXT({col}1,"#,##0.00")',example:'=TEXT(A1,"#,##0.00")',
+      desc:{ru:"Форматировать число как текст",en:"Format number as text"},
+      tags:{ru:["формат","форматировать","число в текст","текст","text"],en:["format","number to text","text"]}},
+    {id:15,keys:"LEFT/RIGHT/MID",type:"formula",template:"=LEFT({col}1,N)",example:"=LEFT(A1,5)",
+      desc:{ru:"Извлечь часть текста",en:"Extract part of text"},
+      tags:{ru:["часть текста","левые символы","правые символы","левсимв","правсимв","пстр"],en:["extract text","left","right","mid","substring"]}},
+    {id:16,keys:"TRIM / СЖПРОБЕЛЫ",type:"formula",template:"=TRIM({col}1)",example:"=TRIM(A1)",
+      desc:{ru:"Убрать лишние пробелы",en:"Remove extra spaces"},
+      tags:{ru:["пробелы","убрать пробелы","сжпробелы","trim","очистить"],en:["trim","spaces","remove spaces"]}},
+    {id:17,keys:"COUNTIFS / СЧЁТЕСЛИМН",type:"formula",template:'=COUNTIFS({col}:{col},"условие1",B:B,"условие2")',example:'=COUNTIFS(A:A,"да",B:B,">0")',
+      desc:{ru:"Подсчёт по нескольким условиям",en:"Count with multiple conditions"},
+      tags:{ru:["несколько условий","countifs","счётеслимн","много условий"],en:["countifs","multiple conditions","count multiple"]}},
+    {id:18,keys:"SUMPRODUCT",type:"formula",template:"=SUMPRODUCT({col}:{col},B:B)",example:"=SUMPRODUCT(A:A,B:B)",
+      desc:{ru:"Сумма произведений (умножить столбцы)",en:"Sum of products"},
+      tags:{ru:["умножить столбцы","суммпроизв","sumproduct","произведение"],en:["sumproduct","multiply columns","product sum"]}},
+    {id:19,keys:"UNIQUE / УНИК",type:"formula",template:"=UNIQUE({col}:{col})",example:"=UNIQUE(A:A)",
+      desc:{ru:"Уникальные значения из столбца",en:"Unique values from column"},
+      tags:{ru:["уникальные","убрать дубли","unique","уник","без повторений"],en:["unique","deduplicate","distinct"]}},
+
+    // ── Сложные формулы ──
+    {id:51,keys:"ВПР + внешний файл",type:"formula",complex:true,
+      template:'=VLOOKUP({col}22,\'[Файл.xlsx]Лист\'!$H$3:$AA$303,15,0)',
+      example:"=VLOOKUP(D22,'D:\\Папка\\[База 2026.xlsx]HL_веса'!$H$3:$AA$303,15,0)",
+      desc:{ru:"ВПР с поиском в другом файле Excel",en:"VLOOKUP referencing external Excel file"},
+      tags:{ru:["впр другой файл","внешний файл","vlookup файл","поиск в другом файле","база","xlsx","другой документ","внешняя таблица"],en:["vlookup external file","external workbook","cross-file lookup"]}},
+    {id:52,keys:"СЦЕПИТЬ несколько ячеек",type:"formula",complex:true,
+      template:'=CONCATENATE({col}3,{col}4," ",{col}5)',
+      example:'=CONCATENATE(G3,H3," ",I3)',
+      desc:{ru:"Объединить несколько ячеек в одну строку",en:"Combine multiple cells into one string"},
+      tags:{ru:["сцепить","объединить ячейки","склеить несколько","concatenate","сцепить три","собрать строку","прикрепить значение"],en:["concatenate cells","combine cells","join multiple"]}},
+    {id:53,keys:"ЕСЛИ + И/ИЛИ",type:"formula",complex:true,
+      template:'=IF(AND({col}1>0,{col}1<100),"В диапазоне","Вне диапазона")',
+      example:'=IF(AND(A1>0,A1<100),"ОК","Нет")',
+      desc:{ru:"Условие с несколькими проверками",en:"Condition with multiple checks"},
+      tags:{ru:["если и","если или","сложное условие","and or","несколько условий в если"],en:["if and","if or","complex condition","multiple checks"]}},
+    {id:54,keys:"СУММЕСЛИ по диапазону дат",type:"formula",complex:true,
+      template:'=SUMIFS(C:C,A:A,">="&DATE(2024,1,1),A:A,"<="&TODAY())',
+      example:'=SUMIFS(C:C,A:A,">="&DATE(2024,1,1),A:A,"<="&TODAY())',
+      desc:{ru:"Сумма за период (между двумя датами)",en:"Sum between two dates"},
+      tags:{ru:["сумма за период","сумма по датам","суммесли дата","sumifs дата","за год","за месяц"],en:["sum by date","date range sum","sumifs date"]}},
+    {id:55,keys:"ВПР приблизительный",type:"formula",complex:true,
+      template:'=VLOOKUP({col}2,A:B,2,1)',
+      example:'=VLOOKUP(D2,A:B,2,1)',
+      desc:{ru:"ВПР с приблизительным совпадением (для диапазонов)",en:"VLOOKUP approximate match (for ranges/grades)"},
+      tags:{ru:["впр диапазон","приблизительный впр","интервальный просмотр","1 в впр","оценки","категории"],en:["vlookup approximate","range lookup","grade lookup"]}},
+    {id:56,keys:"ИНДЕКС+ПОИСКПОЗ двойной",type:"formula",complex:true,
+      template:'=INDEX(C:C,MATCH(1,(A:A={col}2)*(B:B="условие"),0))',
+      example:'=INDEX(C:C,MATCH(1,(A:A=D2)*(B:B="активный"),0))',
+      desc:{ru:"Поиск по двум условиям одновременно",en:"Lookup with two simultaneous conditions"},
+      tags:{ru:["поиск по двум условиям","двойной впр","индекс поискпоз два условия","сложный поиск"],en:["two condition lookup","double match","index match two criteria"]}},
+    {id:57,keys:"SUBTOTAL / ПРОМЕЖУТОЧНЫЕ.ИТОГИ",type:"formula",complex:true,
+      template:"=SUBTOTAL(9,{col}:{col})",
+      example:"=SUBTOTAL(9,B:B)",
+      desc:{ru:"Сумма только видимых строк (с учётом фильтра)",en:"Sum visible rows only (respects filters)"},
+      tags:{ru:["сумма фильтр","видимые строки","промежуточные итоги","subtotal","сумма после фильтра"],en:["subtotal","filtered sum","visible rows sum"]}},
+
+    // ── Горячие клавиши ──
+    {id:20,keys:"Alt + =",type:"hotkey",desc:{ru:"Автосумма",en:"AutoSum"},
+      tags:{ru:["автосумма","быстрая сумма"],en:["autosum","quick sum"]}},
+    {id:21,keys:"Ctrl + Shift + L",type:"hotkey",desc:{ru:"Фильтр вкл/выкл",en:"Toggle filter"},
       tags:{ru:["фильтр","включить фильтр"],en:["filter","toggle filter"]}},
-    {id:22,keys:"Ctrl + T",type:"hotkey",
-      desc:{ru:"Создать умную таблицу",en:"Create smart table"},
+    {id:22,keys:"Ctrl + T",type:"hotkey",desc:{ru:"Создать умную таблицу",en:"Create table"},
       tags:{ru:["таблица","умная таблица"],en:["table","smart table"]}},
-    {id:23,keys:"F4",type:"hotkey",
-      desc:{ru:"Переключить тип ссылки ($A$1)",en:"Toggle reference type ($A$1)"},
+    {id:23,keys:"F4",type:"hotkey",desc:{ru:"Абсолютная ссылка $A$1",en:"Toggle absolute reference $A$1"},
       tags:{ru:["закрепить","абсолютная ссылка","$"],en:["lock","absolute reference","$"]}},
-    {id:24,keys:"Ctrl + 1",type:"hotkey",
-      desc:{ru:"Открыть «Формат ячеек»",en:"Open Format Cells"},
+    {id:24,keys:"Ctrl + 1",type:"hotkey",desc:{ru:"Формат ячеек",en:"Format Cells dialog"},
       tags:{ru:["формат","формат ячеек"],en:["format","format cells"]}},
-    {id:25,keys:"Ctrl + Shift + +",type:"hotkey",
-      desc:{ru:"Вставить строку / столбец",en:"Insert row / column"},
-      tags:{ru:["добавить строку","вставить строку"],en:["insert row","add row","new row"]}},
-    {id:26,keys:"Ctrl + -",type:"hotkey",
-      desc:{ru:"Удалить строку / столбец",en:"Delete row / column"},
+    {id:25,keys:"Ctrl + Shift + +",type:"hotkey",desc:{ru:"Вставить строку / столбец",en:"Insert row / column"},
+      tags:{ru:["добавить строку","вставить строку","новая строка"],en:["insert row","add row"]}},
+    {id:26,keys:"Ctrl + -",type:"hotkey",desc:{ru:"Удалить строку / столбец",en:"Delete row / column"},
       tags:{ru:["удалить строку","удалить столбец"],en:["delete row","remove row"]}},
-    {id:27,keys:"Ctrl + F",type:"hotkey",
-      desc:{ru:"Найти в документе",en:"Find in document"},
+    {id:27,keys:"Ctrl + F",type:"hotkey",desc:{ru:"Найти в документе",en:"Find"},
       tags:{ru:["найти","поиск"],en:["find","search"]}},
-    {id:28,keys:"Ctrl + H",type:"hotkey",
-      desc:{ru:"Найти и заменить",en:"Find and replace"},
+    {id:28,keys:"Ctrl + H",type:"hotkey",desc:{ru:"Найти и заменить",en:"Find and replace"},
       tags:{ru:["заменить","найти и заменить"],en:["replace","find and replace"]}},
-    {id:29,keys:"Ctrl + Z",type:"hotkey",
-      desc:{ru:"Отменить действие",en:"Undo"},
+    {id:29,keys:"Ctrl + Z",type:"hotkey",desc:{ru:"Отменить",en:"Undo"},
       tags:{ru:["отменить","undo"],en:["undo","revert"]}},
-    {id:30,keys:"Ctrl + S",type:"hotkey",
-      desc:{ru:"Сохранить файл",en:"Save file"},
+    {id:30,keys:"Ctrl + S",type:"hotkey",desc:{ru:"Сохранить",en:"Save"},
       tags:{ru:["сохранить"],en:["save"]}},
+    {id:31,keys:"Ctrl + D",type:"hotkey",desc:{ru:"Заполнить вниз (повторить формулу)",en:"Fill down"},
+      tags:{ru:["заполнить вниз","протянуть формулу","скопировать вниз"],en:["fill down","copy down"]}},
+    {id:32,keys:"Ctrl + R",type:"hotkey",desc:{ru:"Заполнить вправо",en:"Fill right"},
+      tags:{ru:["заполнить вправо","протянуть вправо"],en:["fill right"]}},
+    {id:33,keys:"Ctrl + Shift + End",type:"hotkey",desc:{ru:"Выделить до конца данных",en:"Select to last cell"},
+      tags:{ru:["выделить всё","до конца","весь диапазон"],en:["select all","select to end"]}},
+    {id:34,keys:"F2",type:"hotkey",desc:{ru:"Редактировать ячейку",en:"Edit cell"},
+      tags:{ru:["редактировать ячейку","изменить ячейку","f2"],en:["edit cell","f2"]}},
+    {id:35,keys:"Ctrl + ;",type:"hotkey",desc:{ru:"Вставить текущую дату",en:"Insert today's date"},
+      tags:{ru:["вставить дату","текущая дата","сегодня вставить"],en:["insert date","today"]}},
   ],
   Word:[
     {id:40,keys:"Ctrl + B / I / U",type:"hotkey",
@@ -262,29 +325,32 @@ const DB = {
       tags:{ru:["жирный","курсив","подчеркнуть","bold"],en:["bold","italic","underline"]}},
     {id:41,keys:"Ctrl + Enter",type:"hotkey",
       desc:{ru:"Разрыв страницы",en:"Page break"},
-      tags:{ru:["новая страница","разрыв"],en:["page break","new page"]}},
+      tags:{ru:["новая страница","разрыв страницы"],en:["page break","new page"]}},
     {id:42,keys:"Ctrl + L/E/R/J",type:"hotkey",
       desc:{ru:"Выравнивание текста",en:"Text alignment"},
       tags:{ru:["выравнивание","по центру","justify"],en:["align","center","justify"]}},
     {id:43,keys:"Ctrl + Alt + 1/2/3",type:"hotkey",
       desc:{ru:"Стиль Заголовок 1/2/3",en:"Heading style 1/2/3"},
-      tags:{ru:["заголовок","стиль","heading"],en:["heading","style","h1","h2"]}},
+      tags:{ru:["заголовок","стиль","heading"],en:["heading","style","h1"]}},
     {id:44,keys:"Ctrl + D",type:"hotkey",
       desc:{ru:"Диалог «Шрифт»",en:"Font dialog"},
       tags:{ru:["шрифт","размер шрифта"],en:["font","font size"]}},
     {id:45,keys:"Ctrl + F",type:"hotkey",
-      desc:{ru:"Найти в документе",en:"Find in document"},
-      tags:{ru:["найти","поиск"],en:["find","search"]}},
+      desc:{ru:"Найти в документе",en:"Find"},
+      tags:{ru:["найти","поиск"],en:["find"]}},
     {id:46,keys:"Ctrl + Z",type:"hotkey",
-      desc:{ru:"Отменить действие",en:"Undo"},
+      desc:{ru:"Отменить",en:"Undo"},
       tags:{ru:["отменить"],en:["undo"]}},
+    {id:47,keys:"Ctrl + Shift + N",type:"hotkey",
+      desc:{ru:"Обычный стиль (сбросить форматирование)",en:"Normal style (clear formatting)"},
+      tags:{ru:["обычный стиль","сбросить форматирование","убрать форматирование"],en:["normal style","clear formatting"]}},
   ],
   PowerPoint:[
     {id:50,keys:"F5",type:"hotkey",
       desc:{ru:"Запустить показ с начала",en:"Start slideshow"},
       tags:{ru:["показ","запустить","презентация"],en:["slideshow","present","play"]}},
     {id:51,keys:"Shift + F5",type:"hotkey",
-      desc:{ru:"Показ с текущего слайда",en:"Start from current slide"},
+      desc:{ru:"Показ с текущего слайда",en:"Show from current slide"},
       tags:{ru:["текущий слайд","показ"],en:["current slide","slideshow"]}},
     {id:52,keys:"Ctrl + M",type:"hotkey",
       desc:{ru:"Добавить новый слайд",en:"Add new slide"},
@@ -294,10 +360,13 @@ const DB = {
       tags:{ru:["дублировать","копия слайда"],en:["duplicate","copy slide"]}},
     {id:54,keys:"Ctrl + G",type:"hotkey",
       desc:{ru:"Группировать объекты",en:"Group objects"},
-      tags:{ru:["группировать","группа"],en:["group","group objects"]}},
+      tags:{ru:["группировать","группа"],en:["group"]}},
     {id:55,keys:"Ctrl + Z",type:"hotkey",
-      desc:{ru:"Отменить действие",en:"Undo"},
+      desc:{ru:"Отменить",en:"Undo"},
       tags:{ru:["отменить"],en:["undo"]}},
+    {id:56,keys:"B / W",type:"hotkey",
+      desc:{ru:"Чёрный / белый экран во время показа",en:"Black / white screen during slideshow"},
+      tags:{ru:["чёрный экран","белый экран","пауза показ"],en:["black screen","white screen","pause slideshow"]}},
   ],
   "VS Code":[
     {id:60,keys:"Ctrl + P",type:"hotkey",
@@ -310,8 +379,8 @@ const DB = {
       desc:{ru:"Переместить строку вверх/вниз",en:"Move line up/down"},
       tags:{ru:["переместить строку","двигать строку"],en:["move line","reorder"]}},
     {id:63,keys:"Ctrl + /",type:"hotkey",
-      desc:{ru:"Закомментировать строку",en:"Comment out line"},
-      tags:{ru:["комментарий","закомментировать"],en:["comment","comment out"]}},
+      desc:{ru:"Закомментировать строку",en:"Toggle comment"},
+      tags:{ru:["комментарий","закомментировать"],en:["comment","toggle comment"]}},
     {id:64,keys:"Ctrl + D",type:"hotkey",
       desc:{ru:"Выделить следующее вхождение",en:"Select next occurrence"},
       tags:{ru:["мультикурсор","выделить слово"],en:["multi cursor","select word"]}},
@@ -320,18 +389,21 @@ const DB = {
       tags:{ru:["терминал","консоль"],en:["terminal","console"]}},
     {id:66,keys:"Ctrl + Shift + K",type:"hotkey",
       desc:{ru:"Удалить строку",en:"Delete line"},
-      tags:{ru:["удалить строку"],en:["delete line","remove line"]}},
+      tags:{ru:["удалить строку"],en:["delete line"]}},
     {id:67,keys:"Ctrl + B",type:"hotkey",
-      desc:{ru:"Скрыть / показать боковую панель",en:"Toggle sidebar"},
+      desc:{ru:"Боковая панель вкл/выкл",en:"Toggle sidebar"},
       tags:{ru:["боковая панель","sidebar"],en:["sidebar","toggle sidebar"]}},
     {id:68,keys:"Ctrl + Z",type:"hotkey",
-      desc:{ru:"Отменить действие",en:"Undo"},
+      desc:{ru:"Отменить",en:"Undo"},
       tags:{ru:["отменить"],en:["undo"]}},
+    {id:69,keys:"Ctrl + Shift + F",type:"hotkey",
+      desc:{ru:"Поиск по всем файлам",en:"Search across files"},
+      tags:{ru:["поиск по проекту","найти везде","глобальный поиск"],en:["global search","search files"]}},
   ],
   Photoshop:[
     {id:70,keys:"Ctrl + J",type:"hotkey",
       desc:{ru:"Дублировать слой",en:"Duplicate layer"},
-      tags:{ru:["дублировать слой","скопировать слой"],en:["duplicate layer","copy layer"]}},
+      tags:{ru:["дублировать слой","скопировать слой"],en:["duplicate layer"]}},
     {id:71,keys:"Ctrl + T",type:"hotkey",
       desc:{ru:"Свободная трансформация",en:"Free transform"},
       tags:{ru:["трансформация","масштаб","повернуть"],en:["transform","scale","rotate"]}},
@@ -339,38 +411,35 @@ const DB = {
       desc:{ru:"Уменьшить / увеличить кисть",en:"Decrease / increase brush"},
       tags:{ru:["кисть","размер кисти"],en:["brush","brush size"]}},
     {id:73,keys:"Ctrl + Alt + Z",type:"hotkey",
-      desc:{ru:"Несколько шагов назад",en:"Step backward (history)"},
-      tags:{ru:["история","отменить несколько"],en:["history","step back","multiple undo"]}},
+      desc:{ru:"Несколько шагов назад",en:"Step backward"},
+      tags:{ru:["история","отменить несколько"],en:["history","step back"]}},
     {id:74,keys:"Ctrl + Shift + S",type:"hotkey",
       desc:{ru:"Сохранить как",en:"Save as"},
       tags:{ru:["сохранить как","экспорт"],en:["save as","export"]}},
     {id:75,keys:"Ctrl + Shift + Alt + E",type:"hotkey",
-      desc:{ru:"Объединить видимые слои в новый",en:"Merge visible to new layer"},
-      tags:{ru:["объединить слои","stamp"],en:["merge layers","stamp","flatten"]}},
+      desc:{ru:"Объединить видимые слои в новый",en:"Merge visible to new"},
+      tags:{ru:["объединить слои","stamp"],en:["merge layers","stamp"]}},
   ]
 };
 
-const PROGRAMS = Object.keys(DB);
-const COLORS = {Excel:"#22c55e",Word:"#3b82f6",PowerPoint:"#f97316","VS Code":"#a78bfa",Photoshop:"#38bdf8"};
-const ICONS  = {Excel:"⊞",Word:"W",PowerPoint:"P","VS Code":"</>",Photoshop:"Ps"};
+const PROGRAMS=Object.keys(DB);
+const COLORS={Excel:"#22c55e",Word:"#3b82f6",PowerPoint:"#f97316","VS Code":"#a78bfa",Photoshop:"#38bdf8"};
+const ICONS={Excel:"⊞",Word:"W",PowerPoint:"P","VS Code":"</>",Photoshop:"Ps"};
 
-// ── App State ──
-let state = {query:"", progs:["Excel"], tab:"search"};
+let state={query:"",progs:["Excel"],tab:"search"};
 
-// ── Helpers ──
 function extractColumns(q){
   const parts=q.toUpperCase().split(/[\s,+иand&]+/);
   const cols=[];
   for(const p of parts) if(/^[A-Z]{1,2}$/.test(p.trim())) cols.push(p.trim());
   return [...new Set(cols)];
 }
-
-function getDesc(item){ return typeof item.desc==='object'?item.desc[settings.lang]:item.desc; }
-function getTags(item){ return typeof item.tags==='object'?(item.tags[settings.lang]||[]):(item.tags||[]); }
+function getDesc(item){return typeof item.desc==='object'?item.desc[settings.lang]:item.desc}
+function getTags(item){return typeof item.tags==='object'?(item.tags[settings.lang]||[]):(item.tags||[])}
 
 function scoreItem(query,item){
-  const q=query.toLowerCase().trim(); let s=0;
-  const fields=[getDesc(item).toLowerCase(), item.keys.toLowerCase(), ...getTags(item)];
+  const q=query.toLowerCase().trim();let s=0;
+  const fields=[getDesc(item).toLowerCase(),item.keys.toLowerCase(),...getTags(item)];
   for(const f of fields){
     if(f===q){s+=10;continue}
     if(f.includes(q)){s+=5;continue}
@@ -396,30 +465,24 @@ function buildChain(query,items){
   const base=items.find(i=>i.template)||items[0];
   if(!base) return null;
   return cols.map((col,i)=>({
-    step:i+1, col,
+    step:i+1,col,
     formula:base.template?base.template.replace(/\{col\}/g,col):(base.example||base.keys),
-    desc:getDesc(base), program:base.program
+    desc:getDesc(base),program:base.program
   }));
 }
 
 function copyText(text,btn){
   navigator.clipboard.writeText(text).then(()=>{
-    const orig=btn.textContent;
-    btn.textContent="✓";
-    btn.style.color="#4ade80";
-    btn.style.borderColor="rgba(34,197,94,0.5)";
-    btn.style.background="rgba(34,197,94,0.2)";
-    setTimeout(()=>{
-      btn.textContent=orig;
-      btn.style.color="";btn.style.borderColor="";btn.style.background="";
-    },1400);
+    btn.textContent="✓";btn.style.color="#4ade80";
+    btn.style.borderColor="rgba(34,197,94,0.5)";btn.style.background="rgba(34,197,94,0.2)";
+    setTimeout(()=>{btn.textContent="⎘";btn.style.color="";btn.style.borderColor="";btn.style.background=""},1400);
   });
 }
 
 function makeCopyBtn(text){
   const btn=document.createElement('button');
   btn.textContent="⎘";
-  btn.style.cssText="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);color:#64748b;border-radius:7px;padding:5px 11px;font-size:11px;cursor:pointer;font-weight:700;transition:all 0.18s;flex-shrink:0;font-family:inherit";
+  btn.style.cssText="background:var(--copy-bg);border:1px solid var(--copy-border);color:var(--copy-color);border-radius:7px;padding:5px 11px;font-size:11px;cursor:pointer;font-weight:700;transition:all 0.18s;flex-shrink:0;font-family:inherit";
   btn.onclick=()=>copyText(text,btn);
   return btn;
 }
@@ -438,88 +501,55 @@ function renderSettings(){
 
   function section(title){
     const d=el('p',"color:var(--text3);font-size:10px;text-transform:uppercase;letter-spacing:2px;font-weight:800;margin:24px 0 10px");
-    d.textContent=title; return d;
+    d.textContent=title;return d;
   }
-
   function settingRow(icon,title,desc,control){
     const row=el('div',"display:flex;align-items:center;justify-content:space-between;gap:16px;background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:14px 16px;margin-bottom:8px");
     const left=el('div',"display:flex;align-items:center;gap:12px;flex:1;min-width:0");
-    const iconEl=el('div',"font-size:18px;flex-shrink:0");
-    iconEl.textContent=icon;
-    const text=el('div',"");
-    const titleEl=el('div',"font-size:12px;font-weight:700;color:var(--text);margin-bottom:3px");
-    titleEl.textContent=title;
-    const descEl=el('div',"font-size:11px;color:var(--text2)");
-    descEl.textContent=desc;
-    text.appendChild(titleEl);
-    text.appendChild(descEl);
-    left.appendChild(iconEl);
-    left.appendChild(text);
-    row.appendChild(left);
-    row.appendChild(control);
-    return row;
+    const ic=el('div',"font-size:18px;flex-shrink:0");ic.textContent=icon;
+    const tx=el('div',"");
+    const ti=el('div',"font-size:12px;font-weight:700;color:var(--text);margin-bottom:3px");ti.textContent=title;
+    const de=el('div',"font-size:11px;color:var(--text2)");de.textContent=desc;
+    tx.appendChild(ti);tx.appendChild(de);left.appendChild(ic);left.appendChild(tx);
+    row.appendChild(left);row.appendChild(control);return row;
   }
-
-  function segmented(options, current, onChange){
-    const wrap=el('div',"display:flex;gap:2px;background:rgba(0,0,0,0.2);border:1px solid var(--border);border-radius:8px;padding:3px;flex-shrink:0");
+  function segmented(options,current,onChange){
+    const w=el('div',"display:flex;gap:2px;background:var(--seg-bg);border:1px solid var(--border);border-radius:8px;padding:3px;flex-shrink:0");
     options.forEach(({val,label})=>{
       const on=current===val;
-      const btn=el('button',`background:${on?"rgba(99,102,241,0.3)":"transparent"};border:1px solid ${on?"rgba(99,102,241,0.5)":"transparent"};border-radius:6px;padding:5px 10px;font-size:11px;font-weight:700;color:${on?"#c7d2fe":"var(--text2)"};cursor:pointer;transition:all 0.18s;white-space:nowrap`);
+      const btn=el('button',`background:${on?"rgba(99,102,241,0.25)":"transparent"};border:1px solid ${on?"rgba(99,102,241,0.45)":"transparent"};border-radius:6px;padding:5px 10px;font-size:11px;font-weight:700;color:${on?"#c7d2fe":"var(--text2)"};cursor:pointer;transition:all 0.18s;white-space:nowrap`);
       btn.textContent=label;
-      btn.onclick=()=>{ onChange(val); };
-      wrap.appendChild(btn);
+      btn.onclick=()=>onChange(val);
+      w.appendChild(btn);
     });
-    return wrap;
+    return w;
   }
-
-  function toggle(current, onChange){
-    const on=current;
-    const t=T[settings.lang];
-    const btn=el('button',`background:${on?"rgba(34,197,94,0.15)":"rgba(255,255,255,0.04)"};border:1px solid ${on?"rgba(34,197,94,0.4)":"var(--border)"};border-radius:20px;padding:6px 14px;font-size:11px;font-weight:700;color:${on?"#4ade80":"var(--text2)"};cursor:pointer;transition:all 0.2s;display:flex;align-items:center;gap:6px;flex-shrink:0`);
-    btn.innerHTML=`<span style="width:8px;height:8px;border-radius:50%;background:${on?"#4ade80":"#475569"};display:inline-block;transition:background 0.2s"></span>${on?t.on:t.off}`;
+  function toggle(current,onChange){
+    const btn=el('button',`background:${current?"rgba(34,197,94,0.15)":"var(--toggle-off-bg)"};border:1px solid ${current?"rgba(34,197,94,0.4)":"var(--border)"};border-radius:20px;padding:6px 14px;font-size:11px;font-weight:700;color:${current?"#4ade80":"var(--text2)"};cursor:pointer;transition:all 0.2s;display:flex;align-items:center;gap:6px;flex-shrink:0`);
+    btn.innerHTML=`<span style="width:8px;height:8px;border-radius:50%;background:${current?"#4ade80":"#475569"};display:inline-block"></span>${current?t.on:t.off}`;
     btn.onclick=()=>onChange(!current);
     return btn;
   }
 
-  // Lang
   wrap.appendChild(section(t.sLang));
-  wrap.appendChild(settingRow("🌐", t.sLang, t.sLangDesc,
-    segmented([{val:'ru',label:'RU'},{val:'en',label:'EN'}], settings.lang, val=>{
-      settings.lang=val; saveSettings(settings); render();
-    })
-  ));
+  wrap.appendChild(settingRow("🌐",t.sLang,t.sLangDesc,
+    segmented([{val:'ru',label:'RU'},{val:'en',label:'EN'}],settings.lang,val=>{settings.lang=val;saveSettings(settings);render()})));
 
-  // Theme
   wrap.appendChild(section(t.sTheme));
-  wrap.appendChild(settingRow("🎨", t.sTheme, t.sThemeDesc,
-    segmented([{val:'dark',label:t.dark},{val:'light',label:t.light}], settings.theme, val=>{
-      settings.theme=val; saveSettings(settings); applyTheme(); render();
-    })
-  ));
+  wrap.appendChild(settingRow("🎨",t.sTheme,t.sThemeDesc,
+    segmented([{val:'dark',label:t.dark},{val:'light',label:t.light}],settings.theme,val=>{settings.theme=val;saveSettings(settings);applyTheme();render()})));
 
-  // OS
   wrap.appendChild(section(t.sOS));
-  const osRow = settingRow("💻", t.sOS,
-    `${t.sOSDesc} (${t.sDetected}: ${detectedOS})`,
-    segmented([{val:'win',label:'Windows'},{val:'mac',label:'macOS'},{val:'linux',label:'Linux'}], settings.os, val=>{
-      settings.os=val; saveSettings(settings); render();
-    })
-  );
-  wrap.appendChild(osRow);
+  wrap.appendChild(settingRow("💻",t.sOS,`${t.sOSDesc} (${t.sDetected}: ${detectedOS})`,
+    segmented([{val:'win',label:'Windows'},{val:'mac',label:'macOS'},{val:'linux',label:'Linux'}],settings.os,val=>{settings.os=val;saveSettings(settings);render()})));
 
-  // Preview hotkey
-  const preview=el('div',"background:rgba(99,102,241,0.06);border:1px solid rgba(99,102,241,0.15);border-radius:10px;padding:12px 16px;margin-bottom:8px;font-size:11px;color:var(--text2)");
-  const exKey = adaptKeys("Ctrl + Z");
-  preview.innerHTML=`<span style="color:var(--text3)">${settings.lang==='ru'?'Например:':'Example:'}</span> <span style="background:rgba(99,102,241,0.15);border:1px solid rgba(99,102,241,0.3);border-radius:5px;padding:2px 8px;color:#c7d2fe;font-weight:700">${exKey}</span>`;
+  const preview=el('div',"background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:12px 16px;margin-bottom:8px;font-size:11px;color:var(--text2)");
+  preview.innerHTML=`<span style="color:var(--text3)">${settings.lang==='ru'?'Например:':'Example:'}</span> <span style="background:rgba(99,102,241,0.15);border:1px solid rgba(99,102,241,0.3);border-radius:5px;padding:2px 8px;color:#c7d2fe;font-weight:700">${adaptKeys("Ctrl + Z")}</span>`;
   wrap.appendChild(preview);
 
-  // Auto-update
   wrap.appendChild(section(t.sUpdate));
-  wrap.appendChild(settingRow("🔔", t.sUpdate, t.sUpdateDesc,
-    toggle(settings.autoUpdate, val=>{
-      settings.autoUpdate=val; saveSettings(settings); render();
-    })
-  ));
+  wrap.appendChild(settingRow("🔔",t.sUpdate,t.sUpdateDesc,
+    toggle(settings.autoUpdate,val=>{settings.autoUpdate=val;saveSettings(settings);render()})));
 
   wrap.appendChild(el('div',"text-align:center;color:var(--text3);font-size:10px;margin-top:28px;padding-bottom:8px",t.footer));
   return wrap;
@@ -530,31 +560,28 @@ function renderChainCard(chain){
   const t=T[settings.lang];
   const prog=chain[0]?.program||"Excel";
   const color=COLORS[prog]||"#818cf8";
-  const wrap=el('div',"position:relative;overflow:hidden;background:rgba(12,10,28,0.97);border:1px solid rgba(139,92,246,0.35);border-radius:14px;padding:18px 20px;margin-bottom:10px;animation:fadeUp 0.3s ease both");
+  const wrap=el('div',"position:relative;overflow:hidden;background:var(--chain-bg);border:1px solid rgba(139,92,246,0.35);border-radius:14px;padding:18px 20px;margin-bottom:10px;animation:fadeUp 0.3s ease both");
   wrap.appendChild(el('div',"position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,#7c3aed,#4f46e5,#0ea5e9)"));
-
   const hdr=el('div',"display:flex;align-items:center;gap:10px;margin-bottom:16px");
-  hdr.innerHTML=`<div style="background:linear-gradient(135deg,rgba(124,58,237,0.25),rgba(79,70,229,0.25));border:1px solid rgba(139,92,246,0.5);border-radius:8px;padding:4px 12px;font-size:10px;color:#c4b5fd;font-weight:800;text-transform:uppercase;letter-spacing:1.5px">${t.chainTitle}</div><span style="font-size:11px;color:#475569">${t.chainSteps(chain.length)}</span>`;
+  hdr.innerHTML=`<div style="background:linear-gradient(135deg,rgba(124,58,237,0.25),rgba(79,70,229,0.25));border:1px solid rgba(139,92,246,0.5);border-radius:8px;padding:4px 12px;font-size:10px;color:#c4b5fd;font-weight:800;text-transform:uppercase;letter-spacing:1.5px">${t.chainTitle}</div><span style="font-size:11px;color:var(--text2)">${t.chainSteps(chain.length)}</span>`;
   wrap.appendChild(hdr);
-
   const steps=el('div',"display:flex;flex-direction:column;gap:10px");
   chain.forEach(step=>{
     const row=el('div',"display:flex;align-items:flex-start;gap:12px");
     const num=el('div',`width:28px;height:28px;border-radius:50%;flex-shrink:0;margin-top:2px;background:${color}20;border:1.5px solid ${color}60;display:flex;align-items:center;justify-content:center;font-size:12px;color:${color};font-weight:800`);
-    num.textContent=step.step; row.appendChild(num);
+    num.textContent=step.step;row.appendChild(num);
     const content=el('div',"flex:1");
     const meta=el('div',"display:flex;align-items:center;gap:8px;margin-bottom:6px;flex-wrap:wrap");
-    meta.innerHTML=`<span style="background:rgba(99,102,241,0.18);border:1px solid rgba(99,102,241,0.4);border-radius:6px;padding:3px 10px;font-size:12px;color:#c7d2fe;font-weight:700">${t.chainCol(step.col)}</span><span style="font-size:11px;color:#475569">${step.desc}</span>`;
+    meta.innerHTML=`<span style="background:rgba(99,102,241,0.18);border:1px solid rgba(99,102,241,0.4);border-radius:6px;padding:3px 10px;font-size:12px;color:#c7d2fe;font-weight:700">${t.chainCol(step.col)}</span><span style="font-size:11px;color:var(--text2)">${step.desc}</span>`;
     content.appendChild(meta);
     const fr=el('div',"display:flex;align-items:center;gap:8px");
-    const fb=el('div',"background:rgba(14,165,233,0.1);border:1px solid rgba(14,165,233,0.3);border-radius:8px;padding:8px 14px;font-size:13px;color:#bae6fd;font-weight:700;flex:1;word-break:break-all");
-    fb.textContent=step.formula; fr.appendChild(fb); fr.appendChild(makeCopyBtn(step.formula));
-    content.appendChild(fr); row.appendChild(content); steps.appendChild(row);
+    const fb=el('div',"background:var(--formula-bg);border:1px solid var(--formula-border);border-radius:8px;padding:8px 14px;font-size:13px;color:var(--formula-color);font-weight:700;flex:1;word-break:break-all");
+    fb.textContent=step.formula;fr.appendChild(fb);fr.appendChild(makeCopyBtn(step.formula));
+    content.appendChild(fr);row.appendChild(content);steps.appendChild(row);
   });
   wrap.appendChild(steps);
-
-  const footer=el('div',"margin-top:14px;padding-top:12px;border-top:1px solid rgba(255,255,255,0.05);display:flex;justify-content:space-between;align-items:center");
-  footer.appendChild(el('span',"font-size:10px;color:#334155",t.chainCopyAll));
+  const footer=el('div',"margin-top:14px;padding-top:12px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center");
+  footer.appendChild(el('span',"font-size:10px;color:var(--text3)",t.chainCopyAll));
   footer.appendChild(makeCopyBtn(chain.map(s=>s.formula).join('\n')));
   wrap.appendChild(footer);
   return wrap;
@@ -568,50 +595,39 @@ function renderResultCard(item,idx,detectedCols){
   const displayKeys=adaptKeys(item.keys);
   let display=item.example||"";
   let adapted=false;
-  if(item.template&&detectedCols.length>0){
-    display=item.template.replace(/\{col\}/g,detectedCols[0]);
-    adapted=true;
+  if(item.template&&detectedCols.length>0&&!item.complex){
+    display=item.template.replace(/\{col\}/g,detectedCols[0]);adapted=true;
   }
-
-  const card=el('div',`background:var(--bg2);border:1px solid var(--card-border);border-left:3px solid ${color};border-radius:12px;padding:14px 18px;display:flex;align-items:flex-start;gap:14px;animation:fadeUp 0.3s ease ${idx*0.04}s both`);
-
+  const card=el('div',`background:var(--card-bg);border:1px solid var(--border);border-left:3px solid ${color};border-radius:12px;padding:14px 18px;display:flex;align-items:flex-start;gap:14px;animation:fadeUp 0.3s ease ${idx*0.04}s both`);
   const progTag=el('div',`background:${color}14;border:1px solid ${color}40;border-radius:7px;padding:3px 8px;font-size:10px;color:${color};font-weight:800;text-transform:uppercase;white-space:nowrap;margin-top:2px`);
-  progTag.textContent=`${ICONS[item.program]} ${item.program}`;
-  card.appendChild(progTag);
+  progTag.textContent=`${ICONS[item.program]} ${item.program}`;card.appendChild(progTag);
 
   const body=el('div',"flex:1;min-width:0");
   const meta=el('div',"display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-bottom:5px");
-
   const keyBadge=el('span',"background:rgba(99,102,241,0.15);border:1px solid rgba(99,102,241,0.3);border-radius:6px;padding:3px 10px;font-size:13px;color:#c7d2fe;font-weight:700");
-  keyBadge.textContent=displayKeys;
-  meta.appendChild(keyBadge);
-
+  keyBadge.textContent=displayKeys;meta.appendChild(keyBadge);
   const isFormula=item.type==="formula";
   const typeBadge=el('span',`font-size:10px;padding:2px 8px;border-radius:999px;background:${isFormula?"rgba(34,197,94,0.1)":"rgba(251,191,36,0.1)"};border:1px solid ${isFormula?"rgba(34,197,94,0.25)":"rgba(251,191,36,0.25)"};color:${isFormula?"#4ade80":"#fbbf24"}`);
-  typeBadge.textContent=isFormula?t.typeFormula:t.typeHotkey;
-  meta.appendChild(typeBadge);
-
+  typeBadge.textContent=isFormula?t.typeFormula:t.typeHotkey;meta.appendChild(typeBadge);
+  if(item.complex){
+    meta.appendChild(el('span',"font-size:10px;padding:2px 8px;border-radius:999px;background:rgba(168,85,247,0.1);border:1px solid rgba(168,85,247,0.3);color:#c084fc",t.complex));
+  }
   if(adapted) meta.appendChild(el('span',"font-size:10px;padding:2px 8px;border-radius:999px;background:rgba(14,165,233,0.1);border:1px solid rgba(14,165,233,0.3);color:#38bdf8",t.adapted));
   body.appendChild(meta);
-
   const descEl=el('p',"margin:0 0 7px;color:var(--text2);font-size:12px");
-  descEl.textContent=desc; body.appendChild(descEl);
-
+  descEl.textContent=desc;body.appendChild(descEl);
   if(display){
     const fr=el('div',"display:flex;align-items:center;gap:8px");
-    const fb=el('div',"background:rgba(0,0,0,0.3);border:1px solid var(--border);border-radius:7px;padding:6px 12px;font-size:12px;color:#93c5fd;flex:1;word-break:break-all;font-weight:600");
-    fb.textContent=display; fr.appendChild(fb); fr.appendChild(makeCopyBtn(display));
-    body.appendChild(fr);
+    const fb=el('div',"background:var(--code-bg);border:1px solid var(--code-border);border-radius:7px;padding:6px 12px;font-size:12px;color:var(--code-color);flex:1;word-break:break-all;font-weight:600");
+    fb.textContent=display;fr.appendChild(fb);fr.appendChild(makeCopyBtn(display));body.appendChild(fr);
   }
-  card.appendChild(body);
-  return card;
+  card.appendChild(body);return card;
 }
 
 // ── About tab ──
 function renderAbout(){
   const t=T[settings.lang];
   const wrap=el('div',"animation:fadeUp 0.35s ease both");
-
   function infoRow(icon,title,body){
     const d=el('div',"display:flex;gap:14px;background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:8px");
     d.innerHTML=`<span style="font-size:20px;flex-shrink:0;line-height:1;margin-top:1px">${icon}</span><div><div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:5px">${title}</div><div style="font-size:12px;color:var(--text2);line-height:1.65">${body}</div></div>`;
@@ -624,21 +640,16 @@ function renderAbout(){
   }
   function heading(txt){
     const d=el('p',"color:var(--text3);font-size:10px;text-transform:uppercase;letter-spacing:2px;font-weight:800;margin:24px 0 10px");
-    d.textContent=txt; return d;
+    d.textContent=txt;return d;
   }
-
   const hero=el('div',"background:linear-gradient(135deg,rgba(79,70,229,0.1),rgba(14,165,233,0.07));border:1px solid rgba(99,102,241,0.2);border-radius:16px;padding:24px;text-align:center;margin-bottom:6px");
   hero.innerHTML=`<div style="font-size:32px;margin-bottom:10px">⌘</div><h2 style="margin:0 0 5px;font-size:20px;font-weight:900;color:var(--text);letter-spacing:-0.5px">SearchCopy</h2><p style="margin:0 0 10px;color:#818cf8;font-size:10px;letter-spacing:2.5px;text-transform:uppercase">by RENDERGAMES</p><p style="margin:0;color:var(--text2);font-size:12px;line-height:1.6">${t.aboutHero}</p>`;
   wrap.appendChild(hero);
-
   wrap.appendChild(heading(t.h_howto));
   t.rows.slice(0,3).forEach(r=>wrap.appendChild(infoRow(r[0],r[1],r[2])));
-  wrap.appendChild(heading(t.h_filters));
-  wrap.appendChild(infoRow(t.rows[3][0],t.rows[3][1],t.rows[3][2]));
-  wrap.appendChild(heading(t.h_updates));
-  wrap.appendChild(infoRow(t.rows[4][0],t.rows[4][1],t.rows[4][2]));
-  wrap.appendChild(heading(t.h_errors));
-  t.errs.forEach(r=>wrap.appendChild(errRow(r[0],r[1])));
+  wrap.appendChild(heading(t.h_filters));wrap.appendChild(infoRow(t.rows[3][0],t.rows[3][1],t.rows[3][2]));
+  wrap.appendChild(heading(t.h_updates));wrap.appendChild(infoRow(t.rows[4][0],t.rows[4][1],t.rows[4][2]));
+  wrap.appendChild(heading(t.h_errors));t.errs.forEach(r=>wrap.appendChild(errRow(r[0],r[1])));
   wrap.appendChild(el('div',"text-align:center;color:var(--text3);font-size:10px;margin-top:28px;padding-bottom:8px",t.footer));
   return wrap;
 }
@@ -646,73 +657,54 @@ function renderAbout(){
 // ── Main render ──
 function render(){
   const t=T[settings.lang];
-  const app=document.getElementById('app');
-  app.innerHTML='';
+  const app=document.getElementById('app');app.innerHTML='';
 
-  // Header
   const hdr=el('div',"text-align:center;margin-bottom:30px");
   hdr.innerHTML=`
     <div style="display:inline-flex;align-items:center;gap:8px;background:var(--badge-bg);border:1px solid var(--badge-border);border-radius:999px;padding:5px 16px;margin-bottom:14px;font-size:10px;color:#818cf8;letter-spacing:2.5px;text-transform:uppercase">
       <span style="animation:pulse 2.5s infinite">●</span> RENDERGAMES
     </div>
     <h1 style="font-size:clamp(30px,6vw,48px);font-weight:900;margin:0 0 7px;background:linear-gradient(135deg,#f1f5f9 0%,#c7d2fe 50%,#818cf8 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:-2px;line-height:1">SearchCopy</h1>
-    <p style="color:var(--text3);font-size:11px;margin:0;letter-spacing:0.5px">${t.tagline}</p>
-  `;
+    <p style="color:var(--text3);font-size:11px;margin:0;letter-spacing:0.5px">${t.tagline}</p>`;
   app.appendChild(hdr);
 
-  // Tabs
   const tabBar=el('div',"display:flex;gap:4px;background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:4px;margin-bottom:22px");
   [{id:"search",label:t.tabSearch},{id:"about",label:t.tabAbout},{id:"settings",label:t.tabSettings}].forEach(tb=>{
     const on=state.tab===tb.id;
-    const btn=el('button',`flex:1;background:${on?"rgba(99,102,241,0.18)":"transparent"};border:1px solid ${on?"rgba(99,102,241,0.35)":"transparent"};border-radius:9px;padding:9px 16px;font-size:12px;font-weight:700;color:${on?"#c7d2fe":"var(--text2)"};cursor:pointer;transition:all 0.2s;letter-spacing:0.3px`);
-    btn.textContent=tb.label;
-    btn.onclick=()=>{state.tab=tb.id;render()};
-    tabBar.appendChild(btn);
+    const btn=el('button',`flex:1;background:${on?"rgba(99,102,241,0.18)":"transparent"};border:1px solid ${on?"rgba(99,102,241,0.35)":"transparent"};border-radius:9px;padding:9px 12px;font-size:12px;font-weight:700;color:${on?"#c7d2fe":"var(--text2)"};cursor:pointer;transition:all 0.2s`);
+    btn.textContent=tb.label;btn.onclick=()=>{state.tab=tb.id;render()};tabBar.appendChild(btn);
   });
   app.appendChild(tabBar);
 
   if(state.tab==="about"){app.appendChild(renderAbout());return;}
   if(state.tab==="settings"){app.appendChild(renderSettings());return;}
 
-  // Search tab
   const sw=el('div',"animation:fadeUp 0.3s ease both");
 
-  // Filters
   const filters=el('div',"display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-bottom:18px");
   PROGRAMS.forEach(p=>{
-    const on=state.progs.includes(p);
-    const c=COLORS[p];
+    const on=state.progs.includes(p);const c=COLORS[p];
     const btn=el('button',`background:${on?c+"16":"var(--bg3)"};border:1px solid ${on?c+"70":"var(--border)"};color:${on?c:"var(--text2)"};border-radius:999px;padding:5px 14px;font-size:11px;font-weight:700;cursor:pointer;transition:all 0.18s;display:flex;align-items:center;gap:5px`);
     btn.innerHTML=`<span style="font-size:10px">${ICONS[p]}</span>${p}`;
-    btn.onclick=()=>{
-      if(on&&state.progs.length===1) return;
-      state.progs=on?state.progs.filter(x=>x!==p):[...state.progs,p];
-      render();
-    };
+    btn.onclick=()=>{if(on&&state.progs.length===1)return;state.progs=on?state.progs.filter(x=>x!==p):[...state.progs,p];render()};
     filters.appendChild(btn);
   });
   sw.appendChild(filters);
 
-  // Input
-  const iw=el('div',"position:relative;margin-bottom:16px;border-radius:14px;box-shadow:0 8px 40px rgba(0,0,0,0.4);transition:box-shadow 0.3s");
+  const iw=el('div',"position:relative;margin-bottom:16px;border-radius:14px;box-shadow:var(--shadow);transition:box-shadow 0.3s");
   iw.appendChild(el('span',"position:absolute;left:18px;top:50%;transform:translateY(-50%);font-size:17px;color:#4f46e5;pointer-events:none;font-weight:700","⌘"));
-
   const input=document.createElement('input');
-  input.value=state.query;
-  input.placeholder=t.placeholder;
+  input.value=state.query;input.placeholder=t.placeholder;
   input.style.cssText="width:100%;background:var(--input-bg);border:1px solid var(--border);border-radius:14px;padding:16px 46px 16px 48px;font-size:15px;color:var(--text);outline:none;font-family:inherit;transition:border 0.25s";
   input.oninput=e=>{state.query=e.target.value;renderResults()};
-  input.onfocus=()=>{iw.style.boxShadow="0 0 0 2px rgba(99,102,241,0.4),0 24px 60px rgba(0,0,0,0.55)";input.style.borderColor="rgba(99,102,241,0.55)"};
-  input.onblur=()=>{iw.style.boxShadow="0 8px 40px rgba(0,0,0,0.4)";input.style.borderColor="var(--border)"};
+  input.onfocus=()=>{iw.style.boxShadow=`var(--shadow-focus)`;input.style.borderColor="rgba(99,102,241,0.55)"};
+  input.onblur=()=>{iw.style.boxShadow="var(--shadow)";input.style.borderColor="var(--border)"};
   iw.appendChild(input);
-
-  const clrBtn=el('button',"position:absolute;right:14px;top:50%;transform:translateY(-50%);background:rgba(255,255,255,0.07);border:none;color:#64748b;width:26px;height:26px;border-radius:50%;cursor:pointer;font-size:12px;display:flex;align-items:center;justify-content:center","✕");
+  const clrBtn=el('button',"position:absolute;right:14px;top:50%;transform:translateY(-50%);background:var(--bg3);border:1px solid var(--border);color:var(--text2);width:26px;height:26px;border-radius:50%;cursor:pointer;font-size:12px;display:flex;align-items:center;justify-content:center","✕");
   clrBtn.style.display=state.query?"flex":"none";
   clrBtn.onclick=()=>{state.query="";render()};
-  iw.appendChild(clrBtn);
-  sw.appendChild(iw);
+  iw.appendChild(clrBtn);sw.appendChild(iw);
 
-  // Suggestions
   const sugWrap=el('div',"margin-bottom:28px");
   sugWrap.style.display=state.query?"none":"block";
   sugWrap.appendChild(el('p',"color:var(--text3);font-size:10px;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:8px",t.tryLabel));
@@ -720,41 +712,35 @@ function render(){
   t.suggestions.forEach(s=>{
     const btn=el('button',"background:var(--bg3);border:1px solid var(--border);border-radius:7px;padding:5px 11px;font-size:11px;color:var(--text2);cursor:pointer;transition:all 0.15s");
     btn.textContent=s;
-    btn.onmouseenter=()=>{btn.style.color="#a5b4fc";btn.style.borderColor="rgba(99,102,241,0.3)";btn.style.background="rgba(99,102,241,0.08)"};
-    btn.onmouseleave=()=>{btn.style.color="#64748b";btn.style.borderColor="rgba(255,255,255,0.06)";btn.style.background="rgba(255,255,255,0.03)"};
-    btn.onclick=()=>{state.query=s;render();document.querySelector('input').focus()};
+    btn.onmouseenter=()=>{btn.style.color="#a5b4fc";btn.style.borderColor="rgba(99,102,241,0.35)";btn.style.background="rgba(99,102,241,0.07)"};
+    btn.onmouseleave=()=>{btn.style.color="";btn.style.borderColor="";btn.style.background=""};
+    btn.onclick=()=>{state.query=s;render();setTimeout(()=>document.querySelector('input')?.focus(),50)};
     sugRow.appendChild(btn);
   });
-  sugWrap.appendChild(sugRow);
-  sw.appendChild(sugWrap);
+  sugWrap.appendChild(sugRow);sw.appendChild(sugWrap);
 
-  const rw=el('div',"");rw.id="results-wrap";
-  sw.appendChild(rw);
-  app.appendChild(sw);
+  const rw=el('div',"");rw.id="results-wrap";sw.appendChild(rw);app.appendChild(sw);
   renderResults();
 
   function renderResults(){
-    const rw=document.getElementById('results-wrap');
-    if(!rw) return;
-    rw.innerHTML='';
+    const rw=document.getElementById('results-wrap');if(!rw)return;rw.innerHTML='';
     const q=state.query;
     const results=doSearch(q,state.progs);
     const chain=buildChain(q,results);
     const cols=extractColumns(q);
-    if(sugWrap) sugWrap.style.display=q?"none":"block";
-    if(clrBtn) clrBtn.style.display=q?"flex":"none";
-
+    if(sugWrap)sugWrap.style.display=q?"none":"block";
+    if(clrBtn)clrBtn.style.display=q?"flex":"none";
     if(chain||results.length>0){
       const label=el('p',"color:var(--text3);font-size:10px;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:12px");
       label.textContent=chain?t.foundChain(results.length):t.found(results.length);
       rw.appendChild(label);
-      if(chain) rw.appendChild(renderChainCard(chain));
+      if(chain)rw.appendChild(renderChainCard(chain));
       const list=el('div',"display:flex;flex-direction:column;gap:8px");
       results.forEach((item,i)=>list.appendChild(renderResultCard(item,i,cols)));
       rw.appendChild(list);
     } else if(q.trim().length>1){
-      const empty=el('div',"text-align:center;padding:60px 20px;color:var(--text3)");
-      empty.innerHTML=`<div style="font-size:36px;margin-bottom:12px;opacity:0.4">⌕</div><p style="margin:0;font-size:13px">${t.notFound(q)}</p><p style="margin:6px 0 0;font-size:11px;color:var(--text3)">${t.notFoundHint}</p>`;
+      const empty=el('div',"text-align:center;padding:60px 20px;color:var(--empty-color)");
+      empty.innerHTML=`<div style="font-size:36px;margin-bottom:12px;opacity:0.4">⌕</div><p style="margin:0;font-size:13px">${t.notFound(q)}</p><p style="margin:6px 0 0;font-size:11px">${t.notFoundHint}</p>`;
       rw.appendChild(empty);
     }
   }
@@ -762,25 +748,24 @@ function render(){
 
 // ── Auto-updater ──
 async function checkForUpdates(){
-  if(!settings.autoUpdate) return;
+  if(!settings.autoUpdate)return;
   try{
-    const {check} = await import('@tauri-apps/plugin-updater');
-    const {relaunch} = await import('@tauri-apps/plugin-process');
-    const update = await check();
-    if(!update) return;
+    const invoke=window.__TAURI__?.core?.invoke;
+    if(!invoke)return;
+    const update=await invoke('plugin:updater|check');
+    if(!update||!update.available)return;
     const t=T[settings.lang];
-    const banner=el('div',"position:fixed;bottom:60px;right:20px;background:rgba(12,10,28,0.97);border:1px solid rgba(99,102,241,0.4);border-radius:12px;padding:14px 18px;z-index:999;display:flex;align-items:center;gap:14px;backdrop-filter:blur(20px);box-shadow:0 8px 40px rgba(0,0,0,0.6);animation:fadeUp 0.4s ease both;max-width:320px");
-    banner.innerHTML=`<div style="flex:1"><div style="font-size:11px;font-weight:800;color:#c7d2fe;margin-bottom:3px">${t.updateBanner(updateObj.version||'?')}</div><div style="font-size:10px;color:#475569">${updateObj.body||t.updateBody}</div></div><button id="install-btn" style="background:linear-gradient(135deg,#4f46e5,#7c3aed);border:none;border-radius:8px;padding:7px 14px;font-size:11px;font-weight:800;color:#fff;cursor:pointer;white-space:nowrap;font-family:inherit">${t.install}</button>`;
+    const banner=el('div',"position:fixed;bottom:60px;right:20px;background:var(--chain-bg);border:1px solid rgba(99,102,241,0.4);border-radius:12px;padding:14px 18px;z-index:999;display:flex;align-items:center;gap:14px;backdrop-filter:blur(20px);box-shadow:0 8px 40px rgba(0,0,0,0.4);animation:fadeUp 0.4s ease both;max-width:320px");
+    banner.innerHTML=`<div style="flex:1"><div style="font-size:11px;font-weight:800;color:#c7d2fe;margin-bottom:3px">${t.updateBanner(update.version||'?')}</div><div style="font-size:10px;color:var(--text2)">${update.body||t.updateBody}</div></div><button id="install-btn" style="background:linear-gradient(135deg,#4f46e5,#7c3aed);border:none;border-radius:8px;padding:7px 14px;font-size:11px;font-weight:800;color:#fff;cursor:pointer;white-space:nowrap;font-family:inherit">${t.install}</button>`;
     document.body.appendChild(banner);
     document.getElementById('install-btn').onclick=async()=>{
       document.getElementById('install-btn').textContent=t.installing;
       await invoke('plugin:updater|download_and_install');
       await invoke('plugin:process|restart');
     };
-  }catch(e){ console.log('Updater:',e); }
+  }catch(e){console.log('Updater:',e);}
 }
-
-if(window.__TAURI__) setTimeout(checkForUpdates, 2000);
+if(window.__TAURI__)setTimeout(checkForUpdates,2000);
 
 render();
 </script>
