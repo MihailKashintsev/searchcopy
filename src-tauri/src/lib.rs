@@ -1,4 +1,5 @@
 mod giga;
+mod updater;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -8,7 +9,7 @@ pub fn run() {
         .plugin(tauri_plugin_process::init())
         .plugin(tauri_plugin_shell::init())
         .plugin(tauri_plugin_http::init())
-        .invoke_handler(tauri::generate_handler![greet, get_version, giga::giga_search])
+        .invoke_handler(tauri::generate_handler![greet, get_version, giga::giga_search, updater::download_and_install])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
