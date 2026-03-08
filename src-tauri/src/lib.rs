@@ -1,3 +1,4 @@
+mod giga;
 // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
 #[tauri::command]
 fn greet(name: &str) -> String {
@@ -17,7 +18,7 @@ pub fn run() {
         .plugin(tauri_plugin_process::init())
         .plugin(tauri_plugin_http::init())
         .plugin(tauri_plugin_shell::init())
-        .invoke_handler(tauri::generate_handler![greet, get_version])
+        .invoke_handler(tauri::generate_handler![greet, get_version, giga::giga_search])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

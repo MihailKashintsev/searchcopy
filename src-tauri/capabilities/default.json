@@ -14,8 +14,6 @@
     "process:default",
     "process:allow-restart",
     "shell:allow-execute",
-    "shell:allow-open",
-    "http:default",
-    "http:allow-fetch"
+    "shell:allow-open"
   ]
 }
