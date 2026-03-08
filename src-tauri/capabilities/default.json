@@ -15,8 +15,6 @@
     "process:allow-restart",
     "shell:allow-execute",
     "shell:allow-open",
-    "app:default",
-    "app:allow-version",
     "http:default",
     "http:allow-fetch"
   ]
