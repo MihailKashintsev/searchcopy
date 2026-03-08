@@ -8,7 +8,7 @@
   "app": {
     "windows": [
       {
-        "title": "SearchCopy — RENDERGAMES",
+        "title": "SearchCopy \u2014 RENDERGAMES",
         "width": 820,
         "height": 700,
         "minWidth": 600,
@@ -19,7 +19,8 @@
     ],
     "security": {
       "csp": null
-    }
+    },
+    "withGlobalTauri": true
   },
   "bundle": {
     "active": true,
@@ -34,7 +35,7 @@
     "publisher": "RENDERGAMES",
     "category": "Productivity",
     "shortDescription": "Hotkeys and formulas finder",
-    "longDescription": "SearchCopy by RENDERGAMES — find hotkeys and formulas by typing what you want to do.",
+    "longDescription": "SearchCopy by RENDERGAMES \u2014 find hotkeys and formulas by typing what you want to do.",
     "createUpdaterArtifacts": true
   },
   "plugins": {
