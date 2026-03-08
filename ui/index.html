@@ -775,7 +775,7 @@ async function checkForUpdates(){
     document.getElementById('install-btn').onclick=async()=>{
       document.getElementById('install-btn').textContent=t.installing;
       await invoke('plugin:updater|download_and_install');
-      await invoke('plugin:process|relaunch');
+      await invoke('plugin:process|restart');
     };
   }catch(e){ console.log('Updater:',e); }
 }
