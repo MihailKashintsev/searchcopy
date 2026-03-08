@@ -7,79 +7,42 @@
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --bg:#070710;
-  --bg2:rgba(20,18,35,0.98);
-  --bg3:rgba(255,255,255,0.025);
-  --bg4:rgba(0,0,0,0.4);
-  --border:rgba(255,255,255,0.07);
-  --border2:rgba(255,255,255,0.12);
-  --text:#e2e8f0;
-  --text2:#64748b;
-  --text3:#334155;
-  --text4:#1e293b;
-  --input-bg:rgba(12,12,22,0.98);
-  --card-bg:rgba(12,12,22,0.92);
-  --chain-bg:rgba(12,10,28,0.97);
-  --formula-bg:rgba(14,165,233,0.1);
-  --formula-border:rgba(14,165,233,0.3);
-  --formula-color:#bae6fd;
-  --code-bg:rgba(0,0,0,0.4);
-  --code-border:rgba(255,255,255,0.07);
-  --code-color:#93c5fd;
-  --copy-bg:rgba(255,255,255,0.06);
-  --copy-border:rgba(255,255,255,0.12);
-  --copy-color:#64748b;
-  --badge-bg:rgba(99,102,241,0.1);
-  --badge-border:rgba(99,102,241,0.22);
-  --seg-bg:rgba(0,0,0,0.2);
-  --toggle-off-bg:rgba(255,255,255,0.04);
-  --empty-color:#1e293b;
-  --shadow:0 8px 40px rgba(0,0,0,0.4);
-  --shadow-focus:0 0 0 2px rgba(99,102,241,0.4),0 24px 60px rgba(0,0,0,0.55);
+  --bg:#070710;--bg2:rgba(20,18,35,0.98);--bg3:rgba(255,255,255,0.025);
+  --border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.12);
+  --text:#e2e8f0;--text2:#64748b;--text3:#334155;--text4:#1e293b;
+  --input-bg:rgba(12,12,22,0.98);--card-bg:rgba(12,12,22,0.92);--chain-bg:rgba(12,10,28,0.97);
+  --formula-bg:rgba(14,165,233,0.1);--formula-border:rgba(14,165,233,0.3);--formula-color:#bae6fd;
+  --code-bg:rgba(0,0,0,0.4);--code-border:rgba(255,255,255,0.07);--code-color:#93c5fd;
+  --copy-bg:rgba(255,255,255,0.06);--copy-border:rgba(255,255,255,0.12);--copy-color:#64748b;
+  --badge-bg:rgba(99,102,241,0.1);--badge-border:rgba(99,102,241,0.22);
+  --seg-bg:rgba(0,0,0,0.2);--toggle-off-bg:rgba(255,255,255,0.04);--empty-color:#1e293b;
+  --shadow:0 8px 40px rgba(0,0,0,0.4);--shadow-focus:0 0 0 2px rgba(99,102,241,0.4),0 24px 60px rgba(0,0,0,0.55);
 }
 .light{
-  --bg:#f0f4ff;
-  --bg2:#ffffff;
-  --bg3:rgba(0,0,0,0.03);
-  --bg4:rgba(0,0,0,0.04);
-  --border:rgba(0,0,0,0.09);
-  --border2:rgba(0,0,0,0.15);
-  --text:#0f172a;
-  --text2:#475569;
-  --text3:#94a3b8;
-  --text4:#cbd5e1;
-  --input-bg:#ffffff;
-  --card-bg:#ffffff;
-  --chain-bg:#f8f7ff;
-  --formula-bg:rgba(14,165,233,0.07);
-  --formula-border:rgba(14,165,233,0.25);
-  --formula-color:#0369a1;
-  --code-bg:rgba(99,102,241,0.04);
-  --code-border:rgba(99,102,241,0.15);
-  --code-color:#4338ca;
-  --copy-bg:rgba(0,0,0,0.04);
-  --copy-border:rgba(0,0,0,0.1);
-  --copy-color:#64748b;
-  --badge-bg:rgba(99,102,241,0.08);
-  --badge-border:rgba(99,102,241,0.2);
-  --seg-bg:rgba(0,0,0,0.05);
-  --toggle-off-bg:rgba(0,0,0,0.04);
-  --empty-color:#94a3b8;
-  --shadow:0 4px 20px rgba(0,0,0,0.08);
-  --shadow-focus:0 0 0 2px rgba(99,102,241,0.3),0 8px 30px rgba(0,0,0,0.12);
+  --bg:#f0f4ff;--bg2:#ffffff;--bg3:rgba(0,0,0,0.03);
+  --border:rgba(0,0,0,0.09);--border2:rgba(0,0,0,0.15);
+  --text:#0f172a;--text2:#475569;--text3:#94a3b8;--text4:#cbd5e1;
+  --input-bg:#ffffff;--card-bg:#ffffff;--chain-bg:#f8f7ff;
+  --formula-bg:rgba(14,165,233,0.07);--formula-border:rgba(14,165,233,0.25);--formula-color:#0369a1;
+  --code-bg:rgba(99,102,241,0.04);--code-border:rgba(99,102,241,0.15);--code-color:#4338ca;
+  --copy-bg:rgba(0,0,0,0.04);--copy-border:rgba(0,0,0,0.1);--copy-color:#64748b;
+  --badge-bg:rgba(99,102,241,0.08);--badge-border:rgba(99,102,241,0.2);
+  --seg-bg:rgba(0,0,0,0.05);--toggle-off-bg:rgba(0,0,0,0.04);--empty-color:#94a3b8;
+  --shadow:0 4px 20px rgba(0,0,0,0.08);--shadow-focus:0 0 0 2px rgba(99,102,241,0.3),0 8px 30px rgba(0,0,0,0.12);
 }
 body{min-height:100vh;background:var(--bg);font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;color:var(--text);overflow-x:hidden;transition:background 0.3s,color 0.3s}
-input,button{font-family:inherit}button{cursor:pointer}
-::-webkit-scrollbar{width:4px}
-::-webkit-scrollbar-thumb{background:rgba(99,102,241,0.3);border-radius:4px}
-input::placeholder{color:var(--text3)}
+input,button,textarea{font-family:inherit}button{cursor:pointer}
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-thumb{background:rgba(99,102,241,0.3);border-radius:4px}
+input::placeholder,textarea::placeholder{color:var(--text3)}
 @keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.3}}
+@keyframes spin{to{transform:rotate(360deg)}}
 .glow1{position:fixed;top:-250px;left:50%;transform:translateX(-50%);width:900px;height:500px;background:radial-gradient(ellipse,rgba(79,70,229,0.13) 0%,transparent 65%);pointer-events:none;z-index:0}
 .glow2{position:fixed;bottom:-150px;right:-80px;width:450px;height:350px;background:radial-gradient(ellipse,rgba(14,165,233,0.07) 0%,transparent 70%);pointer-events:none;z-index:0}
 .light .glow1{background:radial-gradient(ellipse,rgba(99,102,241,0.06) 0%,transparent 65%)}
 .light .glow2{background:radial-gradient(ellipse,rgba(14,165,233,0.04) 0%,transparent 70%)}
 .wrap{position:relative;z-index:1;max-width:760px;margin:0 auto;padding:40px 20px 100px}
+.spinner{width:18px;height:18px;border:2px solid rgba(99,102,241,0.3);border-top-color:#818cf8;border-radius:50%;animation:spin 0.7s linear infinite;display:inline-block}
 </style>
 </head>
 <body>
@@ -88,7 +51,6 @@ input::placeholder{color:var(--text3)}
 <div id="version-badge" style="position:fixed;bottom:18px;right:20px;background:var(--bg);border:1px solid rgba(99,102,241,0.18);border-radius:8px;padding:5px 12px;font-size:10px;color:var(--text3);backdrop-filter:blur(12px);z-index:100;display:flex;align-items:center;gap:6px;letter-spacing:0.5px">
   <span style="color:#4f46e5">◆</span> SearchCopy v<span id="vnum">1.0.0</span>
 </div>
-
 <script>
 const VERSION="1.0.0";
 document.getElementById('vnum').textContent=VERSION;
@@ -100,18 +62,23 @@ function detectOS(){
   return 'win';
 }
 const detectedOS=detectOS();
-
 const SETTINGS_KEY='sc_settings_v2';
 function loadSettings(){try{return JSON.parse(localStorage.getItem(SETTINGS_KEY)||'{}')}catch{return{}}}
 function saveSettings(s){localStorage.setItem(SETTINGS_KEY,JSON.stringify(s))}
-
-let settings={lang:'ru',theme:'dark',os:detectedOS,autoUpdate:true,...loadSettings()};
+let settings={lang:'ru',theme:'dark',os:detectedOS,autoUpdate:true,aiKey:'',gigaKey:'',aiProvider:'claude',...loadSettings()};
 function applyTheme(){document.body.classList.toggle('light',settings.theme==='light')}
 applyTheme();
 
 function adaptKeys(keys){
+  if(!keys) return keys;
+  if(typeof keys==='object'){
+    return keys[settings.os]||keys.win||keys;
+  }
   if(settings.os==='mac'){
-    return keys.replace(/\bCtrl\b/g,'⌘ Cmd').replace(/\bAlt\b/g,'⌥ Option').replace(/\bShift\b/g,'⇧ Shift');
+    return keys.replace(/\bCtrl\b/g,'⌘').replace(/\bAlt\b/g,'⌥').replace(/\bShift\b/g,'⇧').replace(/\bWin\b/g,'⌘');
+  }
+  if(settings.os==='linux'){
+    return keys.replace(/\bWin\b/g,'Super');
   }
   return keys;
 }
@@ -119,254 +86,204 @@ function adaptKeys(keys){
 // ── Translations ──
 const T={
   ru:{
-    tagline:"Горячие клавиши · Формулы · Цепочки действий",
+    tagline:"Горячие клавиши · Формулы · AI-поиск",
     tabSearch:"⌘ Поиск",tabAbout:"◎ О приложении",tabSettings:"⚙ Настройки",
     tryLabel:"Попробуй:",
-    suggestions:["сумма столбца G и B","найти значение в таблице","удалить строку","склеить ячейки","добавить слайд","открыть терминал"],
-    placeholder:'Например: "сумма столбца G и B"...',
-    chainTitle:"⛓ Цепочка действий",chainSteps:n=>`${n} шага`,chainCol:c=>`столбец ${c}`,
-    chainCopyAll:"Скопировать все формулы",
-    typeFormula:"📊 Формула",typeHotkey:"⌨️ Клавиша",adapted:"✦ Адаптировано",
-    complex:"🔬 Сложная",
-    foundChain:n=>`Цепочка + ${n} результатов`,found:n=>`Найдено: ${n}`,
-    notFound:q=>`Ничего не найдено по «${q}»`,
-    notFoundHint:"Попробуй другие слова или включи больше программ",
-    aboutHero:"Ищи горячие клавиши и формулы на русском — просто напиши что хочешь сделать.",
-    h_howto:"Как пользоваться",h_filters:"Фильтры",h_updates:"Обновления",h_errors:"Частые ошибки",
+    suggestions:["сумма столбца G и B","найти значение в таблице","удалить строку","новая вкладка","открыть терминал","скопировать форматирование"],
+    placeholder:'Что хочешь сделать?',
+    aiPlaceholder:'Спроси AI о любом приложении или команде...',
+    aiSearch:"✦ AI-поиск",aiSearchOn:"✦ AI вкл",
+    aiSearching:"Ищу...",aiError:"Ошибка. Проверь API ключ в настройках.",
+    aiNoKey:"Введи API ключ в ⚙ Настройках для AI-поиска",
+    chainTitle:"⛓ Цепочка",chainSteps:n=>`${n} шага`,chainCol:c=>`столбец ${c}`,
+    chainCopyAll:"Копировать все",
+    typeFormula:"📊 Формула",typeHotkey:"⌨️ Клавиша",adapted:"✦ Адаптировано",complex:"🔬 Сложная",
+    foundChain:n=>`Цепочка + ${n}`,found:n=>`Найдено: ${n}`,
+    notFound:q=>`Ничего по «${q}»`,notFoundHint:"Попробуй AI-поиск ↑ или другие слова",
+    aboutHero:"Ищи горячие клавиши и формулы — или спроси AI о любом приложении.",
+    h_howto:"Поиск",h_filters:"Программы",h_ai:"AI-поиск",h_updates:"Обновления",h_errors:"Ошибки",
     rows:[
-      ["🔍","Пиши как обычно","Введи что хочешь сделать: «посчитать сумму», «удалить строку». Поиск найдёт формулы и горячие клавиши."],
-      ["⛓","Цепочки","Укажи несколько столбцов — получишь цепочку: «сумма G и B» выдаст =SUM(G:G) и =SUM(B:B)."],
-      ["✦","Адаптация","«Сумма столбца C» → =SUM(C:C). Результаты помечены тегом «Адаптировано»."],
-      ["🏷","Фильтры программ","Выбирай нужные программы над строкой поиска."],
-      ["🔔","Автообновление","Новая версия — баннер внизу. Нажми «Установить»."],
+      ["🔍","Локальный поиск","База из 100+ сочетаний. Работает офлайн."],
+      ["✦","AI-поиск","Нажми «AI поиск» и спроси о любом приложении — ответит Anthropic Claude."],
+      ["⛓","Цепочки","«Сумма G и B» → =SUM(G:G) и =SUM(B:B) по шагам."],
+      ["🏷","Фильтры","Выбирай программы над поиском."],
+      ["🔔","Обновления","Баннер при новой версии → тихая установка."],
     ],
     errs:[
-      ["Ничего не найдено","Попробуй переформулировать. Убедись, что нужная программа включена."],
-      ["Формула выглядит странно","Замени A:A или A2 на нужный столбец/ячейку."],
+      ["Ничего не найдено","Переформулируй или используй AI-поиск."],
+      ["AI не отвечает","Проверь API ключ в Настройках → Anthropic API Key."],
     ],
     footer:"RENDERGAMES © 2025",
-    sTitle:"Настройки",sLang:"Язык",sTheme:"Тема",sOS:"Платформа клавиш",sUpdate:"Автообновление",
-    sLangDesc:"Язык отображения и поиска",sThemeDesc:"Светлая или тёмная тема",
-    sOSDesc:"Адаптация горячих клавиш",sUpdateDesc:"Показывать баннер при выходе новой версии",
-    sDetected:"определено",dark:"Тёмная",light:"Светлая",on:"Вкл",off:"Выкл",
-    updateBanner:v=>`🔔 Новая версия ${v}`,updateBody:"Доступно обновление",install:"Установить",installing:"⏳",
+    sTitle:"Настройки",sLang:"Язык",sTheme:"Тема",sOS:"Платформа",sUpdate:"Автообновление",sAI:"Anthropic API Key",
+    sLangDesc:"Язык интерфейса и поиска",sThemeDesc:"Светлая или тёмная тема",
+    sOSDesc:"Адаптация горячих клавиш",sUpdateDesc:"Проверять обновления при запуске",
+    sAIDesc:"Для AI-поиска по любым приложениям",sAIPlaceholder:"sk-ant-...",
+    sAISave:"Сохранить",sAISaved:"✓ Сохранено",
+    sDetected:"авто",dark:"Тёмная",light:"Светлая",on:"Вкл",off:"Выкл",
+    updateBanner:v=>`🔔 Версия ${v}`,updateBody:"Доступно обновление",install:"Установить",installing:"⏳",
   },
   en:{
-    tagline:"Hotkeys · Formulas · Action Chains",
+    tagline:"Hotkeys · Formulas · AI Search",
     tabSearch:"⌘ Search",tabAbout:"◎ About",tabSettings:"⚙ Settings",
     tryLabel:"Try:",
-    suggestions:["sum column G and B","find value in table","delete row","merge cells","add slide","open terminal"],
-    placeholder:'e.g. "sum column G and B"...',
-    chainTitle:"⛓ Action Chain",chainSteps:n=>`${n} steps`,chainCol:c=>`column ${c}`,
-    chainCopyAll:"Copy all formulas",
-    typeFormula:"📊 Formula",typeHotkey:"⌨️ Hotkey",adapted:"✦ Adapted",
-    complex:"🔬 Complex",
-    foundChain:n=>`Chain + ${n} results`,found:n=>`Found: ${n}`,
-    notFound:q=>`Nothing found for "${q}"`,
-    notFoundHint:"Try different words or enable more programs",
-    aboutHero:"Find hotkeys and formulas in plain English — just type what you want to do.",
-    h_howto:"How to use",h_filters:"Filters",h_updates:"Updates",h_errors:"Common issues",
+    suggestions:["sum column G and B","find value in table","delete row","new tab","open terminal","copy formatting"],
+    placeholder:'What do you want to do?',
+    aiPlaceholder:'Ask AI about any app or command...',
+    aiSearch:"✦ AI search",aiSearchOn:"✦ AI on",
+    aiSearching:"Searching...",aiError:"Error. Check your API key in Settings.",
+    aiNoKey:"Enter API key in ⚙ Settings to use AI search",
+    chainTitle:"⛓ Chain",chainSteps:n=>`${n} steps`,chainCol:c=>`col ${c}`,
+    chainCopyAll:"Copy all",
+    typeFormula:"📊 Formula",typeHotkey:"⌨️ Hotkey",adapted:"✦ Adapted",complex:"🔬 Complex",
+    foundChain:n=>`Chain + ${n}`,found:n=>`Found: ${n}`,
+    notFound:q=>`Nothing for "${q}"`,notFoundHint:"Try AI search ↑ or rephrase",
+    aboutHero:"Search hotkeys and formulas — or ask AI about any application.",
+    h_howto:"Search",h_filters:"Programs",h_ai:"AI Search",h_updates:"Updates",h_errors:"Issues",
     rows:[
-      ["🔍","Type naturally","Enter what you want to do. The app finds formulas and hotkeys automatically."],
-      ["⛓","Chains","Specify multiple columns: 'sum G and B' returns =SUM(G:G) and =SUM(B:B)."],
-      ["✦","Adapted","'Sum column C' → =SUM(C:C). Results are marked 'Adapted'."],
-      ["🏷","Program filters","Select programs above the search bar."],
-      ["🔔","Auto-update","New version shows a banner. Click Install."],
+      ["🔍","Local search","100+ shortcuts. Works offline."],
+      ["✦","AI search","Click 'AI search' and ask about any app — powered by Anthropic Claude."],
+      ["⛓","Chains","'Sum G and B' → =SUM(G:G) and =SUM(B:B) step by step."],
+      ["🏷","Filters","Choose programs above the search bar."],
+      ["🔔","Updates","Banner on new version → silent install."],
     ],
     errs:[
-      ["Nothing found","Try rephrasing. Make sure the right program is enabled."],
-      ["Formula looks wrong","Replace A:A or A2 with your column/cell."],
+      ["Nothing found","Rephrase or use AI search."],
+      ["AI not responding","Check your API key in Settings → Anthropic API Key."],
     ],
     footer:"RENDERGAMES © 2025",
-    sTitle:"Settings",sLang:"Language",sTheme:"Theme",sOS:"Keyboard platform",sUpdate:"Auto-update",
+    sTitle:"Settings",sLang:"Language",sTheme:"Theme",sOS:"Platform",sUpdate:"Auto-update",sAI:"Anthropic API Key",
     sLangDesc:"Display and search language",sThemeDesc:"Light or dark theme",
-    sOSDesc:"Adapt hotkeys for your OS",sUpdateDesc:"Show banner when new version is available",
-    sDetected:"detected",dark:"Dark",light:"Light",on:"On",off:"Off",
-    updateBanner:v=>`🔔 New version ${v}`,updateBody:"Update available",install:"Install",installing:"⏳",
+    sOSDesc:"Adapt hotkeys for your OS",sUpdateDesc:"Check for updates on launch",
+    sAIDesc:"For AI search across any application",sAIPlaceholder:"sk-ant-...",
+    sAISave:"Save",sAISaved:"✓ Saved",
+    sDetected:"auto",dark:"Dark",light:"Light",on:"On",off:"Off",
+    updateBanner:v=>`🔔 Version ${v}`,updateBody:"Update available",install:"Install",installing:"⏳",
   }
 };
 
-// ── DB ──
+// ── DB — local shortcuts ──
+// keys can be string (cross-platform) or object {win, mac, linux}
 const DB={
   Excel:[
-    // ── Формулы базовые ──
     {id:1,keys:"SUM",type:"formula",template:"=SUM({col}:{col})",example:"=SUM(A:A)",
-      desc:{ru:"Сумма столбца",en:"Sum of a column"},
-      tags:{ru:["сумма","посчитать","столбец","итого","сложить","подсчитать","суммировать"],en:["sum","total","column","add up","calculate"]}},
+      desc:{ru:"Сумма столбца",en:"Sum of column"},
+      tags:{ru:["сумма","посчитать","столбец","итого","сложить"],en:["sum","total","column","add"]}},
     {id:2,keys:"AVERAGE",type:"formula",template:"=AVERAGE({col}:{col})",example:"=AVERAGE(A:A)",
-      desc:{ru:"Среднее значение столбца",en:"Average of a column"},
-      tags:{ru:["среднее","среднее значение","средний"],en:["average","mean","avg"]}},
+      desc:{ru:"Среднее значение",en:"Average"},
+      tags:{ru:["среднее","средний"],en:["average","mean"]}},
     {id:3,keys:"VLOOKUP / ВПР",type:"formula",template:"=VLOOKUP({col}2,B:C,2,0)",example:"=VLOOKUP(A2,B:C,2,0)",
-      desc:{ru:"Поиск значения в таблице (ВПР)",en:"Look up value in table"},
-      tags:{ru:["впр","vlookup","найти","поиск","подтянуть","справочник","значение по таблице","искомое значение"],en:["vlookup","find","search","lookup","reference table"]}},
-    {id:4,keys:"IF / ЕСЛИ",type:"formula",template:'=IF({col}1>0,"Да","Нет")',example:'=IF(A1>0,"Да","Нет")',
+      desc:{ru:"Поиск в таблице (ВПР)",en:"Table lookup (VLOOKUP)"},
+      tags:{ru:["впр","найти","поиск","подтянуть","справочник","искомое значение"],en:["vlookup","find","lookup","reference"]}},
+    {id:4,keys:"IF / ЕСЛИ",type:"formula",template:'=IF({col}1>0,"Да","Нет")',example:'=IF(A1>0,"Yes","No")',
       desc:{ru:"Логическое условие",en:"Logical condition"},
-      tags:{ru:["если","условие","если то","логика","проверить","иначе"],en:["if","condition","logic","check","else"]}},
-    {id:5,keys:"COUNTIF / СЧЁТЕСЛИ",type:"formula",template:'=COUNTIF({col}:{col},"условие")',example:'=COUNTIF(A:A,"да")',
-      desc:{ru:"Подсчёт ячеек по условию",en:"Count cells matching condition"},
-      tags:{ru:["посчитать","количество","countif","счётесли","сколько раз","сколько ячеек"],en:["count","countif","how many","occurrences"]}},
-    {id:6,keys:"SUMIF / СУММЕСЛИ",type:"formula",template:'=SUMIF({col}:{col},"условие",B:B)',example:'=SUMIF(A:A,"да",B:B)',
+      tags:{ru:["если","условие","логика"],en:["if","condition","logic"]}},
+    {id:5,keys:"COUNTIF",type:"formula",template:'=COUNTIF({col}:{col},"условие")',example:'=COUNTIF(A:A,"да")',
+      desc:{ru:"Подсчёт по условию",en:"Count by condition"},
+      tags:{ru:["посчитать","количество","счётесли","сколько"],en:["count","countif","how many"]}},
+    {id:6,keys:"SUMIF",type:"formula",template:'=SUMIF({col}:{col},"условие",B:B)',example:'=SUMIF(A:A,"да",B:B)',
       desc:{ru:"Сумма по условию",en:"Sum by condition"},
-      tags:{ru:["сумма с условием","суммесли","sumif","выборочная сумма"],en:["sum if","conditional sum","sumif"]}},
-    {id:7,keys:"MAX / MIN",type:"formula",template:"=MAX({col}:{col})",example:"=MAX(A:A)",
-      desc:{ru:"Максимум / минимум",en:"Maximum / minimum"},
-      tags:{ru:["максимум","минимум","max","min","наибольший","наименьший"],en:["max","min","maximum","minimum","largest"]}},
-    {id:8,keys:"ROUND / ОКРУГЛ",type:"formula",template:"=ROUND({col}1,2)",example:"=ROUND(A1,2)",
-      desc:{ru:"Округление числа",en:"Round a number"},
-      tags:{ru:["округлить","округление","round","округл"],en:["round","decimal","rounding"]}},
-    {id:9,keys:"IFERROR / ЕСЛИОШИБКА",type:"formula",template:'=IFERROR({col}1,"—")',example:'=IFERROR(A1,"—")',
-      desc:{ru:"Скрыть ошибку формулы",en:"Suppress formula error"},
-      tags:{ru:["ошибка","скрыть ошибку","iferror","еслиошибка"],en:["error","hide error","iferror"]}},
-    {id:10,keys:"INDEX+MATCH",type:"formula",template:"=INDEX(B:B,MATCH({col}2,A:A,0))",example:"=INDEX(B:B,MATCH(A2,A:A,0))",
-      desc:{ru:"Гибкий поиск (лучше ВПР)",en:"Flexible lookup (better than VLOOKUP)"},
-      tags:{ru:["найти","поиск","index match","гибкий поиск","индекс поискпоз"],en:["find","lookup","index match","flexible"]}},
-    {id:11,keys:"CONCATENATE / СЦЕПИТЬ",type:"formula",template:'={col}1&" "&{col}2',example:'=A1&" "&B1',
-      desc:{ru:"Склеить текст из ячеек",en:"Merge text from cells"},
-      tags:{ru:["объединить","склеить","текст","сцепить","сцепитъ","concatenate","соединить ячейки","прикрепить","приклеить","сложить текст"],en:["merge","join","concatenate","combine text","concat"]}},
-    {id:12,keys:"TODAY / СЕГОДНЯ",type:"formula",template:"=TODAY()",example:"=TODAY()",
-      desc:{ru:"Текущая дата",en:"Current date"},
-      tags:{ru:["дата","сегодня","today","текущая дата","сегодняшняя дата"],en:["date","today","current date"]}},
-    {id:13,keys:"LEN / ДЛСТР",type:"formula",template:"=LEN({col}1)",example:"=LEN(A1)",
-      desc:{ru:"Длина текста в ячейке",en:"Text length in cell"},
-      tags:{ru:["длина","символы","len","длстр","количество символов"],en:["length","characters","len"]}},
-    {id:14,keys:"TEXT / ТЕКСТ",type:"formula",template:'=TEXT({col}1,"#,##0.00")',example:'=TEXT(A1,"#,##0.00")',
-      desc:{ru:"Форматировать число как текст",en:"Format number as text"},
-      tags:{ru:["формат","форматировать","число в текст","текст","text"],en:["format","number to text","text"]}},
-    {id:15,keys:"LEFT/RIGHT/MID",type:"formula",template:"=LEFT({col}1,N)",example:"=LEFT(A1,5)",
-      desc:{ru:"Извлечь часть текста",en:"Extract part of text"},
-      tags:{ru:["часть текста","левые символы","правые символы","левсимв","правсимв","пстр"],en:["extract text","left","right","mid","substring"]}},
-    {id:16,keys:"TRIM / СЖПРОБЕЛЫ",type:"formula",template:"=TRIM({col}1)",example:"=TRIM(A1)",
+      tags:{ru:["сумма с условием","суммесли"],en:["sum if","sumif"]}},
+    {id:7,keys:"INDEX+MATCH",type:"formula",template:"=INDEX(B:B,MATCH({col}2,A:A,0))",example:"=INDEX(B:B,MATCH(A2,A:A,0))",
+      desc:{ru:"Гибкий поиск (лучше ВПР)",en:"Flexible lookup (better VLOOKUP)"},
+      tags:{ru:["гибкий поиск","индекс поискпоз"],en:["index match","flexible lookup"]}},
+    {id:8,keys:"IFERROR",type:"formula",template:'=IFERROR({col}1,"—")',example:'=IFERROR(A1,"—")',
+      desc:{ru:"Скрыть ошибку",en:"Hide error"},
+      tags:{ru:["ошибка","скрыть ошибку","еслиошибка"],en:["error","hide error","iferror"]}},
+    {id:9,keys:"CONCATENATE / СЦЕПИТЬ",type:"formula",template:'={col}1&" "&{col}2',example:'=A1&" "&B1',
+      desc:{ru:"Склеить ячейки",en:"Merge cells text"},
+      tags:{ru:["объединить","склеить","сцепить","прикрепить","соединить"],en:["merge","join","concatenate","combine"]}},
+    {id:10,keys:"TODAY",type:"formula",template:"=TODAY()",example:"=TODAY()",
+      desc:{ru:"Сегодняшняя дата",en:"Today's date"},
+      tags:{ru:["дата","сегодня"],en:["date","today"]}},
+    {id:11,keys:"ROUND",type:"formula",template:"=ROUND({col}1,2)",example:"=ROUND(A1,2)",
+      desc:{ru:"Округлить число",en:"Round number"},
+      tags:{ru:["округлить","округление"],en:["round","rounding"]}},
+    {id:12,keys:"TRIM",type:"formula",template:"=TRIM({col}1)",example:"=TRIM(A1)",
       desc:{ru:"Убрать лишние пробелы",en:"Remove extra spaces"},
-      tags:{ru:["пробелы","убрать пробелы","сжпробелы","trim","очистить"],en:["trim","spaces","remove spaces"]}},
-    {id:17,keys:"COUNTIFS / СЧЁТЕСЛИМН",type:"formula",template:'=COUNTIFS({col}:{col},"условие1",B:B,"условие2")',example:'=COUNTIFS(A:A,"да",B:B,">0")',
-      desc:{ru:"Подсчёт по нескольким условиям",en:"Count with multiple conditions"},
-      tags:{ru:["несколько условий","countifs","счётеслимн","много условий"],en:["countifs","multiple conditions","count multiple"]}},
-    {id:18,keys:"SUMPRODUCT",type:"formula",template:"=SUMPRODUCT({col}:{col},B:B)",example:"=SUMPRODUCT(A:A,B:B)",
-      desc:{ru:"Сумма произведений (умножить столбцы)",en:"Sum of products"},
-      tags:{ru:["умножить столбцы","суммпроизв","sumproduct","произведение"],en:["sumproduct","multiply columns","product sum"]}},
-    {id:19,keys:"UNIQUE / УНИК",type:"formula",template:"=UNIQUE({col}:{col})",example:"=UNIQUE(A:A)",
-      desc:{ru:"Уникальные значения из столбца",en:"Unique values from column"},
-      tags:{ru:["уникальные","убрать дубли","unique","уник","без повторений"],en:["unique","deduplicate","distinct"]}},
-
-    // ── Сложные формулы ──
-    {id:51,keys:"ВПР + внешний файл",type:"formula",complex:true,
-      template:'=VLOOKUP({col}22,\'[Файл.xlsx]Лист\'!$H$3:$AA$303,15,0)',
-      example:"=VLOOKUP(D22,'D:\\Папка\\[База 2026.xlsx]HL_веса'!$H$3:$AA$303,15,0)",
-      desc:{ru:"ВПР с поиском в другом файле Excel",en:"VLOOKUP referencing external Excel file"},
-      tags:{ru:["впр другой файл","внешний файл","vlookup файл","поиск в другом файле","база","xlsx","другой документ","внешняя таблица"],en:["vlookup external file","external workbook","cross-file lookup"]}},
-    {id:52,keys:"СЦЕПИТЬ несколько ячеек",type:"formula",complex:true,
-      template:'=CONCATENATE({col}3,{col}4," ",{col}5)',
-      example:'=CONCATENATE(G3,H3," ",I3)',
-      desc:{ru:"Объединить несколько ячеек в одну строку",en:"Combine multiple cells into one string"},
-      tags:{ru:["сцепить","объединить ячейки","склеить несколько","concatenate","сцепить три","собрать строку","прикрепить значение"],en:["concatenate cells","combine cells","join multiple"]}},
-    {id:53,keys:"ЕСЛИ + И/ИЛИ",type:"formula",complex:true,
-      template:'=IF(AND({col}1>0,{col}1<100),"В диапазоне","Вне диапазона")',
-      example:'=IF(AND(A1>0,A1<100),"ОК","Нет")',
-      desc:{ru:"Условие с несколькими проверками",en:"Condition with multiple checks"},
-      tags:{ru:["если и","если или","сложное условие","and or","несколько условий в если"],en:["if and","if or","complex condition","multiple checks"]}},
-    {id:54,keys:"СУММЕСЛИ по диапазону дат",type:"formula",complex:true,
-      template:'=SUMIFS(C:C,A:A,">="&DATE(2024,1,1),A:A,"<="&TODAY())',
-      example:'=SUMIFS(C:C,A:A,">="&DATE(2024,1,1),A:A,"<="&TODAY())',
-      desc:{ru:"Сумма за период (между двумя датами)",en:"Sum between two dates"},
-      tags:{ru:["сумма за период","сумма по датам","суммесли дата","sumifs дата","за год","за месяц"],en:["sum by date","date range sum","sumifs date"]}},
-    {id:55,keys:"ВПР приблизительный",type:"formula",complex:true,
-      template:'=VLOOKUP({col}2,A:B,2,1)',
-      example:'=VLOOKUP(D2,A:B,2,1)',
-      desc:{ru:"ВПР с приблизительным совпадением (для диапазонов)",en:"VLOOKUP approximate match (for ranges/grades)"},
-      tags:{ru:["впр диапазон","приблизительный впр","интервальный просмотр","1 в впр","оценки","категории"],en:["vlookup approximate","range lookup","grade lookup"]}},
-    {id:56,keys:"ИНДЕКС+ПОИСКПОЗ двойной",type:"formula",complex:true,
-      template:'=INDEX(C:C,MATCH(1,(A:A={col}2)*(B:B="условие"),0))',
-      example:'=INDEX(C:C,MATCH(1,(A:A=D2)*(B:B="активный"),0))',
-      desc:{ru:"Поиск по двум условиям одновременно",en:"Lookup with two simultaneous conditions"},
-      tags:{ru:["поиск по двум условиям","двойной впр","индекс поискпоз два условия","сложный поиск"],en:["two condition lookup","double match","index match two criteria"]}},
-    {id:57,keys:"SUBTOTAL / ПРОМЕЖУТОЧНЫЕ.ИТОГИ",type:"formula",complex:true,
-      template:"=SUBTOTAL(9,{col}:{col})",
-      example:"=SUBTOTAL(9,B:B)",
-      desc:{ru:"Сумма только видимых строк (с учётом фильтра)",en:"Sum visible rows only (respects filters)"},
-      tags:{ru:["сумма фильтр","видимые строки","промежуточные итоги","subtotal","сумма после фильтра"],en:["subtotal","filtered sum","visible rows sum"]}},
-
-    // ── Горячие клавиши ──
-    {id:20,keys:"Alt + =",type:"hotkey",desc:{ru:"Автосумма",en:"AutoSum"},
+      tags:{ru:["пробелы","убрать пробелы","сжпробелы"],en:["trim","spaces"]}},
+    {id:13,keys:"SUBTOTAL",type:"formula",complex:true,template:"=SUBTOTAL(9,{col}:{col})",example:"=SUBTOTAL(9,B:B)",
+      desc:{ru:"Сумма с учётом фильтра",en:"Sum respecting filter"},
+      tags:{ru:["сумма фильтр","видимые строки","промежуточные"],en:["subtotal","filtered sum"]}},
+    {id:14,keys:"ВПР внешний файл",type:"formula",complex:true,
+      template:"=VLOOKUP({col}2,'[Файл.xlsx]Лист'!$A$1:$Z$999,2,0)",
+      example:"=VLOOKUP(D22,'[База 2026.xlsx]HL_веса'!$H$3:$AA$303,15,0)",
+      desc:{ru:"ВПР с поиском в другом файле",en:"VLOOKUP from external file"},
+      tags:{ru:["впр другой файл","внешний файл","другой документ","внешняя таблица"],en:["vlookup external file","cross-file"]}},
+    {id:15,keys:"СЦЕПИТЬ несколько",type:"formula",complex:true,
+      template:'=CONCATENATE({col}3,{col}4," ",{col}5)',example:'=CONCATENATE(G3,H3," ",I3)',
+      desc:{ru:"Склеить несколько ячеек",en:"Combine multiple cells"},
+      tags:{ru:["сцепить","объединить несколько","собрать строку"],en:["concatenate cells","combine multiple"]}},
+    // Hotkeys
+    {id:20,keys:{win:"Alt + =",mac:"⌘ + Shift + T",linux:"Alt + ="},type:"hotkey",
+      desc:{ru:"Автосумма",en:"AutoSum"},
       tags:{ru:["автосумма","быстрая сумма"],en:["autosum","quick sum"]}},
-    {id:21,keys:"Ctrl + Shift + L",type:"hotkey",desc:{ru:"Фильтр вкл/выкл",en:"Toggle filter"},
-      tags:{ru:["фильтр","включить фильтр"],en:["filter","toggle filter"]}},
-    {id:22,keys:"Ctrl + T",type:"hotkey",desc:{ru:"Создать умную таблицу",en:"Create table"},
-      tags:{ru:["таблица","умная таблица"],en:["table","smart table"]}},
-    {id:23,keys:"F4",type:"hotkey",desc:{ru:"Абсолютная ссылка $A$1",en:"Toggle absolute reference $A$1"},
-      tags:{ru:["закрепить","абсолютная ссылка","$"],en:["lock","absolute reference","$"]}},
-    {id:24,keys:"Ctrl + 1",type:"hotkey",desc:{ru:"Формат ячеек",en:"Format Cells dialog"},
-      tags:{ru:["формат","формат ячеек"],en:["format","format cells"]}},
-    {id:25,keys:"Ctrl + Shift + +",type:"hotkey",desc:{ru:"Вставить строку / столбец",en:"Insert row / column"},
-      tags:{ru:["добавить строку","вставить строку","новая строка"],en:["insert row","add row"]}},
-    {id:26,keys:"Ctrl + -",type:"hotkey",desc:{ru:"Удалить строку / столбец",en:"Delete row / column"},
-      tags:{ru:["удалить строку","удалить столбец"],en:["delete row","remove row"]}},
-    {id:27,keys:"Ctrl + F",type:"hotkey",desc:{ru:"Найти в документе",en:"Find"},
-      tags:{ru:["найти","поиск"],en:["find","search"]}},
-    {id:28,keys:"Ctrl + H",type:"hotkey",desc:{ru:"Найти и заменить",en:"Find and replace"},
-      tags:{ru:["заменить","найти и заменить"],en:["replace","find and replace"]}},
-    {id:29,keys:"Ctrl + Z",type:"hotkey",desc:{ru:"Отменить",en:"Undo"},
-      tags:{ru:["отменить","undo"],en:["undo","revert"]}},
-    {id:30,keys:"Ctrl + S",type:"hotkey",desc:{ru:"Сохранить",en:"Save"},
-      tags:{ru:["сохранить"],en:["save"]}},
-    {id:31,keys:"Ctrl + D",type:"hotkey",desc:{ru:"Заполнить вниз (повторить формулу)",en:"Fill down"},
-      tags:{ru:["заполнить вниз","протянуть формулу","скопировать вниз"],en:["fill down","copy down"]}},
-    {id:32,keys:"Ctrl + R",type:"hotkey",desc:{ru:"Заполнить вправо",en:"Fill right"},
-      tags:{ru:["заполнить вправо","протянуть вправо"],en:["fill right"]}},
-    {id:33,keys:"Ctrl + Shift + End",type:"hotkey",desc:{ru:"Выделить до конца данных",en:"Select to last cell"},
-      tags:{ru:["выделить всё","до конца","весь диапазон"],en:["select all","select to end"]}},
-    {id:34,keys:"F2",type:"hotkey",desc:{ru:"Редактировать ячейку",en:"Edit cell"},
-      tags:{ru:["редактировать ячейку","изменить ячейку","f2"],en:["edit cell","f2"]}},
-    {id:35,keys:"Ctrl + ;",type:"hotkey",desc:{ru:"Вставить текущую дату",en:"Insert today's date"},
-      tags:{ru:["вставить дату","текущая дата","сегодня вставить"],en:["insert date","today"]}},
+    {id:21,keys:"Ctrl + Shift + L",type:"hotkey",
+      desc:{ru:"Фильтр вкл/выкл",en:"Toggle filter"},
+      tags:{ru:["фильтр","включить фильтр"],en:["filter","toggle"]}},
+    {id:22,keys:"Ctrl + T",type:"hotkey",
+      desc:{ru:"Умная таблица",en:"Create table"},
+      tags:{ru:["таблица","умная таблица"],en:["table"]}},
+    {id:23,keys:"F4",type:"hotkey",
+      desc:{ru:"Абсолютная ссылка $A$1",en:"Absolute reference $A$1"},
+      tags:{ru:["закрепить","абсолютная ссылка","$"],en:["lock","absolute","$"]}},
+    {id:24,keys:"Ctrl + ;",type:"hotkey",
+      desc:{ru:"Вставить текущую дату",en:"Insert today's date"},
+      tags:{ru:["вставить дату","сегодня вставить"],en:["insert date","today"]}},
+    {id:25,keys:"Ctrl + Shift + +",type:"hotkey",
+      desc:{ru:"Вставить строку/столбец",en:"Insert row/column"},
+      tags:{ru:["добавить строку","вставить строку"],en:["insert row","add row"]}},
+    {id:26,keys:"Ctrl + -",type:"hotkey",
+      desc:{ru:"Удалить строку/столбец",en:"Delete row/column"},
+      tags:{ru:["удалить строку","удалить столбец"],en:["delete row"]}},
+    {id:27,keys:"F2",type:"hotkey",
+      desc:{ru:"Редактировать ячейку",en:"Edit cell"},
+      tags:{ru:["редактировать ячейку","изменить"],en:["edit cell"]}},
+    {id:28,keys:"Ctrl + D",type:"hotkey",
+      desc:{ru:"Заполнить вниз",en:"Fill down"},
+      tags:{ru:["заполнить вниз","протянуть формулу"],en:["fill down","copy down"]}},
   ],
   Word:[
     {id:40,keys:"Ctrl + B / I / U",type:"hotkey",
       desc:{ru:"Жирный / Курсив / Подчёркивание",en:"Bold / Italic / Underline"},
-      tags:{ru:["жирный","курсив","подчеркнуть","bold"],en:["bold","italic","underline"]}},
+      tags:{ru:["жирный","курсив","подчеркнуть"],en:["bold","italic","underline"]}},
     {id:41,keys:"Ctrl + Enter",type:"hotkey",
       desc:{ru:"Разрыв страницы",en:"Page break"},
-      tags:{ru:["новая страница","разрыв страницы"],en:["page break","new page"]}},
-    {id:42,keys:"Ctrl + L/E/R/J",type:"hotkey",
+      tags:{ru:["новая страница","разрыв"],en:["page break"]}},
+    {id:42,keys:"Ctrl + Alt + 1/2/3",type:"hotkey",
+      desc:{ru:"Стиль Заголовок 1/2/3",en:"Heading 1/2/3"},
+      tags:{ru:["заголовок","стиль"],en:["heading","style"]}},
+    {id:43,keys:{win:"Ctrl + Shift + C",mac:"⌘ + Shift + C",linux:"Ctrl + Shift + C"},type:"hotkey",
+      desc:{ru:"Копировать форматирование",en:"Copy formatting"},
+      tags:{ru:["скопировать форматирование","формат по образцу"],en:["copy formatting","format painter"]}},
+    {id:44,keys:"Ctrl + F",type:"hotkey",
+      desc:{ru:"Найти",en:"Find"},
+      tags:{ru:["найти","поиск"],en:["find","search"]}},
+    {id:45,keys:"Ctrl + H",type:"hotkey",
+      desc:{ru:"Найти и заменить",en:"Find and replace"},
+      tags:{ru:["заменить"],en:["replace","find replace"]}},
+    {id:46,keys:"Ctrl + L/E/R/J",type:"hotkey",
       desc:{ru:"Выравнивание текста",en:"Text alignment"},
-      tags:{ru:["выравнивание","по центру","justify"],en:["align","center","justify"]}},
-    {id:43,keys:"Ctrl + Alt + 1/2/3",type:"hotkey",
-      desc:{ru:"Стиль Заголовок 1/2/3",en:"Heading style 1/2/3"},
-      tags:{ru:["заголовок","стиль","heading"],en:["heading","style","h1"]}},
-    {id:44,keys:"Ctrl + D",type:"hotkey",
-      desc:{ru:"Диалог «Шрифт»",en:"Font dialog"},
-      tags:{ru:["шрифт","размер шрифта"],en:["font","font size"]}},
-    {id:45,keys:"Ctrl + F",type:"hotkey",
-      desc:{ru:"Найти в документе",en:"Find"},
-      tags:{ru:["найти","поиск"],en:["find"]}},
-    {id:46,keys:"Ctrl + Z",type:"hotkey",
-      desc:{ru:"Отменить",en:"Undo"},
-      tags:{ru:["отменить"],en:["undo"]}},
-    {id:47,keys:"Ctrl + Shift + N",type:"hotkey",
-      desc:{ru:"Обычный стиль (сбросить форматирование)",en:"Normal style (clear formatting)"},
-      tags:{ru:["обычный стиль","сбросить форматирование","убрать форматирование"],en:["normal style","clear formatting"]}},
+      tags:{ru:["выравнивание","по центру"],en:["align","center","justify"]}},
   ],
   PowerPoint:[
     {id:50,keys:"F5",type:"hotkey",
       desc:{ru:"Запустить показ с начала",en:"Start slideshow"},
-      tags:{ru:["показ","запустить","презентация"],en:["slideshow","present","play"]}},
+      tags:{ru:["показ","запустить","презентация"],en:["slideshow","present"]}},
     {id:51,keys:"Shift + F5",type:"hotkey",
-      desc:{ru:"Показ с текущего слайда",en:"Show from current slide"},
-      tags:{ru:["текущий слайд","показ"],en:["current slide","slideshow"]}},
+      desc:{ru:"Показ с текущего слайда",en:"From current slide"},
+      tags:{ru:["текущий слайд"],en:["current slide"]}},
     {id:52,keys:"Ctrl + M",type:"hotkey",
-      desc:{ru:"Добавить новый слайд",en:"Add new slide"},
+      desc:{ru:"Новый слайд",en:"New slide"},
       tags:{ru:["новый слайд","добавить слайд"],en:["new slide","add slide"]}},
     {id:53,keys:"Ctrl + D",type:"hotkey",
-      desc:{ru:"Дублировать слайд / объект",en:"Duplicate slide / object"},
-      tags:{ru:["дублировать","копия слайда"],en:["duplicate","copy slide"]}},
-    {id:54,keys:"Ctrl + G",type:"hotkey",
+      desc:{ru:"Дублировать слайд",en:"Duplicate slide"},
+      tags:{ru:["дублировать","копия слайда"],en:["duplicate"]}},
+    {id:54,keys:"B / W",type:"hotkey",
+      desc:{ru:"Чёрный/белый экран во время показа",en:"Black/white screen during show"},
+      tags:{ru:["чёрный экран","белый экран","пауза"],en:["black screen","pause show"]}},
+    {id:55,keys:"Ctrl + G",type:"hotkey",
       desc:{ru:"Группировать объекты",en:"Group objects"},
       tags:{ru:["группировать","группа"],en:["group"]}},
-    {id:55,keys:"Ctrl + Z",type:"hotkey",
-      desc:{ru:"Отменить",en:"Undo"},
-      tags:{ru:["отменить"],en:["undo"]}},
-    {id:56,keys:"B / W",type:"hotkey",
-      desc:{ru:"Чёрный / белый экран во время показа",en:"Black / white screen during slideshow"},
-      tags:{ru:["чёрный экран","белый экран","пауза показ"],en:["black screen","white screen","pause slideshow"]}},
   ],
   "VS Code":[
     {id:60,keys:"Ctrl + P",type:"hotkey",
@@ -374,59 +291,202 @@ const DB={
       tags:{ru:["найти файл","открыть файл"],en:["open file","quick open"]}},
     {id:61,keys:"Ctrl + Shift + P",type:"hotkey",
       desc:{ru:"Командная палитра",en:"Command palette"},
-      tags:{ru:["команда","меню команд"],en:["command","palette"]}},
+      tags:{ru:["команда","палитра"],en:["command","palette"]}},
     {id:62,keys:"Alt + ↑/↓",type:"hotkey",
-      desc:{ru:"Переместить строку вверх/вниз",en:"Move line up/down"},
-      tags:{ru:["переместить строку","двигать строку"],en:["move line","reorder"]}},
+      desc:{ru:"Переместить строку",en:"Move line"},
+      tags:{ru:["переместить строку","двигать строку"],en:["move line"]}},
     {id:63,keys:"Ctrl + /",type:"hotkey",
       desc:{ru:"Закомментировать строку",en:"Toggle comment"},
-      tags:{ru:["комментарий","закомментировать"],en:["comment","toggle comment"]}},
+      tags:{ru:["комментарий","закомментировать"],en:["comment"]}},
     {id:64,keys:"Ctrl + D",type:"hotkey",
       desc:{ru:"Выделить следующее вхождение",en:"Select next occurrence"},
       tags:{ru:["мультикурсор","выделить слово"],en:["multi cursor","select word"]}},
-    {id:65,keys:"Ctrl + `",type:"hotkey",
+    {id:65,keys:{win:"Ctrl + `",mac:"⌘ + `",linux:"Ctrl + `"},type:"hotkey",
       desc:{ru:"Открыть терминал",en:"Open terminal"},
       tags:{ru:["терминал","консоль"],en:["terminal","console"]}},
     {id:66,keys:"Ctrl + Shift + K",type:"hotkey",
       desc:{ru:"Удалить строку",en:"Delete line"},
       tags:{ru:["удалить строку"],en:["delete line"]}},
-    {id:67,keys:"Ctrl + B",type:"hotkey",
-      desc:{ru:"Боковая панель вкл/выкл",en:"Toggle sidebar"},
-      tags:{ru:["боковая панель","sidebar"],en:["sidebar","toggle sidebar"]}},
-    {id:68,keys:"Ctrl + Z",type:"hotkey",
-      desc:{ru:"Отменить",en:"Undo"},
-      tags:{ru:["отменить"],en:["undo"]}},
-    {id:69,keys:"Ctrl + Shift + F",type:"hotkey",
-      desc:{ru:"Поиск по всем файлам",en:"Search across files"},
-      tags:{ru:["поиск по проекту","найти везде","глобальный поиск"],en:["global search","search files"]}},
+    {id:67,keys:"Ctrl + Shift + F",type:"hotkey",
+      desc:{ru:"Поиск по всем файлам",en:"Search in files"},
+      tags:{ru:["поиск по проекту","найти везде"],en:["global search","search files"]}},
+    {id:68,keys:"Ctrl + Shift + L",type:"hotkey",
+      desc:{ru:"Выделить все вхождения",en:"Select all occurrences"},
+      tags:{ru:["все вхождения","мультикурсор все"],en:["select all","all occurrences"]}},
+    {id:69,keys:{win:"Ctrl + Shift + `",mac:"⌘ + Shift + `",linux:"Ctrl + Shift + `"},type:"hotkey",
+      desc:{ru:"Новый терминал",en:"New terminal"},
+      tags:{ru:["новый терминал"],en:["new terminal"]}},
   ],
   Photoshop:[
     {id:70,keys:"Ctrl + J",type:"hotkey",
       desc:{ru:"Дублировать слой",en:"Duplicate layer"},
-      tags:{ru:["дублировать слой","скопировать слой"],en:["duplicate layer"]}},
+      tags:{ru:["дублировать слой"],en:["duplicate layer"]}},
     {id:71,keys:"Ctrl + T",type:"hotkey",
       desc:{ru:"Свободная трансформация",en:"Free transform"},
       tags:{ru:["трансформация","масштаб","повернуть"],en:["transform","scale","rotate"]}},
     {id:72,keys:"[ / ]",type:"hotkey",
-      desc:{ru:"Уменьшить / увеличить кисть",en:"Decrease / increase brush"},
+      desc:{ru:"Размер кисти −/+",en:"Brush size −/+"},
       tags:{ru:["кисть","размер кисти"],en:["brush","brush size"]}},
     {id:73,keys:"Ctrl + Alt + Z",type:"hotkey",
       desc:{ru:"Несколько шагов назад",en:"Step backward"},
       tags:{ru:["история","отменить несколько"],en:["history","step back"]}},
-    {id:74,keys:"Ctrl + Shift + S",type:"hotkey",
-      desc:{ru:"Сохранить как",en:"Save as"},
-      tags:{ru:["сохранить как","экспорт"],en:["save as","export"]}},
-    {id:75,keys:"Ctrl + Shift + Alt + E",type:"hotkey",
-      desc:{ru:"Объединить видимые слои в новый",en:"Merge visible to new"},
+    {id:74,keys:"Ctrl + Shift + Alt + E",type:"hotkey",
+      desc:{ru:"Объединить видимые слои",en:"Merge visible layers"},
       tags:{ru:["объединить слои","stamp"],en:["merge layers","stamp"]}},
-  ]
+    {id:75,keys:"Ctrl + L",type:"hotkey",
+      desc:{ru:"Уровни",en:"Levels"},
+      tags:{ru:["уровни","яркость","контраст"],en:["levels","brightness"]}},
+  ],
+  Figma:[
+    {id:80,keys:{win:"Ctrl + D",mac:"⌘ + D",linux:"Ctrl + D"},type:"hotkey",
+      desc:{ru:"Дублировать элемент",en:"Duplicate element"},
+      tags:{ru:["дублировать","копия"],en:["duplicate","copy"]}},
+    {id:81,keys:{win:"Ctrl + G",mac:"⌘ + G",linux:"Ctrl + G"},type:"hotkey",
+      desc:{ru:"Группировать",en:"Group"},
+      tags:{ru:["группировать","группа"],en:["group"]}},
+    {id:82,keys:{win:"Ctrl + Shift + G",mac:"⌘ + Shift + G",linux:"Ctrl + Shift + G"},type:"hotkey",
+      desc:{ru:"Разгруппировать",en:"Ungroup"},
+      tags:{ru:["разгруппировать"],en:["ungroup"]}},
+    {id:83,keys:{win:"Ctrl + Alt + C",mac:"⌘ + Alt + C",linux:"Ctrl + Alt + C"},type:"hotkey",
+      desc:{ru:"Копировать свойства",en:"Copy properties"},
+      tags:{ru:["копировать свойства","копировать стиль"],en:["copy style","copy properties"]}},
+    {id:84,keys:"K",type:"hotkey",
+      desc:{ru:"Инструмент масштаба",en:"Scale tool"},
+      tags:{ru:["масштаб","изменить размер"],en:["scale","resize"]}},
+    {id:85,keys:{win:"Ctrl + \\",mac:"⌘ + \\",linux:"Ctrl + \\"},type:"hotkey",
+      desc:{ru:"Скрыть/показать UI",en:"Toggle UI"},
+      tags:{ru:["скрыть интерфейс","полный экран"],en:["hide ui","fullscreen"]}},
+    {id:86,keys:{win:"Ctrl + Shift + E",mac:"⌘ + Shift + E",linux:"Ctrl + Shift + E"},type:"hotkey",
+      desc:{ru:"Экспортировать",en:"Export"},
+      tags:{ru:["экспорт","сохранить png","export"],en:["export","save png"]}},
+    {id:87,keys:"C",type:"hotkey",
+      desc:{ru:"Инструмент комментариев",en:"Comment tool"},
+      tags:{ru:["комментарий","добавить комментарий"],en:["comment","add comment"]}},
+  ],
+  Chrome:[
+    {id:90,keys:{win:"Ctrl + T",mac:"⌘ + T",linux:"Ctrl + T"},type:"hotkey",
+      desc:{ru:"Новая вкладка",en:"New tab"},
+      tags:{ru:["новая вкладка","открыть вкладку"],en:["new tab","open tab"]}},
+    {id:91,keys:{win:"Ctrl + W",mac:"⌘ + W",linux:"Ctrl + W"},type:"hotkey",
+      desc:{ru:"Закрыть вкладку",en:"Close tab"},
+      tags:{ru:["закрыть вкладку"],en:["close tab"]}},
+    {id:92,keys:{win:"Ctrl + Shift + T",mac:"⌘ + Shift + T",linux:"Ctrl + Shift + T"},type:"hotkey",
+      desc:{ru:"Открыть закрытую вкладку",en:"Reopen closed tab"},
+      tags:{ru:["вернуть вкладку","открыть закрытую"],en:["reopen tab","restore tab"]}},
+    {id:93,keys:{win:"Ctrl + L",mac:"⌘ + L",linux:"Ctrl + L"},type:"hotkey",
+      desc:{ru:"Перейти в адресную строку",en:"Focus address bar"},
+      tags:{ru:["адресная строка","перейти по адресу"],en:["address bar","url bar"]}},
+    {id:94,keys:{win:"Ctrl + Shift + J",mac:"⌘ + Opt + J",linux:"Ctrl + Shift + J"},type:"hotkey",
+      desc:{ru:"Консоль разработчика",en:"Developer console"},
+      tags:{ru:["консоль","devtools","разработчик"],en:["console","devtools","developer"]}},
+    {id:95,keys:{win:"Ctrl + R",mac:"⌘ + R",linux:"Ctrl + R"},type:"hotkey",
+      desc:{ru:"Обновить страницу",en:"Refresh page"},
+      tags:{ru:["обновить","перезагрузить страницу"],en:["refresh","reload"]}},
+    {id:96,keys:{win:"Ctrl + Shift + N",mac:"⌘ + Shift + N",linux:"Ctrl + Shift + N"},type:"hotkey",
+      desc:{ru:"Режим инкогнито",en:"Incognito mode"},
+      tags:{ru:["инкогнито","приватный режим"],en:["incognito","private"]}},
+    {id:97,keys:{win:"Ctrl + 1..9",mac:"⌘ + 1..9",linux:"Ctrl + 1..9"},type:"hotkey",
+      desc:{ru:"Перейти на вкладку 1-9",en:"Switch to tab 1-9"},
+      tags:{ru:["переключить вкладку","перейти на вкладку"],en:["switch tab"]}},
+    {id:98,keys:{win:"Ctrl + D",mac:"⌘ + D",linux:"Ctrl + D"},type:"hotkey",
+      desc:{ru:"Добавить в закладки",en:"Bookmark page"},
+      tags:{ru:["закладка","добавить в избранное"],en:["bookmark","favorite"]}},
+  ],
+  Windows:[
+    {id:100,keys:{win:"Win + E",mac:"⌘ + Space (Finder)",linux:"Super + E"},type:"hotkey",
+      desc:{ru:"Проводник / Finder",en:"File Explorer / Finder"},
+      tags:{ru:["проводник","открыть папку","файловый менеджер"],en:["explorer","finder","file manager"]}},
+    {id:101,keys:{win:"Win + D",mac:"⌘ + M (minimize all)",linux:"Super + D"},type:"hotkey",
+      desc:{ru:"Показать рабочий стол",en:"Show desktop"},
+      tags:{ru:["рабочий стол","свернуть все"],en:["desktop","minimize all"]}},
+    {id:102,keys:{win:"Win + L",mac:"⌘ + Ctrl + Q",linux:"Super + L"},type:"hotkey",
+      desc:{ru:"Заблокировать экран",en:"Lock screen"},
+      tags:{ru:["заблокировать","блокировка экрана"],en:["lock","lock screen"]}},
+    {id:103,keys:{win:"Win + V",mac:"⌘ + Shift + V",linux:"Super + V"},type:"hotkey",
+      desc:{ru:"История буфера обмена",en:"Clipboard history"},
+      tags:{ru:["история буфера","clipboard","скопированное"],en:["clipboard","history","paste"]}},
+    {id:104,keys:{win:"Win + Shift + S",mac:"⌘ + Shift + 4",linux:"Print Screen"},type:"hotkey",
+      desc:{ru:"Снимок экрана области",en:"Screenshot area"},
+      tags:{ru:["скриншот","снимок экрана","вырезать экран"],en:["screenshot","snip","capture"]}},
+    {id:105,keys:{win:"Alt + Tab",mac:"⌘ + Tab",linux:"Alt + Tab"},type:"hotkey",
+      desc:{ru:"Переключить окно",en:"Switch window"},
+      tags:{ru:["переключить окно","переключение между окнами"],en:["switch window","alt tab"]}},
+    {id:106,keys:{win:"Win + Tab",mac:"Ctrl + ↑",linux:"Super + Tab"},type:"hotkey",
+      desc:{ru:"Виртуальный рабочий стол",en:"Task/virtual desktop view"},
+      tags:{ru:["виртуальный рабочий стол","task view"],en:["task view","virtual desktop"]}},
+    {id:107,keys:{win:"Win + →/←",mac:"⌘ + Ctrl + →/←",linux:"Super + →/←"},type:"hotkey",
+      desc:{ru:"Прикрепить окно к краю",en:"Snap window to side"},
+      tags:{ru:["прикрепить окно","разделить экран","snap"],en:["snap","split screen","tile"]}},
+    {id:108,keys:{win:"Ctrl + Shift + Esc",mac:"⌘ + Space → Activity Monitor",linux:"Ctrl + Alt + Delete"},type:"hotkey",
+      desc:{ru:"Диспетчер задач",en:"Task manager"},
+      tags:{ru:["диспетчер задач","процессы","завершить процесс"],en:["task manager","processes"]}},
+    {id:109,keys:{win:"Win + R",mac:"⌘ + Space",linux:"Alt + F2"},type:"hotkey",
+      desc:{ru:"Выполнить / запустить приложение",en:"Run / launch app"},
+      tags:{ru:["выполнить","запустить","run","открыть программу"],en:["run","launch","execute"]}},
+    {id:110,keys:{win:"Win + I",mac:"⌘ + ,",linux:"Super + I"},type:"hotkey",
+      desc:{ru:"Открыть настройки системы",en:"Open system settings"},
+      tags:{ru:["настройки","параметры системы","системные настройки"],en:["settings","preferences","system"]}},
+    {id:111,keys:{win:"Win + P",mac:"⌘ + F1",linux:"Super + P"},type:"hotkey",
+      desc:{ru:"Режим экрана/проектора",en:"Display/projector mode"},
+      tags:{ru:["проектор","второй монитор","дублировать экран"],en:["projector","second screen","display mode"]}},
+  ],
+  Terminal:[
+    {id:120,keys:{win:"cls",mac:"clear",linux:"clear"},type:"hotkey",
+      desc:{ru:"Очистить терминал",en:"Clear terminal"},
+      tags:{ru:["очистить терминал","cls","clear"],en:["clear","cls"]}},
+    {id:121,keys:"Ctrl + C",type:"hotkey",
+      desc:{ru:"Остановить процесс",en:"Stop process"},
+      tags:{ru:["остановить","прервать процесс","interrupt"],en:["stop","kill","interrupt"]}},
+    {id:122,keys:{win:"Ctrl + ↑/↓",mac:"Ctrl + P/N",linux:"Ctrl + ↑/↓"},type:"hotkey",
+      desc:{ru:"История команд",en:"Command history"},
+      tags:{ru:["история команд","предыдущая команда"],en:["history","previous command"]}},
+    {id:123,keys:"Tab",type:"hotkey",
+      desc:{ru:"Автодополнение",en:"Autocomplete"},
+      tags:{ru:["автодополнение","tab completion"],en:["autocomplete","tab complete"]}},
+    {id:124,keys:{win:"cd /path",mac:"cd /path",linux:"cd /path"},type:"hotkey",
+      desc:{ru:"Перейти в папку",en:"Change directory"},
+      tags:{ru:["перейти в папку","cd","сменить директорию"],en:["cd","directory","navigate"]}},
+    {id:125,keys:{win:"ls / dir",mac:"ls",linux:"ls"},type:"hotkey",
+      desc:{ru:"Список файлов",en:"List files"},
+      tags:{ru:["список файлов","показать папку","ls","dir"],en:["list files","ls","dir"]}},
+    {id:126,keys:"Ctrl + L",type:"hotkey",
+      desc:{ru:"Очистить экран (альтернатива)",en:"Clear screen"},
+      tags:{ru:["очистить","ctrl l"],en:["clear screen"]}},
+    {id:127,keys:{win:"mkdir",mac:"mkdir",linux:"mkdir"},type:"hotkey",
+      desc:{ru:"Создать папку",en:"Create folder"},
+      tags:{ru:["создать папку","mkdir","новая папка"],en:["mkdir","create folder"]}},
+  ],
+  Telegram:[
+    {id:130,keys:{win:"Ctrl + F",mac:"⌘ + F",linux:"Ctrl + F"},type:"hotkey",
+      desc:{ru:"Поиск по чатам",en:"Search chats"},
+      tags:{ru:["поиск","найти чат","найти сообщение"],en:["search","find chat"]}},
+    {id:131,keys:{win:"Ctrl + N",mac:"⌘ + N",linux:"Ctrl + N"},type:"hotkey",
+      desc:{ru:"Новое сообщение",en:"New message"},
+      tags:{ru:["новое сообщение","написать"],en:["new message","compose"]}},
+    {id:132,keys:{win:"Ctrl + Shift + M",mac:"⌘ + Shift + M",linux:"Ctrl + Shift + M"},type:"hotkey",
+      desc:{ru:"Отключить звук чата",en:"Mute chat"},
+      tags:{ru:["отключить звук","mute","без звука"],en:["mute","silence"]}},
+    {id:133,keys:{win:"Alt + ↑/↓",mac:"⌘ + ↑/↓",linux:"Alt + ↑/↓"},type:"hotkey",
+      desc:{ru:"Следующий/предыдущий чат",en:"Next/previous chat"},
+      tags:{ru:["следующий чат","переключить чат"],en:["next chat","switch chat"]}},
+    {id:134,keys:"Ctrl + Enter",type:"hotkey",
+      desc:{ru:"Отправить (если Enter = новая строка)",en:"Send (when Enter = new line)"},
+      tags:{ru:["отправить","ctrl enter"],en:["send","ctrl enter"]}},
+  ],
 };
 
 const PROGRAMS=Object.keys(DB);
-const COLORS={Excel:"#22c55e",Word:"#3b82f6",PowerPoint:"#f97316","VS Code":"#a78bfa",Photoshop:"#38bdf8"};
-const ICONS={Excel:"⊞",Word:"W",PowerPoint:"P","VS Code":"</>",Photoshop:"Ps"};
+const COLORS={
+  Excel:"#22c55e",Word:"#3b82f6",PowerPoint:"#f97316","VS Code":"#a78bfa",
+  Photoshop:"#38bdf8",Figma:"#a855f7",Chrome:"#f59e0b",Windows:"#0ea5e9",
+  Terminal:"#10b981",Telegram:"#06b6d4"
+};
+const ICONS={
+  Excel:"⊞",Word:"W",PowerPoint:"P","VS Code":"</>",Photoshop:"Ps",
+  Figma:"◈",Chrome:"◉",Windows:"⊟",Terminal:">_",Telegram:"✈"
+};
 
-let state={query:"",progs:["Excel"],tab:"search"};
+let state={query:"",progs:["Excel"],tab:"search",aiMode:false,aiResult:null,aiLoading:false};
 
 function extractColumns(q){
   const parts=q.toUpperCase().split(/[\s,+иand&]+/);
@@ -436,10 +496,12 @@ function extractColumns(q){
 }
 function getDesc(item){return typeof item.desc==='object'?item.desc[settings.lang]:item.desc}
 function getTags(item){return typeof item.tags==='object'?(item.tags[settings.lang]||[]):(item.tags||[])}
+function getKeys(item){return adaptKeys(item.keys)}
 
 function scoreItem(query,item){
   const q=query.toLowerCase().trim();let s=0;
-  const fields=[getDesc(item).toLowerCase(),item.keys.toLowerCase(),...getTags(item)];
+  const k=typeof item.keys==='object'?Object.values(item.keys).join(' '):item.keys;
+  const fields=[getDesc(item).toLowerCase(),k.toLowerCase(),...getTags(item)];
   for(const f of fields){
     if(f===q){s+=10;continue}
     if(f.includes(q)){s+=5;continue}
@@ -462,47 +524,109 @@ function doSearch(query,progs){
 function buildChain(query,items){
   const cols=extractColumns(query);
   if(cols.length<2) return null;
-  const base=items.find(i=>i.template)||items[0];
-  if(!base) return null;
+  const base=items.find(i=>i.template&&!i.complex)||items[0];
+  if(!base||!base.template) return null;
   return cols.map((col,i)=>({
     step:i+1,col,
-    formula:base.template?base.template.replace(/\{col\}/g,col):(base.example||base.keys),
+    formula:base.template.replace(/\{col\}/g,col),
     desc:getDesc(base),program:base.program
   }));
 }
 
 function copyText(text,btn){
   navigator.clipboard.writeText(text).then(()=>{
-    btn.textContent="✓";btn.style.color="#4ade80";
-    btn.style.borderColor="rgba(34,197,94,0.5)";btn.style.background="rgba(34,197,94,0.2)";
+    btn.textContent="✓";btn.style.color="#4ade80";btn.style.borderColor="rgba(34,197,94,0.5)";btn.style.background="rgba(34,197,94,0.2)";
     setTimeout(()=>{btn.textContent="⎘";btn.style.color="";btn.style.borderColor="";btn.style.background=""},1400);
   });
 }
-
 function makeCopyBtn(text){
-  const btn=document.createElement('button');
-  btn.textContent="⎘";
+  const btn=document.createElement('button');btn.textContent="⎘";
   btn.style.cssText="background:var(--copy-bg);border:1px solid var(--copy-border);color:var(--copy-color);border-radius:7px;padding:5px 11px;font-size:11px;cursor:pointer;font-weight:700;transition:all 0.18s;flex-shrink:0;font-family:inherit";
-  btn.onclick=()=>copyText(text,btn);
-  return btn;
+  btn.onclick=()=>copyText(text,btn);return btn;
 }
-
 function el(tag,style,html){
-  const e=document.createElement(tag);
-  if(style) e.style.cssText=style;
-  if(html!==undefined) e.innerHTML=html;
-  return e;
+  const e=document.createElement(tag);if(style)e.style.cssText=style;
+  if(html!==undefined)e.innerHTML=html;return e;
 }
 
-// ── Settings tab ──
+// ── AI Search ──
+async function doAiSearch(query){
+  const provider=settings.aiProvider||'claude';
+  const hasKey=provider==='claude'?!!settings.aiKey:!!settings.gigaKey;
+  if(!hasKey){
+    state.aiResult={error:true,msg:T[settings.lang].aiNoKey};
+    state.aiLoading=false;renderResults();return;
+  }
+  const lang=settings.lang;
+  const osName=settings.os==='mac'?'macOS':settings.os==='linux'?'Linux':'Windows';
+  const systemPrompt=lang==='ru'
+    ?`Ты эксперт по горячим клавишам и командам. Отвечай ТОЛЬКО в формате JSON массива. Каждый элемент: {"keys":"...","desc":"...","example":"...","program":"..."}. Клавиши для ${osName}. Максимум 8 результатов. Только JSON, без markdown.`
+    :`You are a hotkey and command expert. Reply ONLY as a JSON array. Each item: {"keys":"...","desc":"...","example":"...","program":"..."}. Keys for ${osName}. Maximum 8 results. JSON only, no markdown.`;
+
+  try{
+    let items=[];
+
+    if(provider==='claude'){
+      const res=await fetch('https://api.anthropic.com/v1/messages',{
+        method:'POST',
+        headers:{'Content-Type':'application/json','x-api-key':settings.aiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+        body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:800,system:systemPrompt,messages:[{role:'user',content:query}]})
+      });
+      if(!res.ok)throw new Error('Claude API error '+res.status);
+      const data=await res.json();
+      const text=data.content?.[0]?.text||'[]';
+      try{items=JSON.parse(text.replace(/```json|```/g,'').trim())}catch{items=[]}
+
+    } else if(provider==='giga'){
+      // Step 1: get access token via OAuth
+      const tokenRes=await fetch('https://ngw.devices.sberbank.ru:9443/api/v2/oauth',{
+        method:'POST',
+        headers:{
+          'Content-Type':'application/x-www-form-urlencoded',
+          'Accept':'application/json',
+          'Authorization':'Basic '+settings.gigaKey,
+          'RqUID':crypto.randomUUID()
+        },
+        body:'scope=GIGACHAT_API_PERS'
+      });
+      if(!tokenRes.ok)throw new Error('GigaChat auth error '+tokenRes.status);
+      const tokenData=await tokenRes.json();
+      const accessToken=tokenData.access_token;
+
+      // Step 2: call GigaChat
+      const gigaRes=await fetch('https://gigachat.devices.sberbank.ru/api/v1/chat/completions',{
+        method:'POST',
+        headers:{'Content-Type':'application/json','Authorization':'Bearer '+accessToken},
+        body:JSON.stringify({
+          model:'GigaChat',
+          messages:[
+            {role:'system',content:systemPrompt},
+            {role:'user',content:query}
+          ],
+          max_tokens:800,
+          temperature:0.3
+        })
+      });
+      if(!gigaRes.ok)throw new Error('GigaChat error '+gigaRes.status);
+      const gigaData=await gigaRes.json();
+      const text=gigaData.choices?.[0]?.message?.content||'[]';
+      try{items=JSON.parse(text.replace(/```json|```/g,'').trim())}catch{items=[]}
+    }
+
+    state.aiResult={items,query,provider};
+  }catch(e){
+    console.error('AI search error:',e);
+    state.aiResult={error:true,msg:T[settings.lang].aiError+' ('+e.message+')'};
+  }
+  state.aiLoading=false;
+  renderResults();
+}
+
+// ── Settings ──
 function renderSettings(){
   const t=T[settings.lang];
   const wrap=el('div',"animation:fadeUp 0.35s ease both");
-
-  function section(title){
-    const d=el('p',"color:var(--text3);font-size:10px;text-transform:uppercase;letter-spacing:2px;font-weight:800;margin:24px 0 10px");
-    d.textContent=title;return d;
-  }
+  function section(title){const d=el('p',"color:var(--text3);font-size:10px;text-transform:uppercase;letter-spacing:2px;font-weight:800;margin:24px 0 10px");d.textContent=title;return d;}
   function settingRow(icon,title,desc,control){
     const row=el('div',"display:flex;align-items:center;justify-content:space-between;gap:16px;background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:14px 16px;margin-bottom:8px");
     const left=el('div',"display:flex;align-items:center;gap:12px;flex:1;min-width:0");
@@ -518,17 +642,13 @@ function renderSettings(){
     options.forEach(({val,label})=>{
       const on=current===val;
       const btn=el('button',`background:${on?"rgba(99,102,241,0.25)":"transparent"};border:1px solid ${on?"rgba(99,102,241,0.45)":"transparent"};border-radius:6px;padding:5px 10px;font-size:11px;font-weight:700;color:${on?"#c7d2fe":"var(--text2)"};cursor:pointer;transition:all 0.18s;white-space:nowrap`);
-      btn.textContent=label;
-      btn.onclick=()=>onChange(val);
-      w.appendChild(btn);
-    });
-    return w;
+      btn.textContent=label;btn.onclick=()=>onChange(val);w.appendChild(btn);
+    });return w;
   }
   function toggle(current,onChange){
     const btn=el('button',`background:${current?"rgba(34,197,94,0.15)":"var(--toggle-off-bg)"};border:1px solid ${current?"rgba(34,197,94,0.4)":"var(--border)"};border-radius:20px;padding:6px 14px;font-size:11px;font-weight:700;color:${current?"#4ade80":"var(--text2)"};cursor:pointer;transition:all 0.2s;display:flex;align-items:center;gap:6px;flex-shrink:0`);
     btn.innerHTML=`<span style="width:8px;height:8px;border-radius:50%;background:${current?"#4ade80":"#475569"};display:inline-block"></span>${current?t.on:t.off}`;
-    btn.onclick=()=>onChange(!current);
-    return btn;
+    btn.onclick=()=>onChange(!current);return btn;
   }
 
   wrap.appendChild(section(t.sLang));
@@ -542,10 +662,68 @@ function renderSettings(){
   wrap.appendChild(section(t.sOS));
   wrap.appendChild(settingRow("💻",t.sOS,`${t.sOSDesc} (${t.sDetected}: ${detectedOS})`,
     segmented([{val:'win',label:'Windows'},{val:'mac',label:'macOS'},{val:'linux',label:'Linux'}],settings.os,val=>{settings.os=val;saveSettings(settings);render()})));
-
-  const preview=el('div',"background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:12px 16px;margin-bottom:8px;font-size:11px;color:var(--text2)");
-  preview.innerHTML=`<span style="color:var(--text3)">${settings.lang==='ru'?'Например:':'Example:'}</span> <span style="background:rgba(99,102,241,0.15);border:1px solid rgba(99,102,241,0.3);border-radius:5px;padding:2px 8px;color:#c7d2fe;font-weight:700">${adaptKeys("Ctrl + Z")}</span>`;
+  const preview=el('div',"background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:10px 14px;margin-bottom:8px;font-size:11px;color:var(--text2)");
+  const exKeys=[adaptKeys("Ctrl + Z"), adaptKeys("Ctrl + C"), adaptKeys("Win + L")];
+  preview.innerHTML=exKeys.map(k=>`<span style="background:rgba(99,102,241,0.15);border:1px solid rgba(99,102,241,0.3);border-radius:5px;padding:2px 8px;color:#c7d2fe;font-weight:700;margin-right:6px">${k}</span>`).join('');
   wrap.appendChild(preview);
+
+  // AI Provider section
+  wrap.appendChild(section(t.sAI));
+
+  // Provider switcher
+  const providerRow=el('div',"background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:14px 16px;margin-bottom:8px");
+  const providerTop=el('div',"display:flex;align-items:center;justify-content:space-between;gap:16px");
+  const providerLeft=el('div',"display:flex;align-items:center;gap:12px");
+  providerLeft.innerHTML=`<span style="font-size:18px">🤖</span><div><div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:2px">${t.sAIProvider}</div><div style="font-size:11px;color:var(--text2)">${t.sAIProviderDesc}</div></div>`;
+  providerTop.appendChild(providerLeft);
+  providerTop.appendChild(segmented(
+    [{val:'claude',label:'Claude'},{val:'giga',label:'GigaChat'}],
+    settings.aiProvider||'claude',
+    val=>{settings.aiProvider=val;saveSettings(settings);render()}
+  ));
+  providerRow.appendChild(providerTop);
+  wrap.appendChild(providerRow);
+
+  // Claude key
+  const claudeRow=el('div',`background:var(--bg3);border:1px solid ${settings.aiProvider==='claude'?'rgba(99,102,241,0.35)':'var(--border)'};border-radius:12px;padding:16px;margin-bottom:8px;transition:border 0.2s`);
+  const claudeHead=el('div',"display:flex;align-items:center;gap:10px;margin-bottom:12px");
+  claudeHead.innerHTML=`<span style="font-size:16px">✦</span><div><div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:2px">${t.sClaudeKey}</div><div style="font-size:11px;color:var(--text2)">${t.sClaudeKeyDesc}</div></div>`;
+  claudeRow.appendChild(claudeHead);
+  const claudeInputRow=el('div',"display:flex;gap:8px");
+  const claudeInput=el('input',"flex:1;background:var(--input-bg);border:1px solid var(--border);border-radius:8px;padding:9px 12px;font-size:12px;color:var(--text);outline:none;transition:border 0.2s");
+  claudeInput.type='password';claudeInput.placeholder='sk-ant-...';claudeInput.value=settings.aiKey||'';
+  claudeInput.onfocus=()=>claudeInput.style.borderColor="rgba(99,102,241,0.5)";
+  claudeInput.onblur=()=>claudeInput.style.borderColor="var(--border)";
+  const claudeSaveBtn=el('button',"background:rgba(99,102,241,0.2);border:1px solid rgba(99,102,241,0.4);color:#c7d2fe;border-radius:8px;padding:9px 16px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;transition:all 0.18s");
+  claudeSaveBtn.textContent=t.sAISave;
+  claudeSaveBtn.onclick=()=>{settings.aiKey=claudeInput.value.trim();saveSettings(settings);claudeSaveBtn.textContent=t.sAISaved;setTimeout(()=>claudeSaveBtn.textContent=t.sAISave,1500)};
+  claudeInputRow.appendChild(claudeInput);claudeInputRow.appendChild(claudeSaveBtn);
+  claudeRow.appendChild(claudeInputRow);
+  const claudeHint=el('div',"margin-top:8px;font-size:10px;color:var(--text3)");
+  claudeHint.innerHTML=`Получить: <a href="https://console.anthropic.com" target="_blank" style="color:#818cf8;text-decoration:none">console.anthropic.com</a>`;
+  claudeRow.appendChild(claudeHint);
+  wrap.appendChild(claudeRow);
+
+  // GigaChat key
+  const gigaRow=el('div',`background:var(--bg3);border:1px solid ${settings.aiProvider==='giga'?'rgba(34,197,94,0.35)':'var(--border)'};border-radius:12px;padding:16px;margin-bottom:8px;transition:border 0.2s`);
+  const gigaHead=el('div',"display:flex;align-items:center;gap:10px;margin-bottom:12px");
+  gigaHead.innerHTML=`<span style="font-size:16px">🟢</span><div><div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:2px">${t.sGigaKey}</div><div style="font-size:11px;color:var(--text2)">${t.sGigaKeyDesc}</div></div>`;
+  gigaRow.appendChild(gigaHead);
+  const gigaInputRow=el('div',"display:flex;gap:8px");
+  const gigaInput=el('input',"flex:1;background:var(--input-bg);border:1px solid var(--border);border-radius:8px;padding:9px 12px;font-size:12px;color:var(--text);outline:none;transition:border 0.2s");
+  gigaInput.type='password';gigaInput.placeholder='Base64 Client ID:Secret';gigaInput.value=settings.gigaKey||'';
+  gigaInput.onfocus=()=>gigaInput.style.borderColor="rgba(34,197,94,0.5)";
+  gigaInput.onblur=()=>gigaInput.style.borderColor="var(--border)";
+  const gigaSaveBtn=el('button',"background:rgba(34,197,94,0.15);border:1px solid rgba(34,197,94,0.4);color:#4ade80;border-radius:8px;padding:9px 16px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;transition:all 0.18s");
+  gigaSaveBtn.textContent=t.sAISave;
+  gigaSaveBtn.onclick=()=>{settings.gigaKey=gigaInput.value.trim();saveSettings(settings);gigaSaveBtn.textContent=t.sAISaved;setTimeout(()=>gigaSaveBtn.textContent=t.sAISave,1500)};
+  gigaInputRow.appendChild(gigaInput);gigaSaveBtn.textContent=t.sAISave;
+  gigaInputRow.appendChild(gigaSaveBtn);
+  gigaRow.appendChild(gigaInputRow);
+  const gigaHint=el('div',"margin-top:8px;font-size:10px;color:var(--text3)");
+  gigaHint.innerHTML=`Получить: <a href="https://developers.sber.ru/portal/products/gigachat" target="_blank" style="color:#4ade80;text-decoration:none">developers.sber.ru</a> → Credentials → скопировать Authorization`;
+  gigaRow.appendChild(gigaHint);
+  wrap.appendChild(gigaRow);
 
   wrap.appendChild(section(t.sUpdate));
   wrap.appendChild(settingRow("🔔",t.sUpdate,t.sUpdateDesc,
@@ -555,7 +733,7 @@ function renderSettings(){
   return wrap;
 }
 
-// ── Chain card ──
+// ── Render helpers ──
 function renderChainCard(chain){
   const t=T[settings.lang];
   const prog=chain[0]?.program||"Excel";
@@ -583,16 +761,14 @@ function renderChainCard(chain){
   const footer=el('div',"margin-top:14px;padding-top:12px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center");
   footer.appendChild(el('span',"font-size:10px;color:var(--text3)",t.chainCopyAll));
   footer.appendChild(makeCopyBtn(chain.map(s=>s.formula).join('\n')));
-  wrap.appendChild(footer);
-  return wrap;
+  wrap.appendChild(footer);return wrap;
 }
 
-// ── Result card ──
 function renderResultCard(item,idx,detectedCols){
   const t=T[settings.lang];
   const color=COLORS[item.program]||"#818cf8";
   const desc=getDesc(item);
-  const displayKeys=adaptKeys(item.keys);
+  const displayKeys=getKeys(item);
   let display=item.example||"";
   let adapted=false;
   if(item.template&&detectedCols.length>0&&!item.complex){
@@ -600,8 +776,7 @@ function renderResultCard(item,idx,detectedCols){
   }
   const card=el('div',`background:var(--card-bg);border:1px solid var(--border);border-left:3px solid ${color};border-radius:12px;padding:14px 18px;display:flex;align-items:flex-start;gap:14px;animation:fadeUp 0.3s ease ${idx*0.04}s both`);
   const progTag=el('div',`background:${color}14;border:1px solid ${color}40;border-radius:7px;padding:3px 8px;font-size:10px;color:${color};font-weight:800;text-transform:uppercase;white-space:nowrap;margin-top:2px`);
-  progTag.textContent=`${ICONS[item.program]} ${item.program}`;card.appendChild(progTag);
-
+  progTag.textContent=`${ICONS[item.program]||'◆'} ${item.program}`;card.appendChild(progTag);
   const body=el('div',"flex:1;min-width:0");
   const meta=el('div',"display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-bottom:5px");
   const keyBadge=el('span',"background:rgba(99,102,241,0.15);border:1px solid rgba(99,102,241,0.3);border-radius:6px;padding:3px 10px;font-size:13px;color:#c7d2fe;font-weight:700");
@@ -609,13 +784,10 @@ function renderResultCard(item,idx,detectedCols){
   const isFormula=item.type==="formula";
   const typeBadge=el('span',`font-size:10px;padding:2px 8px;border-radius:999px;background:${isFormula?"rgba(34,197,94,0.1)":"rgba(251,191,36,0.1)"};border:1px solid ${isFormula?"rgba(34,197,94,0.25)":"rgba(251,191,36,0.25)"};color:${isFormula?"#4ade80":"#fbbf24"}`);
   typeBadge.textContent=isFormula?t.typeFormula:t.typeHotkey;meta.appendChild(typeBadge);
-  if(item.complex){
-    meta.appendChild(el('span',"font-size:10px;padding:2px 8px;border-radius:999px;background:rgba(168,85,247,0.1);border:1px solid rgba(168,85,247,0.3);color:#c084fc",t.complex));
-  }
-  if(adapted) meta.appendChild(el('span',"font-size:10px;padding:2px 8px;border-radius:999px;background:rgba(14,165,233,0.1);border:1px solid rgba(14,165,233,0.3);color:#38bdf8",t.adapted));
+  if(item.complex)meta.appendChild(el('span',"font-size:10px;padding:2px 8px;border-radius:999px;background:rgba(168,85,247,0.1);border:1px solid rgba(168,85,247,0.3);color:#c084fc",t.complex));
+  if(adapted)meta.appendChild(el('span',"font-size:10px;padding:2px 8px;border-radius:999px;background:rgba(14,165,233,0.1);border:1px solid rgba(14,165,233,0.3);color:#38bdf8",t.adapted));
   body.appendChild(meta);
-  const descEl=el('p',"margin:0 0 7px;color:var(--text2);font-size:12px");
-  descEl.textContent=desc;body.appendChild(descEl);
+  const descEl=el('p',"margin:0 0 7px;color:var(--text2);font-size:12px");descEl.textContent=desc;body.appendChild(descEl);
   if(display){
     const fr=el('div',"display:flex;align-items:center;gap:8px");
     const fb=el('div',"background:var(--code-bg);border:1px solid var(--code-border);border-radius:7px;padding:6px 12px;font-size:12px;color:var(--code-color);flex:1;word-break:break-all;font-weight:600");
@@ -624,7 +796,23 @@ function renderResultCard(item,idx,detectedCols){
   card.appendChild(body);return card;
 }
 
-// ── About tab ──
+function renderAiCard(item,idx){
+  const color="#818cf8";
+  const card=el('div',`background:var(--card-bg);border:1px solid rgba(99,102,241,0.25);border-left:3px solid ${color};border-radius:12px;padding:14px 18px;display:flex;align-items:flex-start;gap:14px;animation:fadeUp 0.3s ease ${idx*0.04}s both`);
+  const badge=el('div',"background:rgba(99,102,241,0.15);border:1px solid rgba(99,102,241,0.3);border-radius:7px;padding:3px 8px;font-size:10px;color:#a78bfa;font-weight:800;white-space:nowrap;margin-top:2px");
+  badge.textContent=`✦ ${item.program||'AI'}`;card.appendChild(badge);
+  const body=el('div',"flex:1;min-width:0");
+  const keyBadge=el('div',"background:rgba(99,102,241,0.15);border:1px solid rgba(99,102,241,0.3);border-radius:6px;padding:3px 10px;font-size:13px;color:#c7d2fe;font-weight:700;display:inline-block;margin-bottom:6px");
+  keyBadge.textContent=item.keys||'';body.appendChild(keyBadge);
+  const desc=el('p',"margin:0 0 7px;color:var(--text2);font-size:12px");desc.textContent=item.desc||'';body.appendChild(desc);
+  if(item.example){
+    const fr=el('div',"display:flex;align-items:center;gap:8px");
+    const fb=el('div',"background:var(--code-bg);border:1px solid var(--code-border);border-radius:7px;padding:6px 12px;font-size:12px;color:var(--code-color);flex:1;word-break:break-all;font-weight:600");
+    fb.textContent=item.example;fr.appendChild(fb);fr.appendChild(makeCopyBtn(item.example));body.appendChild(fr);
+  }
+  card.appendChild(body);return card;
+}
+
 function renderAbout(){
   const t=T[settings.lang];
   const wrap=el('div',"animation:fadeUp 0.35s ease both");
@@ -638,15 +826,11 @@ function renderAbout(){
     d.innerHTML=`<div style="font-size:12px;font-weight:700;color:#fca5a5;margin-bottom:5px">⚠ ${title}</div><div style="font-size:12px;color:var(--text2);line-height:1.65">${fix}</div>`;
     return d;
   }
-  function heading(txt){
-    const d=el('p',"color:var(--text3);font-size:10px;text-transform:uppercase;letter-spacing:2px;font-weight:800;margin:24px 0 10px");
-    d.textContent=txt;return d;
-  }
+  function heading(txt){const d=el('p',"color:var(--text3);font-size:10px;text-transform:uppercase;letter-spacing:2px;font-weight:800;margin:24px 0 10px");d.textContent=txt;return d;}
   const hero=el('div',"background:linear-gradient(135deg,rgba(79,70,229,0.1),rgba(14,165,233,0.07));border:1px solid rgba(99,102,241,0.2);border-radius:16px;padding:24px;text-align:center;margin-bottom:6px");
-  hero.innerHTML=`<div style="font-size:32px;margin-bottom:10px">⌘</div><h2 style="margin:0 0 5px;font-size:20px;font-weight:900;color:var(--text);letter-spacing:-0.5px">SearchCopy</h2><p style="margin:0 0 10px;color:#818cf8;font-size:10px;letter-spacing:2.5px;text-transform:uppercase">by RENDERGAMES</p><p style="margin:0;color:var(--text2);font-size:12px;line-height:1.6">${t.aboutHero}</p>`;
+  hero.innerHTML=`<div style="font-size:32px;margin-bottom:10px">⌘</div><h2 style="margin:0 0 5px;font-size:20px;font-weight:900;color:var(--text)">SearchCopy</h2><p style="margin:0 0 10px;color:#818cf8;font-size:10px;letter-spacing:2.5px;text-transform:uppercase">by RENDERGAMES</p><p style="margin:0;color:var(--text2);font-size:12px;line-height:1.6">${t.aboutHero}</p>`;
   wrap.appendChild(hero);
-  wrap.appendChild(heading(t.h_howto));
-  t.rows.slice(0,3).forEach(r=>wrap.appendChild(infoRow(r[0],r[1],r[2])));
+  wrap.appendChild(heading(t.h_howto));t.rows.slice(0,3).forEach(r=>wrap.appendChild(infoRow(r[0],r[1],r[2])));
   wrap.appendChild(heading(t.h_filters));wrap.appendChild(infoRow(t.rows[3][0],t.rows[3][1],t.rows[3][2]));
   wrap.appendChild(heading(t.h_updates));wrap.appendChild(infoRow(t.rows[4][0],t.rows[4][1],t.rows[4][2]));
   wrap.appendChild(heading(t.h_errors));t.errs.forEach(r=>wrap.appendChild(errRow(r[0],r[1])));
@@ -658,14 +842,13 @@ function renderAbout(){
 function render(){
   const t=T[settings.lang];
   const app=document.getElementById('app');app.innerHTML='';
-
   const hdr=el('div',"text-align:center;margin-bottom:30px");
   hdr.innerHTML=`
     <div style="display:inline-flex;align-items:center;gap:8px;background:var(--badge-bg);border:1px solid var(--badge-border);border-radius:999px;padding:5px 16px;margin-bottom:14px;font-size:10px;color:#818cf8;letter-spacing:2.5px;text-transform:uppercase">
       <span style="animation:pulse 2.5s infinite">●</span> RENDERGAMES
     </div>
     <h1 style="font-size:clamp(30px,6vw,48px);font-weight:900;margin:0 0 7px;background:linear-gradient(135deg,#f1f5f9 0%,#c7d2fe 50%,#818cf8 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:-2px;line-height:1">SearchCopy</h1>
-    <p style="color:var(--text3);font-size:11px;margin:0;letter-spacing:0.5px">${t.tagline}</p>`;
+    <p style="color:var(--text3);font-size:11px;margin:0">${t.tagline}</p>`;
   app.appendChild(hdr);
 
   const tabBar=el('div',"display:flex;gap:4px;background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:4px;margin-bottom:22px");
@@ -675,38 +858,61 @@ function render(){
     btn.textContent=tb.label;btn.onclick=()=>{state.tab=tb.id;render()};tabBar.appendChild(btn);
   });
   app.appendChild(tabBar);
-
   if(state.tab==="about"){app.appendChild(renderAbout());return;}
   if(state.tab==="settings"){app.appendChild(renderSettings());return;}
 
+  // Search tab
   const sw=el('div',"animation:fadeUp 0.3s ease both");
 
-  const filters=el('div',"display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-bottom:18px");
+  // Program filters — scrollable
+  const filterScroll=el('div',"overflow-x:auto;margin-bottom:18px;padding-bottom:4px");
+  filterScroll.style.cssText+="scrollbar-width:none;-ms-overflow-style:none";
+  const filters=el('div',"display:flex;gap:6px;width:max-content;padding:0 2px");
   PROGRAMS.forEach(p=>{
-    const on=state.progs.includes(p);const c=COLORS[p];
-    const btn=el('button',`background:${on?c+"16":"var(--bg3)"};border:1px solid ${on?c+"70":"var(--border)"};color:${on?c:"var(--text2)"};border-radius:999px;padding:5px 14px;font-size:11px;font-weight:700;cursor:pointer;transition:all 0.18s;display:flex;align-items:center;gap:5px`);
-    btn.innerHTML=`<span style="font-size:10px">${ICONS[p]}</span>${p}`;
+    const on=state.progs.includes(p);const c=COLORS[p]||"#818cf8";
+    const btn=el('button',`background:${on?c+"16":"var(--bg3)"};border:1px solid ${on?c+"70":"var(--border)"};color:${on?c:"var(--text2)"};border-radius:999px;padding:5px 14px;font-size:11px;font-weight:700;cursor:pointer;transition:all 0.18s;display:flex;align-items:center;gap:5px;white-space:nowrap`);
+    btn.innerHTML=`<span style="font-size:10px">${ICONS[p]||'◆'}</span>${p}`;
     btn.onclick=()=>{if(on&&state.progs.length===1)return;state.progs=on?state.progs.filter(x=>x!==p):[...state.progs,p];render()};
     filters.appendChild(btn);
   });
-  sw.appendChild(filters);
+  filterScroll.appendChild(filters);sw.appendChild(filterScroll);
 
-  const iw=el('div',"position:relative;margin-bottom:16px;border-radius:14px;box-shadow:var(--shadow);transition:box-shadow 0.3s");
+  // Search input + AI toggle
+  const inputRow=el('div',"display:flex;gap:8px;margin-bottom:16px;align-items:stretch");
+  const iw=el('div',"flex:1;position:relative;border-radius:14px;box-shadow:var(--shadow);transition:box-shadow 0.3s");
   iw.appendChild(el('span',"position:absolute;left:18px;top:50%;transform:translateY(-50%);font-size:17px;color:#4f46e5;pointer-events:none;font-weight:700","⌘"));
   const input=document.createElement('input');
-  input.value=state.query;input.placeholder=t.placeholder;
+  input.value=state.query;
+  input.placeholder=state.aiMode?t.aiPlaceholder:t.placeholder;
   input.style.cssText="width:100%;background:var(--input-bg);border:1px solid var(--border);border-radius:14px;padding:16px 46px 16px 48px;font-size:15px;color:var(--text);outline:none;font-family:inherit;transition:border 0.25s";
-  input.oninput=e=>{state.query=e.target.value;renderResults()};
-  input.onfocus=()=>{iw.style.boxShadow=`var(--shadow-focus)`;input.style.borderColor="rgba(99,102,241,0.55)"};
+  input.oninput=e=>{state.query=e.target.value;if(!state.aiMode)renderResults()};
+  input.onkeydown=e=>{if(e.key==='Enter'&&state.aiMode&&state.query.trim()){e.preventDefault();state.aiLoading=true;state.aiResult=null;renderResults();doAiSearch(state.query.trim())}};
+  input.onfocus=()=>{iw.style.boxShadow="var(--shadow-focus)";input.style.borderColor="rgba(99,102,241,0.55)"};
   input.onblur=()=>{iw.style.boxShadow="var(--shadow)";input.style.borderColor="var(--border)"};
   iw.appendChild(input);
   const clrBtn=el('button',"position:absolute;right:14px;top:50%;transform:translateY(-50%);background:var(--bg3);border:1px solid var(--border);color:var(--text2);width:26px;height:26px;border-radius:50%;cursor:pointer;font-size:12px;display:flex;align-items:center;justify-content:center","✕");
   clrBtn.style.display=state.query?"flex":"none";
-  clrBtn.onclick=()=>{state.query="";render()};
-  iw.appendChild(clrBtn);sw.appendChild(iw);
+  clrBtn.onclick=()=>{state.query="";state.aiResult=null;render()};
+  iw.appendChild(clrBtn);inputRow.appendChild(iw);
 
+  // AI toggle button
+  const aiBtn=el('button',`background:${state.aiMode?"rgba(168,85,247,0.2)":"var(--bg3)"};border:1px solid ${state.aiMode?"rgba(168,85,247,0.5)":"var(--border)"};color:${state.aiMode?"#c084fc":"var(--text2)"};border-radius:14px;padding:0 16px;font-size:12px;font-weight:800;cursor:pointer;transition:all 0.2s;white-space:nowrap;display:flex;align-items:center;gap:6px`);
+  const providerLabel=settings.aiProvider==='giga'?'GigaChat':'Claude';
+  aiBtn.innerHTML=state.aiMode?`✦ ${providerLabel} вкл`:t.aiSearch;
+  aiBtn.onclick=()=>{state.aiMode=!state.aiMode;state.aiResult=null;state.aiLoading=false;render();setTimeout(()=>document.querySelector('input')?.focus(),50)};
+  inputRow.appendChild(aiBtn);
+  sw.appendChild(inputRow);
+
+  // AI mode hint
+  if(state.aiMode){
+    const hint=el('div',"background:rgba(168,85,247,0.07);border:1px solid rgba(168,85,247,0.2);border-radius:10px;padding:10px 14px;margin-bottom:16px;font-size:11px;color:#c084fc;display:flex;align-items:center;gap:8px");
+    hint.innerHTML=`<span>✦</span><span>${settings.lang==='ru'?'Нажми Enter для поиска — Claude найдёт сочетания для любого приложения':'Press Enter to search — Claude will find shortcuts for any app'}</span>`;
+    sw.appendChild(hint);
+  }
+
+  // Suggestions
   const sugWrap=el('div',"margin-bottom:28px");
-  sugWrap.style.display=state.query?"none":"block";
+  sugWrap.style.display=(state.query||state.aiMode)?"none":"block";
   sugWrap.appendChild(el('p',"color:var(--text3);font-size:10px;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:8px",t.tryLabel));
   const sugRow=el('div',"display:flex;flex-wrap:wrap;gap:6px");
   t.suggestions.forEach(s=>{
@@ -721,28 +927,52 @@ function render(){
 
   const rw=el('div',"");rw.id="results-wrap";sw.appendChild(rw);app.appendChild(sw);
   renderResults();
+}
 
-  function renderResults(){
-    const rw=document.getElementById('results-wrap');if(!rw)return;rw.innerHTML='';
-    const q=state.query;
-    const results=doSearch(q,state.progs);
-    const chain=buildChain(q,results);
-    const cols=extractColumns(q);
-    if(sugWrap)sugWrap.style.display=q?"none":"block";
-    if(clrBtn)clrBtn.style.display=q?"flex":"none";
-    if(chain||results.length>0){
-      const label=el('p',"color:var(--text3);font-size:10px;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:12px");
-      label.textContent=chain?t.foundChain(results.length):t.found(results.length);
-      rw.appendChild(label);
-      if(chain)rw.appendChild(renderChainCard(chain));
-      const list=el('div',"display:flex;flex-direction:column;gap:8px");
-      results.forEach((item,i)=>list.appendChild(renderResultCard(item,i,cols)));
-      rw.appendChild(list);
-    } else if(q.trim().length>1){
-      const empty=el('div',"text-align:center;padding:60px 20px;color:var(--empty-color)");
-      empty.innerHTML=`<div style="font-size:36px;margin-bottom:12px;opacity:0.4">⌕</div><p style="margin:0;font-size:13px">${t.notFound(q)}</p><p style="margin:6px 0 0;font-size:11px">${t.notFoundHint}</p>`;
-      rw.appendChild(empty);
+function renderResults(){
+  const rw=document.getElementById('results-wrap');if(!rw)return;rw.innerHTML='';
+  const t=T[settings.lang];
+  const q=state.query;
+  const sugWrap=document.querySelector('#app .wrap > div > div[style*="margin-bottom:28px"]');
+  const clrBtn=document.getElementById('clr-btn');
+
+  // AI mode
+  if(state.aiMode){
+    if(state.aiLoading){
+      const loading=el('div',"display:flex;align-items:center;justify-content:center;gap:12px;padding:40px;color:var(--text2)");
+      loading.innerHTML=`<div class="spinner"></div><span style="font-size:13px">${t.aiSearching}</span>`;
+      rw.appendChild(loading);return;
     }
+    if(state.aiResult){
+      if(state.aiResult.error){
+        const err=el('div',"background:rgba(239,68,68,0.06);border:1px solid rgba(239,68,68,0.2);border-radius:12px;padding:16px;text-align:center;color:#fca5a5;font-size:12px");
+        err.textContent=state.aiResult.msg;rw.appendChild(err);return;
+      }
+      const label=el('p',"color:var(--text3);font-size:10px;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:12px");
+      label.innerHTML=`✦ AI · ${t.found(state.aiResult.items?.length||0)}`;rw.appendChild(label);
+      const list=el('div',"display:flex;flex-direction:column;gap:8px");
+      (state.aiResult.items||[]).forEach((item,i)=>list.appendChild(renderAiCard(item,i)));
+      rw.appendChild(list);
+    }
+    return;
+  }
+
+  // Local search
+  const results=doSearch(q,state.progs);
+  const chain=buildChain(q,results);
+  const cols=extractColumns(q);
+
+  if(chain||results.length>0){
+    const label=el('p',"color:var(--text3);font-size:10px;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:12px");
+    label.textContent=chain?t.foundChain(results.length):t.found(results.length);rw.appendChild(label);
+    if(chain)rw.appendChild(renderChainCard(chain));
+    const list=el('div',"display:flex;flex-direction:column;gap:8px");
+    results.forEach((item,i)=>list.appendChild(renderResultCard(item,i,cols)));
+    rw.appendChild(list);
+  } else if(q.trim().length>1){
+    const empty=el('div',"text-align:center;padding:50px 20px;color:var(--empty-color)");
+    empty.innerHTML=`<div style="font-size:36px;margin-bottom:12px;opacity:0.4">⌕</div><p style="margin:0;font-size:13px">${t.notFound(q)}</p><p style="margin:6px 0 0;font-size:11px">${t.notFoundHint}</p>`;
+    rw.appendChild(empty);
   }
 }
 
@@ -753,62 +983,44 @@ function compareVersions(a,b){
   for(let i=0;i<3;i++){if((pa[i]||0)>(pb[i]||0))return 1;if((pa[i]||0)<(pb[i]||0))return -1;}
   return 0;
 }
-
 async function checkForUpdates(){
   if(!settings.autoUpdate)return;
   try{
-    const res=await fetch('https://api.github.com/repos/MihailKashintsev/searchcopy/releases/latest',{
-      headers:{'Accept':'application/vnd.github.v3+json'}
-    });
+    const res=await fetch('https://api.github.com/repos/MihailKashintsev/searchcopy/releases/latest',{headers:{'Accept':'application/vnd.github.v3+json'}});
     if(!res.ok)return;
     const data=await res.json();
     const latestVersion=data.tag_name||'';
     if(!latestVersion)return;
     if(compareVersions(latestVersion,VERSION)<=0)return;
-
     document.getElementById('update-banner')?.remove();
-
     const isMac=/Mac/.test(navigator.platform);
     const isWin=/Win/.test(navigator.platform);
     const assets=data.assets||[];
-    const platformAsset=assets.find(a=>{
-      const n=a.name.toLowerCase();
-      if(isMac) return n.endsWith('.dmg');
-      if(isWin) return n.endsWith('setup.exe');
-      return n.endsWith('.appimage');
-    });
+    const platformAsset=assets.find(a=>{const n=a.name.toLowerCase();if(isMac)return n.endsWith('.dmg');if(isWin)return n.endsWith('setup.exe');return n.endsWith('.appimage');});
     const releasePageUrl='https://github.com/MihailKashintsev/searchcopy/releases/latest';
     const finalUrl=platformAsset?platformAsset.browser_download_url:releasePageUrl;
     const fileName=platformAsset?platformAsset.name:'GitHub Releases';
     const fileSize=platformAsset?' · '+(platformAsset.size/1024/1024).toFixed(1)+' MB':'';
     const changelog=data.body?(data.body.split('\n').filter(l=>l.trim()).slice(0,2).join(' · ').slice(0,100)):'';
-
     const banner=el('div',"position:fixed;bottom:60px;right:20px;background:var(--chain-bg);border:1px solid rgba(99,102,241,0.4);border-radius:14px;padding:16px 18px;z-index:999;backdrop-filter:blur(20px);box-shadow:0 8px 40px rgba(0,0,0,0.5);animation:fadeUp 0.4s ease both;width:310px");
     banner.id='update-banner';
     banner.innerHTML=`
       <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px">
-        <div>
-          <div style="font-size:10px;color:#818cf8;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:4px">🔔 Обновление</div>
-          <div style="font-size:16px;font-weight:900;color:var(--text)">v${latestVersion} <span style="font-size:11px;font-weight:400;color:var(--text2)">(сейчас v${VERSION})</span></div>
-        </div>
+        <div><div style="font-size:10px;color:#818cf8;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:4px">🔔 Обновление</div>
+        <div style="font-size:16px;font-weight:900;color:var(--text)">v${latestVersion} <span style="font-size:11px;font-weight:400;color:var(--text2)">(сейчас v${VERSION})</span></div></div>
         <button id="close-banner-btn" style="background:transparent;border:none;color:var(--text2);font-size:20px;cursor:pointer;line-height:1;padding:0 0 0 8px">×</button>
       </div>
       ${changelog?`<div style="font-size:11px;color:var(--text2);margin-bottom:12px;line-height:1.5;border-left:2px solid rgba(99,102,241,0.4);padding-left:8px;word-break:break-word">${changelog}</div>`:''}
-      <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:8px 12px;margin-bottom:12px;font-size:10px;color:var(--text2)">
-        📦 <span style="color:var(--text)">${fileName}</span><span style="color:var(--text3)">${fileSize}</span>
-      </div>
+      <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:8px 12px;margin-bottom:12px;font-size:10px;color:var(--text2)">📦 <span style="color:var(--text)">${fileName}</span><span style="color:var(--text3)">${fileSize}</span></div>
       <div style="display:flex;gap:8px">
-        <button id="download-btn" style="flex:1;background:linear-gradient(135deg,#4f46e5,#7c3aed);border:none;border-radius:9px;padding:9px 14px;font-size:12px;font-weight:800;color:#fff;cursor:pointer;font-family:inherit">⬇ Скачать</button>
+        <button id="download-btn" style="flex:1;background:linear-gradient(135deg,#4f46e5,#7c3aed);border:none;border-radius:9px;padding:9px 14px;font-size:12px;font-weight:800;color:#fff;cursor:pointer;font-family:inherit">⬇ Установить</button>
         <a href="${releasePageUrl}" target="_blank" style="background:var(--bg3);border:1px solid var(--border);border-radius:9px;padding:9px 12px;font-size:11px;font-weight:700;color:var(--text2);text-decoration:none;display:flex;align-items:center;white-space:nowrap">GitHub ↗</a>
-      </div>
-    `;
+      </div>`;
     document.body.appendChild(banner);
     document.getElementById('close-banner-btn').onclick=()=>banner.remove();
     document.getElementById('download-btn').onclick=()=>runSilentInstall(finalUrl,fileName,latestVersion);
   }catch(e){console.log('Updater:',e);}
 }
-
-// Check on load + every 30 min
 setTimeout(checkForUpdates,3000);
 setInterval(checkForUpdates,30*60*1000);
 
@@ -816,109 +1028,128 @@ setInterval(checkForUpdates,30*60*1000);
 async function runSilentInstall(url, fileName, version){
   const isMac=/Mac/.test(navigator.platform);
   const isWin=/Win/.test(navigator.platform);
-
-  // Show progress overlay
   document.getElementById('update-banner')?.remove();
-  const overlay=el('div',"position:fixed;inset:0;background:rgba(7,7,16,0.85);z-index:1000;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(8px)");
-  overlay.id='install-overlay';
 
+  const overlay=el('div',"position:fixed;inset:0;background:rgba(7,7,16,0.88);z-index:1000;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(8px)");
+  overlay.id='install-overlay';
   const box=el('div',"background:var(--chain-bg);border:1px solid rgba(99,102,241,0.4);border-radius:16px;padding:28px 32px;width:340px;text-align:center");
   box.innerHTML=`
     <div style="font-size:32px;margin-bottom:14px">⬇</div>
     <div style="font-size:15px;font-weight:900;color:var(--text);margin-bottom:6px">Установка обновления</div>
-    <div id="install-status" style="font-size:12px;color:var(--text2);margin-bottom:18px">Загрузка ${fileName}…</div>
+    <div id="install-status" style="font-size:12px;color:var(--text2);margin-bottom:18px">Подготовка…</div>
     <div style="background:var(--bg3);border-radius:999px;height:4px;overflow:hidden;margin-bottom:8px">
-      <div id="install-bar" style="background:linear-gradient(90deg,#4f46e5,#7c3aed);height:4px;width:0%;transition:width 0.3s;border-radius:999px"></div>
+      <div id="install-bar" style="background:linear-gradient(90deg,#4f46e5,#7c3aed);height:4px;width:0%;transition:width 0.4s;border-radius:999px"></div>
     </div>
-    <div id="install-percent" style="font-size:10px;color:var(--text3)">0%</div>
+    <div id="install-percent" style="font-size:10px;color:var(--text3);margin-bottom:16px">0%</div>
+    <button id="install-cancel" style="background:transparent;border:1px solid var(--border);color:var(--text2);border-radius:8px;padding:6px 16px;font-size:11px;cursor:pointer;font-family:inherit">Отмена</button>
   `;
   overlay.appendChild(box);
   document.body.appendChild(overlay);
+  document.getElementById('install-cancel').onclick=()=>overlay.remove();
 
-  function setStatus(msg){document.getElementById('install-status').textContent=msg}
+  function setStatus(msg){const el=document.getElementById('install-status');if(el)el.textContent=msg}
   function setProgress(pct){
-    document.getElementById('install-bar').style.width=pct+'%';
-    document.getElementById('install-percent').textContent=pct+'%';
+    const bar=document.getElementById('install-bar');
+    const pctEl=document.getElementById('install-percent');
+    if(bar)bar.style.width=pct+'%';
+    if(pctEl)pctEl.textContent=pct+'%';
   }
 
-  try {
-    const shell=window.__TAURI__?.shell;
-    if(!shell){
-      setStatus('Открываю страницу загрузки…');
-      setTimeout(()=>{overlay.remove();window.open(url,'_blank')},1500);
+  const invoke=window.__TAURI__?.core?.invoke || window.__TAURI__?.tauri?.invoke;
+
+  try{
+    // Tauri 2: use shell plugin via invoke
+    const runCmd=async(program,args)=>{
+      return await invoke('plugin:shell|execute',{program,args,options:{}});
+    };
+
+    if(!invoke){
+      // No Tauri — just open URL in browser
+      setStatus('Открываю загрузку в браузере…');
+      setProgress(30);
+      setTimeout(()=>{overlay.remove();window.open(url,'_blank')},1200);
       return;
     }
 
-    const Command=shell.Command;
-
     if(isMac){
-      const tmpDmg='/tmp/SearchCopy-update.dmg';
-      const mountPt='/tmp/SearchCopyUpdateVol';
+      const tmpDmg='/tmp/SearchCopyUpdate.dmg';
+      const mountPt='/Volumes/SearchCopyUpdate';
 
-      setStatus('Скачиваю обновление…');setProgress(5);
-      await Command.create('sh',['-c',`curl -L "${url}" -o "${tmpDmg}"`]).execute();
-      setProgress(40);
+      setStatus('Скачиваю…');setProgress(5);
+      await runCmd('curl',['-L','-o',tmpDmg,url]);
+      setProgress(45);
 
       setStatus('Монтирую образ…');
-      await Command.create('sh',['-c',`hdiutil attach "${tmpDmg}" -mountpoint "${mountPt}" -nobrowse -quiet`]).execute();
-      setProgress(55);
+      await runCmd('hdiutil',['attach',tmpDmg,'-mountpoint',mountPt,'-nobrowse','-quiet']);
+      setProgress(60);
 
-      setStatus('Заменяю приложение…');
-      await Command.create('sh',['-c',`rm -rf /Applications/SearchCopy.app && cp -Rf "${mountPt}/SearchCopy.app" /Applications/`]).execute();
-      setProgress(80);
+      setStatus('Устанавливаю приложение…');
+      await runCmd('sh',['-c',`rm -rf /Applications/SearchCopy.app && cp -Rf "${mountPt}/SearchCopy.app" /Applications/`]);
+      setProgress(82);
 
-      setStatus('Завершаю…');
-      await Command.create('sh',['-c',`hdiutil detach "${mountPt}" -quiet && rm -f "${tmpDmg}"`]).execute();
-      setProgress(95);
+      setStatus('Финализирую…');
+      await runCmd('hdiutil',['detach',mountPt,'-quiet']);
+      await runCmd('rm',['-f',tmpDmg]);
+      setProgress(97);
 
       setStatus('✅ Готово! Перезапуск…');setProgress(100);
       setTimeout(async()=>{
         overlay.remove();
-        await Command.create('sh',['-c','open /Applications/SearchCopy.app']).execute();
-        const invoke=window.__TAURI__?.core?.invoke;
-        if(invoke) await invoke('plugin:process|restart');
-      },1200);
+        try{ await runCmd('open',['/Applications/SearchCopy.app']); }catch{}
+        try{ await invoke('plugin:process|restart'); }catch{}
+      },1400);
 
     } else if(isWin){
-      const tmpExe='%TEMP%\\SearchCopy-setup.exe';
+      const tmpExe='C:\\Users\\Public\\SearchCopySetup.exe';
 
-      setStatus('Скачиваю обновление…');setProgress(5);
-      await Command.create('powershell',['-Command',`Invoke-WebRequest -Uri "${url}" -OutFile "${tmpExe}"`]).execute();
-      setProgress(50);
+      setStatus('Скачиваю…');setProgress(5);
+      await runCmd('powershell',['-NoProfile','-Command',`Invoke-WebRequest -Uri '${url}' -OutFile '${tmpExe}'`]);
+      setProgress(55);
 
       setStatus('Запускаю установщик…');setProgress(60);
-      // /S = silent install (NSIS)
-      await Command.create('powershell',['-Command',`Start-Process "${tmpExe}" -ArgumentList '/S' -Wait`]).execute();
-      setProgress(90);
+      // /S = NSIS silent mode
+      await runCmd('powershell',['-NoProfile','-Command',`Start-Process -FilePath '${tmpExe}' -ArgumentList '/S' -Wait`]);
+      setProgress(92);
 
       setStatus('✅ Готово! Перезапуск…');setProgress(100);
       setTimeout(async()=>{
         overlay.remove();
-        const invoke=window.__TAURI__?.core?.invoke;
-        if(invoke) await invoke('plugin:process|restart');
-      },1200);
+        try{ await invoke('plugin:process|restart'); }catch{}
+      },1400);
 
     } else {
-      // Linux — скачать AppImage и предложить заменить
+      // Linux
       const tmpFile='/tmp/SearchCopy-update.AppImage';
+
       setStatus('Скачиваю AppImage…');setProgress(5);
-      await Command.create('sh',['-c',`curl -L "${url}" -o "${tmpFile}" && chmod +x "${tmpFile}"`]).execute();
-      setProgress(80);
-      setStatus('✅ Скачано! Запускаю…');setProgress(100);
+      await runCmd('sh',['-c',`curl -L '${url}' -o '${tmpFile}' && chmod +x '${tmpFile}'`]);
+      setProgress(85);
+
+      setStatus('✅ Запускаю новую версию…');setProgress(100);
       setTimeout(async()=>{
         overlay.remove();
-        await Command.create('sh',['-c',`"${tmpFile}" &`]).execute();
-        const invoke=window.__TAURI__?.core?.invoke;
-        if(invoke) await invoke('plugin:process|restart');
-      },1200);
+        try{ await runCmd('sh',['-c',`nohup '${tmpFile}' &`]); }catch{}
+        try{ await invoke('plugin:process|restart'); }catch{}
+      },1400);
     }
 
-  } catch(e){
+  }catch(e){
     console.error('Install error:',e);
-    setStatus('❌ Ошибка. Открываю страницу загрузки…');
-    setTimeout(()=>{overlay.remove();window.open(url,'_blank')},2000);
+    setStatus('❌ Ошибка установки');
+    setProgress(0);
+    const errBox=document.getElementById('install-status');
+    if(errBox) errBox.style.color='#fca5a5';
+    // Show fallback button
+    const cancel=document.getElementById('install-cancel');
+    if(cancel){
+      cancel.textContent='Скачать вручную ↗';
+      cancel.style.color='#c7d2fe';
+      cancel.style.borderColor='rgba(99,102,241,0.4)';
+      cancel.onclick=()=>{ overlay.remove(); window.open(url,'_blank'); };
+    }
   }
 }
+
 
 render();
 </script>
