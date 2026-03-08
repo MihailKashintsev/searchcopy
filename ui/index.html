@@ -622,6 +622,40 @@ function render(){
 }
 
 render();
+
+// ── Auto-updater ──
+async function checkForUpdates() {
+  try {
+    const { check } = await import('@tauri-apps/plugin-updater');
+    const { relaunch } = await import('@tauri-apps/plugin-process');
+    const update = await check();
+    if (!update) return;
+
+    const banner = document.createElement('div');
+    banner.style.cssText = 'position:fixed;bottom:60px;right:20px;background:rgba(12,10,28,0.97);border:1px solid rgba(99,102,241,0.4);border-radius:12px;padding:14px 18px;z-index:999;display:flex;align-items:center;gap:14px;backdrop-filter:blur(20px);box-shadow:0 8px 40px rgba(0,0,0,0.6);animation:fadeUp 0.4s ease both;max-width:320px';
+    banner.innerHTML = `
+      <div style="flex:1">
+        <div style="font-size:11px;font-weight:800;color:#c7d2fe;margin-bottom:3px">🔔 Новая версия ${update.version}</div>
+        <div style="font-size:10px;color:#475569">${update.body || 'Доступно обновление'}</div>
+      </div>
+      <button id="install-btn" style="background:linear-gradient(135deg,#4f46e5,#7c3aed);border:none;border-radius:8px;padding:7px 14px;font-size:11px;font-weight:800;color:#fff;cursor:pointer;white-space:nowrap;font-family:inherit">Установить</button>
+    `;
+    document.body.appendChild(banner);
+
+    document.getElementById('install-btn').onclick = async () => {
+      document.getElementById('install-btn').textContent = '⏳';
+      await update.downloadAndInstall();
+      await relaunch();
+    };
+  } catch(e) {
+    console.log('Updater:', e);
+  }
+}
+
+if (window.__TAURI__) {
+  setTimeout(checkForUpdates, 2000);
+}
+
 </script>
 </body>
 </html>
