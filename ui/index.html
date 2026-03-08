@@ -513,14 +513,111 @@ function getDesc(item){return typeof item.desc==='object'?item.desc[settings.lan
 function getTags(item){return typeof item.tags==='object'?(item.tags[settings.lang]||[]):(item.tags||[])}
 function getKeys(item){return adaptKeys(item.keys)}
 
+// ── Fuzzy & Synonym engine ──
+const SYNONYMS={
+  // Excel формулы
+  'сцепить':['concatenate','объединить','склеить','соединить','слить','merge','join','concat','сцепл','сцеплять','сцепление'],
+  'впр':['vlookup','поиск','найти в таблице','подтянуть','справочник'],
+  'сумм':['sum','сложить','итого','total','посчитать сумму'],
+  'если':['if','условие','condition','логика'],
+  'счётесли':['countif','посчитать','количество','сколько'],
+  'суммесли':['sumif','сумма по условию'],
+  'среднее':['average','mean','avg'],
+  'округл':['round','округление'],
+  'сегодня':['today','дата','date'],
+  'индекс':['index','поискпоз','match'],
+  // Действия
+  'удалить':['delete','remove','убрать','стереть'],
+  'вставить':['paste','insert','добавить'],
+  'скопировать':['copy','копировать'],
+  'отменить':['undo','назад','cancel'],
+  'сохранить':['save','сохран'],
+  'найти':['find','search','поиск'],
+  'заменить':['replace','замена'],
+  'новый':['new','create','создать','открыть'],
+  'закрыть':['close','выйти'],
+  'выделить':['select','all','выбрать'],
+  'форматирование':['format','стиль','style'],
+  'таблица':['table','лист','sheet'],
+  'строка':['row','line','ряд'],
+  'столбец':['column','col','колонка'],
+  // Опечатки и варианты
+  'сцепление':['concatenate','сцепить','объединить'],
+  'склеить':['concatenate','сцепить','объединить'],'сцеплять':['сцепить','concatenate','объединить','склеить'],
+  'обьединить':['объединить','concatenate','сцепить','merge'],
+  'объединить':['concatenate','сцепить','merge','join'],
+  'слить':['concatenate','merge','объединить'],
+  'копировать формат':['copy formatting','формат по образцу'],
+  'терминал':['terminal','console','cmd','bash'],
+  'консоль':['terminal','console','devtools'],
+  'скриншот':['screenshot','snip','capture','снимок'],
+  'рабочий стол':['desktop','show desktop'],
+  'закладка':['bookmark','избранное'],
+  'вкладка':['tab','новая вкладка'],
+};
+
+// Транслитерация частых опечаток (ru↔en layout)
+function fixLayout(s){
+  const ruToEn={'й':'q','ц':'w','у':'e','к':'r','е':'t','н':'y','г':'u','ш':'i','щ':'o','з':'p','х':'[','ъ':']','ф':'a','ы':'s','в':'d','а':'f','п':'g','р':'h','о':'j','л':'k','д':'l','ж':';','э':"'",'я':'z','ч':'x','с':'c','м':'v','и':'b','т':'n','ь':'m','б':',','ю':'.'};
+  return s.split('').map(c=>ruToEn[c]||c).join('');
+}
+
+// Расстояние Левенштейна для опечаток
+function levenshtein(a,b){
+  if(a===b)return 0;if(!a.length)return b.length;if(!b.length)return a.length;
+  const m=[];for(let i=0;i<=b.length;i++)m[i]=[i];for(let j=0;j<=a.length;j++)m[0][j]=j;
+  for(let i=1;i<=b.length;i++)for(let j=1;j<=a.length;j++)
+    m[i][j]=b[i-1]===a[j-1]?m[i-1][j-1]:1+Math.min(m[i-1][j],m[i][j-1],m[i-1][j-1]);
+  return m[b.length][a.length];
+}
+
+function expandQuery(q){
+  const words=q.toLowerCase().trim().split(/[\s,]+/).filter(w=>w.length>1);
+  const expanded=new Set(words);
+  for(const w of words){
+    // Прямые синонимы
+    for(const [key,syns] of Object.entries(SYNONYMS)){
+      if(w===key||syns.includes(w)||key.startsWith(w)||w.startsWith(key)){
+        expanded.add(key);syns.forEach(s=>expanded.add(s));
+      }
+    }
+    // Опечатки через Левенштейн (только короткие слова)
+    if(w.length>=4){
+      for(const key of Object.keys(SYNONYMS)){
+        if(levenshtein(w,key)<=1){
+          expanded.add(key);SYNONYMS[key].forEach(s=>expanded.add(s));
+        }
+      }
+    }
+    // Неправильная раскладка
+    const fixed=fixLayout(w);
+    if(fixed!==w)expanded.add(fixed);
+  }
+  return [...expanded];
+}
+
 function scoreItem(query,item){
   const q=query.toLowerCase().trim();let s=0;
   const k=typeof item.keys==='object'?Object.values(item.keys).join(' '):item.keys;
-  const fields=[getDesc(item).toLowerCase(),k.toLowerCase(),...getTags(item)];
+  const fields=[getDesc(item).toLowerCase(),k.toLowerCase(),...getTags(item).map(t=>t.toLowerCase())];
+  const expanded=expandQuery(q);
+
   for(const f of fields){
-    if(f===q){s+=10;continue}
-    if(f.includes(q)){s+=5;continue}
-    for(const w of q.split(/[\s,]+/)) if(w.length>2&&f.includes(w)) s+=2;
+    // Точное совпадение
+    if(f===q){s+=20;continue}
+    if(f.includes(q)){s+=10;continue}
+    // Расширенный поиск (синонимы + опечатки)
+    for(const w of expanded){
+      if(w.length<2)continue;
+      if(f===w){s+=8;break}
+      if(f.includes(w)){s+=5;break}
+      // Нечёткое совпадение для длинных слов
+      if(w.length>=5){
+        for(const fw of f.split(/[\s,+]+/)){
+          if(fw.length>=4&&levenshtein(w,fw)<=1){s+=3;break}
+        }
+      }
+    }
   }
   return s;
 }
@@ -574,9 +671,21 @@ async function doAiSearch(query){
   }
   const lang=settings.lang;
   const osName=settings.os==='mac'?'macOS':settings.os==='linux'?'Linux':'Windows';
+  // Включаем активные фильтры программ в промпт чтобы AI не уходил в сторону
+  const activeProgs=state.progs.join(', ');
   const systemPrompt=lang==='ru'
-    ?`Ты эксперт по горячим клавишам и командам. Отвечай ТОЛЬКО в формате JSON массива. Каждый элемент: {"keys":"...","desc":"...","example":"...","program":"..."}. Клавиши для ${osName}. Максимум 8 результатов. Только JSON, без markdown.`
-    :`You are a hotkey and command expert. Reply ONLY as a JSON array. Each item: {"keys":"...","desc":"...","example":"...","program":"..."}. Keys for ${osName}. Maximum 8 results. JSON only, no markdown.`;
+    ?`Ты эксперт по горячим клавишам, формулам и командам для десктопных приложений.
+Пользователь ищет: конкретное действие или формулу в приложениях: ${activeProgs}.
+СТРОГО отвечай ТОЛЬКО горячими клавишами или формулами СТРОГО ОТНОСЯЩИМИСЯ К ЗАПРОСУ.
+НЕ выдавай общие клавиши (Ctrl+C, Ctrl+V и тп) если запрос не про копирование/вставку.
+Формат ответа — ТОЛЬКО JSON массив без markdown. Каждый элемент: {"keys":"...","desc":"краткое описание действия","example":"пример использования или формулы","program":"название приложения"}.
+Клавиши для ${osName}. Максимум 8 результатов. Только JSON, без пояснений.`
+    :`You are an expert in hotkeys, formulas and commands for desktop apps.
+The user is searching for: a specific action or formula in these apps: ${activeProgs}.
+ONLY return hotkeys or formulas STRICTLY RELATED TO THE QUERY.
+Do NOT return generic keys (Ctrl+C, Ctrl+V etc) unless the query is about copy/paste.
+Reply format — ONLY a JSON array, no markdown. Each item: {"keys":"...","desc":"short description","example":"usage example or formula","program":"app name"}.
+Keys for ${osName}. Maximum 8 results. JSON only, no explanations.`;
 
   try{
     let items=[];
@@ -917,7 +1026,7 @@ function render(){
   // AI mode hint
   if(state.aiMode){
     const hint=el('div',"background:rgba(168,85,247,0.07);border:1px solid rgba(168,85,247,0.2);border-radius:10px;padding:10px 14px;margin-bottom:16px;font-size:11px;color:#c084fc;display:flex;align-items:center;gap:8px");
-    hint.innerHTML=`<span>✦</span><span>${settings.lang==='ru'?'Нажми Enter для поиска — Claude найдёт сочетания для любого приложения':'Press Enter to search — Claude will find shortcuts for any app'}</span>`;
+    hint.innerHTML=`<span>✦</span><span>${settings.lang==='ru'?'Нажми Enter для поиска — ИИ найдёт сочетания для любого приложения':'Press Enter to search — AI will find shortcuts for any app'}</span>`;
     sw.appendChild(hint);
   }
 
@@ -1052,8 +1161,6 @@ async function openInBrowser(url){
 
 // ── Silent installer ──
 async function runSilentInstall(url, fileName, version){
-  const isMac=/Mac/.test(navigator.platform);
-  const isWin=/Win/.test(navigator.platform);
   document.getElementById('update-banner')?.remove();
 
   const overlay=el('div',"position:fixed;inset:0;background:rgba(7,7,16,0.88);z-index:1000;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(8px)");
@@ -1073,105 +1180,75 @@ async function runSilentInstall(url, fileName, version){
   document.body.appendChild(overlay);
   document.getElementById('install-cancel').onclick=()=>overlay.remove();
 
-  function setStatus(msg){const el=document.getElementById('install-status');if(el)el.textContent=msg}
+  function setStatus(msg){const e=document.getElementById('install-status');if(e)e.textContent=msg}
   function setProgress(pct){
-    const bar=document.getElementById('install-bar');
-    const pctEl=document.getElementById('install-percent');
-    if(bar)bar.style.width=pct+'%';
-    if(pctEl)pctEl.textContent=pct+'%';
+    const b=document.getElementById('install-bar');
+    const p=document.getElementById('install-percent');
+    if(b)b.style.width=pct+'%';
+    if(p)p.textContent=pct+'%';
   }
 
-  const invoke=window.__TAURI__?.core?.invoke || window.__TAURI__?.tauri?.invoke;
+  const invoke=window.__TAURI__?.core?.invoke||window.__TAURI__?.tauri?.invoke;
+
+  if(!invoke){
+    setStatus('Открываю загрузку в браузере…');
+    setProgress(50);
+    setTimeout(()=>{overlay.remove();openInBrowser(url);},1000);
+    return;
+  }
+
+  // Определяем платформу
+  const ua=navigator.userAgent+navigator.platform;
+  const platform=/Mac/.test(ua)?'mac':/Win/.test(ua)?'win':'linux';
 
   try{
-    // Tauri 2: use shell plugin via invoke
-    const runCmd=async(program,args)=>{
-      return await invoke('plugin:shell|execute',{program,args,options:{}});
-    };
+    setStatus('Скачиваю обновление…');
+    setProgress(10);
 
-    if(!invoke){
-      // No Tauri — just open URL in browser
-      setStatus('Открываю загрузку в браузере…');
-      setProgress(30);
-      setTimeout(()=>{overlay.remove();openInBrowser(url);},1200);
-      return;
-    }
+    // Анимируем прогресс пока идёт скачивание
+    let fakeProgress=10;
+    const progressTimer=setInterval(()=>{
+      if(fakeProgress<85){fakeProgress+=2;setProgress(fakeProgress);}
+    },500);
 
-    if(isMac){
-      const tmpDmg='/tmp/SearchCopyUpdate.dmg';
-      const mountPt='/Volumes/SearchCopyUpdate';
+    const result=await invoke('download_and_install',{url,platform});
 
-      setStatus('Скачиваю…');setProgress(5);
-      await runCmd('curl',['-L','-o',tmpDmg,url]);
-      setProgress(45);
+    clearInterval(progressTimer);
+    setProgress(95);
 
-      setStatus('Монтирую образ…');
-      await runCmd('hdiutil',['attach',tmpDmg,'-mountpoint',mountPt,'-nobrowse','-quiet']);
-      setProgress(60);
-
-      setStatus('Устанавливаю приложение…');
-      await runCmd('sh',['-c',`rm -rf /Applications/SearchCopy.app && cp -Rf "${mountPt}/SearchCopy.app" /Applications/`]);
-      setProgress(82);
-
-      setStatus('Финализирую…');
-      await runCmd('hdiutil',['detach',mountPt,'-quiet']);
-      await runCmd('rm',['-f',tmpDmg]);
-      setProgress(97);
-
-      setStatus('✅ Готово! Перезапуск…');setProgress(100);
+    if(result==='installed'){
+      // Mac — .app уже скопирован, перезапускаем
+      setStatus('✅ Готово! Перезапуск…');
+      setProgress(100);
       setTimeout(async()=>{
         overlay.remove();
-        try{ await runCmd('open',['/Applications/SearchCopy.app']); }catch{}
-        try{ await invoke('plugin:process|restart'); }catch{}
-      },1400);
-
-    } else if(isWin){
-      const tmpExe='C:\\Users\\Public\\SearchCopySetup.exe';
-
-      setStatus('Скачиваю…');setProgress(5);
-      await runCmd('powershell',['-NoProfile','-Command',`Invoke-WebRequest -Uri '${url}' -OutFile '${tmpExe}'`]);
-      setProgress(55);
-
-      setStatus('Запускаю установщик…');setProgress(60);
-      // /S = NSIS silent mode
-      await runCmd('powershell',['-NoProfile','-Command',`Start-Process -FilePath '${tmpExe}' -ArgumentList '/S' -Wait`]);
-      setProgress(92);
-
-      setStatus('✅ Готово! Перезапуск…');setProgress(100);
-      setTimeout(async()=>{
-        overlay.remove();
-        try{ await invoke('plugin:process|restart'); }catch{}
-      },1400);
-
+        try{await invoke('plugin:process|restart');}catch{}
+        try{
+          await invoke('plugin:shell|open',{path:'/Applications/SearchCopy.app'});
+        }catch{}
+      },1500);
     } else {
-      // Linux
-      const tmpFile='/tmp/SearchCopy-update.AppImage';
-
-      setStatus('Скачиваю AppImage…');setProgress(5);
-      await runCmd('sh',['-c',`curl -L '${url}' -o '${tmpFile}' && chmod +x '${tmpFile}'`]);
-      setProgress(85);
-
-      setStatus('✅ Запускаю новую версию…');setProgress(100);
+      // Win/Linux — установщик запущен
+      setStatus('✅ Установщик запущен, закрываю…');
+      setProgress(100);
       setTimeout(async()=>{
         overlay.remove();
-        try{ await runCmd('sh',['-c',`nohup '${tmpFile}' &`]); }catch{}
-        try{ await invoke('plugin:process|restart'); }catch{}
-      },1400);
+        try{await invoke('plugin:process|exit',{exitCode:0});}catch{}
+      },2000);
     }
 
   }catch(e){
-    console.error('Install error:',e);
-    setStatus('❌ Ошибка установки');
+    const msg=typeof e==='string'?e:(e?.message||String(e));
+    console.error('Install error:',msg);
+    setStatus('❌ '+msg.slice(0,80));
     setProgress(0);
-    const errBox=document.getElementById('install-status');
-    if(errBox) errBox.style.color='#fca5a5';
-    // Show fallback button
-    const cancel=document.getElementById('install-cancel');
-    if(cancel){
-      cancel.textContent='Скачать вручную ↗';
-      cancel.style.color='#c7d2fe';
-      cancel.style.borderColor='rgba(99,102,241,0.4)';
-      cancel.onclick=()=>{ overlay.remove(); openInBrowser(url); };
+    document.getElementById('install-status').style.color='#fca5a5';
+    const btn=document.getElementById('install-cancel');
+    if(btn){
+      btn.textContent='Скачать вручную ↗';
+      btn.style.color='#c7d2fe';
+      btn.style.borderColor='rgba(99,102,241,0.4)';
+      btn.onclick=()=>{overlay.remove();openInBrowser(url);};
     }
   }
 }
