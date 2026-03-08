@@ -764,8 +764,8 @@ function render(){
 async function checkForUpdates(){
   if(!settings.autoUpdate) return;
   try{
-    const {check} = await import('@tauri-apps/plugin-updater');
-    const {relaunch} = await import('@tauri-apps/plugin-process');
+    const {check} = window.__TAURI__.updater;
+    const {relaunch} = window.__TAURI__.process;
     const update = await check();
     if(!update) return;
     const t=T[settings.lang];
