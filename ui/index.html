@@ -766,40 +766,159 @@ async function checkForUpdates(){
     if(!latestVersion)return;
     if(compareVersions(latestVersion,VERSION)<=0)return;
 
-    const t=T[settings.lang];
-    // find installer for current platform
-    const assets=data.assets||[];
-    let downloadUrl=data.html_url; // fallback to release page
+    document.getElementById('update-banner')?.remove();
+
     const isMac=/Mac/.test(navigator.platform);
     const isWin=/Win/.test(navigator.platform);
-    const asset=assets.find(a=>{
+    const assets=data.assets||[];
+    const platformAsset=assets.find(a=>{
       const n=a.name.toLowerCase();
       if(isMac) return n.endsWith('.dmg');
-      if(isWin) return n.endsWith('.exe')&&n.includes('setup');
-      return n.endsWith('.appimage')||n.endsWith('.deb');
+      if(isWin) return n.endsWith('setup.exe');
+      return n.endsWith('.appimage');
     });
-    if(asset) downloadUrl=asset.browser_download_url;
+    const releasePageUrl='https://github.com/MihailKashintsev/searchcopy/releases/latest';
+    const finalUrl=platformAsset?platformAsset.browser_download_url:releasePageUrl;
+    const fileName=platformAsset?platformAsset.name:'GitHub Releases';
+    const fileSize=platformAsset?' · '+(platformAsset.size/1024/1024).toFixed(1)+' MB':'';
+    const changelog=data.body?(data.body.split('\n').filter(l=>l.trim()).slice(0,2).join(' · ').slice(0,100)):'';
 
-    // Remove old banner if any
-    document.getElementById('update-banner')?.remove();
-    const banner=el('div',"position:fixed;bottom:60px;right:20px;background:var(--chain-bg);border:1px solid rgba(99,102,241,0.4);border-radius:12px;padding:14px 18px;z-index:999;display:flex;align-items:center;gap:14px;backdrop-filter:blur(20px);box-shadow:0 8px 40px rgba(0,0,0,0.4);animation:fadeUp 0.4s ease both;max-width:340px");
+    const banner=el('div',"position:fixed;bottom:60px;right:20px;background:var(--chain-bg);border:1px solid rgba(99,102,241,0.4);border-radius:14px;padding:16px 18px;z-index:999;backdrop-filter:blur(20px);box-shadow:0 8px 40px rgba(0,0,0,0.5);animation:fadeUp 0.4s ease both;width:310px");
     banner.id='update-banner';
-    const body=data.body?data.body.split('\n')[0].slice(0,80):'';
     banner.innerHTML=`
-      <div style="flex:1;min-width:0">
-        <div style="font-size:11px;font-weight:800;color:#c7d2fe;margin-bottom:3px">${t.updateBanner(latestVersion)}</div>
-        ${body?`<div style="font-size:10px;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${body}</div>`:''}
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px">
+        <div>
+          <div style="font-size:10px;color:#818cf8;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:4px">🔔 Обновление</div>
+          <div style="font-size:16px;font-weight:900;color:var(--text)">v${latestVersion} <span style="font-size:11px;font-weight:400;color:var(--text2)">(сейчас v${VERSION})</span></div>
+        </div>
+        <button id="close-banner-btn" style="background:transparent;border:none;color:var(--text2);font-size:20px;cursor:pointer;line-height:1;padding:0 0 0 8px">×</button>
       </div>
-      <a id="install-btn" href="${downloadUrl}" target="_blank" style="background:linear-gradient(135deg,#4f46e5,#7c3aed);border:none;border-radius:8px;padding:7px 14px;font-size:11px;font-weight:800;color:#fff;cursor:pointer;white-space:nowrap;font-family:inherit;text-decoration:none;display:block">${t.install}</a>
-      <button onclick="document.getElementById('update-banner').remove()" style="background:transparent;border:none;color:var(--text2);font-size:16px;cursor:pointer;padding:2px 4px;line-height:1">×</button>
+      ${changelog?`<div style="font-size:11px;color:var(--text2);margin-bottom:12px;line-height:1.5;border-left:2px solid rgba(99,102,241,0.4);padding-left:8px;word-break:break-word">${changelog}</div>`:''}
+      <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:8px 12px;margin-bottom:12px;font-size:10px;color:var(--text2)">
+        📦 <span style="color:var(--text)">${fileName}</span><span style="color:var(--text3)">${fileSize}</span>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button id="download-btn" style="flex:1;background:linear-gradient(135deg,#4f46e5,#7c3aed);border:none;border-radius:9px;padding:9px 14px;font-size:12px;font-weight:800;color:#fff;cursor:pointer;font-family:inherit">⬇ Скачать</button>
+        <a href="${releasePageUrl}" target="_blank" style="background:var(--bg3);border:1px solid var(--border);border-radius:9px;padding:9px 12px;font-size:11px;font-weight:700;color:var(--text2);text-decoration:none;display:flex;align-items:center;white-space:nowrap">GitHub ↗</a>
+      </div>
     `;
     document.body.appendChild(banner);
+    document.getElementById('close-banner-btn').onclick=()=>banner.remove();
+    document.getElementById('download-btn').onclick=()=>runSilentInstall(finalUrl,fileName,latestVersion);
   }catch(e){console.log('Updater:',e);}
 }
 
 // Check on load + every 30 min
 setTimeout(checkForUpdates,3000);
 setInterval(checkForUpdates,30*60*1000);
+
+// ── Silent installer ──
+async function runSilentInstall(url, fileName, version){
+  const isMac=/Mac/.test(navigator.platform);
+  const isWin=/Win/.test(navigator.platform);
+
+  // Show progress overlay
+  document.getElementById('update-banner')?.remove();
+  const overlay=el('div',"position:fixed;inset:0;background:rgba(7,7,16,0.85);z-index:1000;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(8px)");
+  overlay.id='install-overlay';
+
+  const box=el('div',"background:var(--chain-bg);border:1px solid rgba(99,102,241,0.4);border-radius:16px;padding:28px 32px;width:340px;text-align:center");
+  box.innerHTML=`
+    <div style="font-size:32px;margin-bottom:14px">⬇</div>
+    <div style="font-size:15px;font-weight:900;color:var(--text);margin-bottom:6px">Установка обновления</div>
+    <div id="install-status" style="font-size:12px;color:var(--text2);margin-bottom:18px">Загрузка ${fileName}…</div>
+    <div style="background:var(--bg3);border-radius:999px;height:4px;overflow:hidden;margin-bottom:8px">
+      <div id="install-bar" style="background:linear-gradient(90deg,#4f46e5,#7c3aed);height:4px;width:0%;transition:width 0.3s;border-radius:999px"></div>
+    </div>
+    <div id="install-percent" style="font-size:10px;color:var(--text3)">0%</div>
+  `;
+  overlay.appendChild(box);
+  document.body.appendChild(overlay);
+
+  function setStatus(msg){document.getElementById('install-status').textContent=msg}
+  function setProgress(pct){
+    document.getElementById('install-bar').style.width=pct+'%';
+    document.getElementById('install-percent').textContent=pct+'%';
+  }
+
+  try {
+    const shell=window.__TAURI__?.shell;
+    if(!shell){
+      setStatus('Открываю страницу загрузки…');
+      setTimeout(()=>{overlay.remove();window.open(url,'_blank')},1500);
+      return;
+    }
+
+    const Command=shell.Command;
+
+    if(isMac){
+      const tmpDmg='/tmp/SearchCopy-update.dmg';
+      const mountPt='/tmp/SearchCopyUpdateVol';
+
+      setStatus('Скачиваю обновление…');setProgress(5);
+      await Command.create('sh',['-c',`curl -L "${url}" -o "${tmpDmg}"`]).execute();
+      setProgress(40);
+
+      setStatus('Монтирую образ…');
+      await Command.create('sh',['-c',`hdiutil attach "${tmpDmg}" -mountpoint "${mountPt}" -nobrowse -quiet`]).execute();
+      setProgress(55);
+
+      setStatus('Заменяю приложение…');
+      await Command.create('sh',['-c',`rm -rf /Applications/SearchCopy.app && cp -Rf "${mountPt}/SearchCopy.app" /Applications/`]).execute();
+      setProgress(80);
+
+      setStatus('Завершаю…');
+      await Command.create('sh',['-c',`hdiutil detach "${mountPt}" -quiet && rm -f "${tmpDmg}"`]).execute();
+      setProgress(95);
+
+      setStatus('✅ Готово! Перезапуск…');setProgress(100);
+      setTimeout(async()=>{
+        overlay.remove();
+        await Command.create('sh',['-c','open /Applications/SearchCopy.app']).execute();
+        const invoke=window.__TAURI__?.core?.invoke;
+        if(invoke) await invoke('plugin:process|restart');
+      },1200);
+
+    } else if(isWin){
+      const tmpExe='%TEMP%\\SearchCopy-setup.exe';
+
+      setStatus('Скачиваю обновление…');setProgress(5);
+      await Command.create('powershell',['-Command',`Invoke-WebRequest -Uri "${url}" -OutFile "${tmpExe}"`]).execute();
+      setProgress(50);
+
+      setStatus('Запускаю установщик…');setProgress(60);
+      // /S = silent install (NSIS)
+      await Command.create('powershell',['-Command',`Start-Process "${tmpExe}" -ArgumentList '/S' -Wait`]).execute();
+      setProgress(90);
+
+      setStatus('✅ Готово! Перезапуск…');setProgress(100);
+      setTimeout(async()=>{
+        overlay.remove();
+        const invoke=window.__TAURI__?.core?.invoke;
+        if(invoke) await invoke('plugin:process|restart');
+      },1200);
+
+    } else {
+      // Linux — скачать AppImage и предложить заменить
+      const tmpFile='/tmp/SearchCopy-update.AppImage';
+      setStatus('Скачиваю AppImage…');setProgress(5);
+      await Command.create('sh',['-c',`curl -L "${url}" -o "${tmpFile}" && chmod +x "${tmpFile}"`]).execute();
+      setProgress(80);
+      setStatus('✅ Скачано! Запускаю…');setProgress(100);
+      setTimeout(async()=>{
+        overlay.remove();
+        await Command.create('sh',['-c',`"${tmpFile}" &`]).execute();
+        const invoke=window.__TAURI__?.core?.invoke;
+        if(invoke) await invoke('plugin:process|restart');
+      },1200);
+    }
+
+  } catch(e){
+    console.error('Install error:',e);
+    setStatus('❌ Ошибка. Открываю страницу загрузки…');
+    setTimeout(()=>{overlay.remove();window.open(url,'_blank')},2000);
+  }
+}
 
 render();
 </script>

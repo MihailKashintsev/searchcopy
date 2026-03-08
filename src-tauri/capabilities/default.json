@@ -12,6 +12,8 @@
     "updater:allow-check",
     "updater:allow-download-and-install",
     "process:default",
-    "process:allow-restart"
+    "process:allow-restart",
+    "shell:allow-execute",
+    "shell:allow-open"
   ]
 }
