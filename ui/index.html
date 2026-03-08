@@ -123,7 +123,10 @@ const T={
       ["AI не отвечает","Проверь API ключ в Настройках → Anthropic API Key."],
     ],
     footer:"RENDERGAMES © 2025",
-    sTitle:"Настройки",sLang:"Язык",sTheme:"Тема",sOS:"Платформа",sUpdate:"Автообновление",sAI:"Anthropic API Key",
+    sTitle:"Настройки",sLang:"Язык",sTheme:"Тема",sOS:"Платформа",sUpdate:"Автообновление",sAI:"AI провайдер",
+    sAIProvider:"Провайдер",sAIProviderDesc:"Выбери сервис для AI-поиска",
+    sClaudeKey:"Anthropic API Key",sClaudeKeyDesc:"Claude Haiku — быстрый, работает везде",
+    sGigaKey:"GigaChat Authorization",sGigaKeyDesc:"Сбер GigaChat — работает в России без VPN",
     sLangDesc:"Язык интерфейса и поиска",sThemeDesc:"Светлая или тёмная тема",
     sOSDesc:"Адаптация горячих клавиш",sUpdateDesc:"Проверять обновления при запуске",
     sAIDesc:"Для AI-поиска по любым приложениям",sAIPlaceholder:"sk-ant-...",
@@ -160,7 +163,10 @@ const T={
       ["AI not responding","Check your API key in Settings → Anthropic API Key."],
     ],
     footer:"RENDERGAMES © 2025",
-    sTitle:"Settings",sLang:"Language",sTheme:"Theme",sOS:"Platform",sUpdate:"Auto-update",sAI:"Anthropic API Key",
+    sTitle:"Settings",sLang:"Language",sTheme:"Theme",sOS:"Platform",sUpdate:"Auto-update",sAI:"AI Provider",
+    sAIProvider:"Provider",sAIProviderDesc:"Choose AI service for search",
+    sClaudeKey:"Anthropic API Key",sClaudeKeyDesc:"Claude Haiku — fast, works everywhere",
+    sGigaKey:"GigaChat Authorization",sGigaKeyDesc:"Sber GigaChat — works in Russia without VPN",
     sLangDesc:"Display and search language",sThemeDesc:"Light or dark theme",
     sOSDesc:"Adapt hotkeys for your OS",sUpdateDesc:"Check for updates on launch",
     sAIDesc:"For AI search across any application",sAIPlaceholder:"sk-ant-...",
@@ -587,63 +593,20 @@ async function doAiSearch(query){
       try{items=JSON.parse(text.replace(/```json|```/g,'').trim())}catch{items=[]}
 
     } else if(provider==='giga'){
-      // GigaChat через кастомную Rust-команду giga_fetch
-      // (браузерный fetch не работает — CORS + самоподписанный сертификат Сбера)
+      // GigaChat: весь запрос через Rust (giga_search) — обходит CORS и Sber SSL
       const invoke=window.__TAURI__?.core?.invoke||window.__TAURI__?.tauri?.invoke;
       if(!invoke) throw new Error('GigaChat работает только в десктоп-приложении');
-
       const rawKey=settings.gigaKey.trim();
-      const authHeader=rawKey.startsWith('Basic ')?rawKey:'Basic '+rawKey;
-
-      // Step 1: OAuth токен
-      const tokenRes=await invoke('giga_fetch',{
-        url:'https://ngw.devices.sberbank.ru:9443/api/v2/oauth',
-        method:'POST',
-        headers:{
-          'Content-Type':'application/x-www-form-urlencoded',
-          'Accept':'application/json',
-          'Authorization':authHeader,
-          'RqUID':crypto.randomUUID()
-        },
-        body:'scope=GIGACHAT_API_PERS'
-      });
-      if(!tokenRes.ok){
-        let msg='Ошибка авторизации GigaChat ('+tokenRes.status+')';
-        try{const e=JSON.parse(tokenRes.data);msg+=': '+(e.message||e.error||tokenRes.data.slice(0,80));}catch{}
-        throw new Error(msg);
-      }
-      const tokenJson=JSON.parse(tokenRes.data);
-      const accessToken=tokenJson.access_token;
-
-      // Step 2: Chat completions
-      const chatRes=await invoke('giga_fetch',{
-        url:'https://gigachat.devices.sberbank.ru/api/v1/chat/completions',
-        method:'POST',
-        headers:{
-          'Content-Type':'application/json',
-          'Authorization':'Bearer '+accessToken
-        },
-        body:JSON.stringify({
-          model:'GigaChat',
-          messages:[{role:'system',content:systemPrompt},{role:'user',content:query}],
-          max_tokens:800,
-          temperature:0.3
-        })
-      });
-      if(!chatRes.ok){
-        let msg='Ошибка GigaChat ('+chatRes.status+')';
-        try{const e=JSON.parse(chatRes.data);msg+=': '+(e.message||e.error||chatRes.data.slice(0,80));}catch{}
-        throw new Error(msg);
-      }
-      const chatJson=JSON.parse(chatRes.data);
-      const text=chatJson.choices?.[0]?.message?.content||'[]';
+      const authKey=rawKey.startsWith('Basic ')?rawKey.slice(6).trim():rawKey;
+      const text=await invoke('giga_search',{authKey,systemPrompt,query});
       try{items=JSON.parse(text.replace(/```json|```/g,'').trim())}catch{items=[]}
     }
 
     state.aiResult={items,query,provider};
   }catch(e){
-    console.error('AI search error:',e);
-    state.aiResult={error:true,msg:T[settings.lang].aiError+' ('+e.message+')'};
+    const errMsg=typeof e==='string'?e:(e?.message||String(e));
+    console.error('AI search error:',errMsg);
+    state.aiResult={error:true,msg:'❌ '+errMsg};
   }
   state.aiLoading=false;
   renderResults();
@@ -759,22 +722,13 @@ function renderSettings(){
     try{
       const invoke=window.__TAURI__?.core?.invoke||window.__TAURI__?.tauri?.invoke;
       if(!invoke) throw new Error('Только в десктоп-приложении');
-      const authHeader=key.startsWith('Basic ')?key:'Basic '+key;
-      const res=await invoke('giga_fetch',{
-        url:'https://ngw.devices.sberbank.ru:9443/api/v2/oauth',
-        method:'POST',
-        headers:{'Content-Type':'application/x-www-form-urlencoded','Accept':'application/json','Authorization':authHeader,'RqUID':crypto.randomUUID()},
-        body:'scope=GIGACHAT_API_PERS'
-      });
-      if(res.ok){
-        gigaTestBtn.textContent='✅ Работает!';gigaTestBtn.style.color='#4ade80';gigaTestBtn.style.borderColor='rgba(34,197,94,0.5)';
-      } else {
-        let msg='Ошибка '+res.status;
-        try{const d=JSON.parse(res.data);msg+=': '+(d.message||d.error||res.data.slice(0,60));}catch{}
-        gigaTestBtn.textContent='❌ '+msg;gigaTestBtn.style.color='#fca5a5';gigaTestBtn.style.borderColor='rgba(239,68,68,0.4)';
-      }
+      const authKey=key.startsWith('Basic ')?key.slice(6).trim():key;
+      // Проверяем через тестовый запрос к giga_search
+      await invoke('giga_search',{authKey,systemPrompt:'test',query:'test'});
+      gigaTestBtn.textContent='✅ Работает!';gigaTestBtn.style.color='#4ade80';gigaTestBtn.style.borderColor='rgba(34,197,94,0.5)';
     }catch(e){
-      gigaTestBtn.textContent='❌ '+e.message.slice(0,40);gigaTestBtn.style.color='#fca5a5';gigaTestBtn.style.borderColor='rgba(239,68,68,0.4)';
+      const em=typeof e==='string'?e:(e?.message||String(e));
+      gigaTestBtn.textContent='❌ '+em.slice(0,50);gigaTestBtn.style.color='#fca5a5';gigaTestBtn.style.borderColor='rgba(239,68,68,0.4)';
     }
     setTimeout(()=>{gigaTestBtn.textContent='🔌 Проверить соединение';gigaTestBtn.style.color='';gigaTestBtn.style.borderColor='';},4000);
   };
