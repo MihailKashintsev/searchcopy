@@ -916,12 +916,20 @@ function adaptKeys(keys){
   // String shortcut — adapt for macOS/Linux
   if(os==='mac'){
     return keys
+      .replace(/\bCommand\b/g,'⌘')
+      .replace(/\bCmd\b/g,'⌘')
       .replace(/\bCtrl\b/g,'⌘')
+      .replace(/\bOption\b/g,'⌥')
+      .replace(/\bOpt\b/g,'⌥')
       .replace(/\bAlt\b/g,'⌥')
       .replace(/\bShift\b/g,'⇧')
       .replace(/\bWin\b/g,'⌘')
       .replace(/\bEnter\b/g,'↩')
-      .replace(/\bDelete\b/g,'⌫');
+      .replace(/\bDelete\b/g,'⌫')
+      .replace(/\bUp\b/g,'↑')
+      .replace(/\bDown\b/g,'↓')
+      .replace(/\bLeft\b/g,'←')
+      .replace(/\bRight\b/g,'→');
   }
   if(os==='linux'){
     return keys.replace(/\bWin\b/g,'Super');
@@ -1355,12 +1363,12 @@ async function doAiSearch(query){
   const osKeyHint={
     ru:{
       win:'ВАЖНО: Клавиши в формате Windows: Ctrl, Alt, Shift, Win. Пример: "Ctrl+C", "Win+E".',
-      mac:'ВАЖНО: Клавиши в формате macOS: ⌘ вместо Ctrl, ⌥ вместо Alt, ⇧ вместо Shift. Пример: "⌘+C", "⌘+⇧+P", "⌥+↑". НЕ используй Ctrl.',
+      mac:'ВАЖНО: Клавиши в формате macOS. Используй Command вместо Ctrl, Option вместо Alt, Shift остаётся. Пример: "Command+C", "Command+Shift+P", "Option+Up". НЕ используй Ctrl.',
       linux:'ВАЖНО: Клавиши в формате Linux: Ctrl, Alt, Shift, Super. Пример: "Ctrl+C", "Super+E".'
     },
     en:{
       win:'IMPORTANT: Keys in Windows format: Ctrl, Alt, Shift, Win. Example: "Ctrl+C", "Win+E".',
-      mac:'IMPORTANT: Keys in macOS format: ⌘ instead of Ctrl, ⌥ instead of Alt, ⇧ instead of Shift. Example: "⌘+C", "⌘+⇧+P", "⌥+↑". Do NOT use Ctrl.',
+      mac:'IMPORTANT: Keys in macOS format. Use Command instead of Ctrl, Option instead of Alt, Shift stays the same. Example: "Command+C", "Command+Shift+P", "Option+Up". Do NOT use Ctrl.',
       linux:'IMPORTANT: Keys in Linux format: Ctrl, Alt, Shift, Super. Example: "Ctrl+C", "Super+E".'
     }
   };
