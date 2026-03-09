@@ -1215,28 +1215,55 @@ async function doAiSearch(query){
   const lang=settings.lang;
   const osName=settings.os==='mac'?'macOS':settings.os==='linux'?'Linux':'Windows';
   const activeProgs=state.progs.join(', ');
+  const tf=state.typeFilter; // 'all' | 'hotkey' | 'formula' | 'chain'
 
-  // Промпт для Claude — структурированный
+  // ── Инструкция по типу фильтра ──
+  const typeInstructions={
+    ru:{
+      all:   'Ищи ВСЁ подходящее: горячие клавиши, формулы, цепочки действий.',
+      hotkey:'Ищи ТОЛЬКО горячие клавиши и сочетания клавиш. Формулы не нужны.',
+      formula:'Ищи ТОЛЬКО формулы (Excel, Google Sheets и т.п.). Горячие клавиши не нужны.',
+      chain: 'Составь ПОШАГОВУЮ ЦЕПОЧКУ действий для выполнения задачи. Каждый шаг — отдельный элемент массива с полем "step" (номер шага) и "keys" (клавиша или команда для этого шага).'
+    },
+    en:{
+      all:   'Find EVERYTHING relevant: hotkeys, formulas, action chains.',
+      hotkey:'Find ONLY keyboard shortcuts and hotkeys. No formulas.',
+      formula:'Find ONLY formulas (Excel, Google Sheets, etc.). No hotkeys.',
+      chain: 'Build a STEP-BY-STEP ACTION CHAIN to complete the task. Each step is a separate array element with "step" (step number) and "keys" (key or command for that step).'
+    }
+  };
+  const typeHint=typeInstructions[lang]?.[tf]||typeInstructions[lang].all;
+
+  // ── Пример JSON для цепочки ──
+  const chainExample=tf==='chain'
+    ?'[{"step":1,"keys":"Ctrl+C","desc":"Копировать","example":"","program":"Excel"},{"step":2,"keys":"Ctrl+V","desc":"Вставить","example":"","program":"Excel"}]'
+    :'[{"keys":"Ctrl+C","desc":"Копировать","example":"","program":"Excel"}]';
+
+  // Промпт для Claude
   const claudePrompt=lang==='ru'
     ?`Ты эксперт по горячим клавишам, формулам и командам для десктопных приложений.
-Пользователь ищет: конкретное действие или формулу в приложениях: ${activeProgs}.
-СТРОГО отвечай ТОЛЬКО горячими клавишами или формулами СТРОГО ОТНОСЯЩИМИСЯ К ЗАПРОСУ.
-НЕ выдавай общие клавиши (Ctrl+C, Ctrl+V и тп) если запрос не про копирование/вставку.
-Формат ответа — ТОЛЬКО JSON массив без markdown. Каждый элемент: {"keys":"...","desc":"краткое описание действия","example":"пример использования или формулы","program":"название приложения"}.
-Клавиши для ${osName}. Максимум 8 результатов. Только JSON, без пояснений.`
+Приложения: ${activeProgs}. ОС: ${osName}.
+${typeHint}
+НЕ выдавай нерелевантные клавиши.
+Формат ответа — ТОЛЬКО JSON массив без markdown. Пример: ${chainExample}
+Поля каждого элемента: "keys", "desc", "example", "program"${tf==='chain'?', "step"':''}.
+Максимум 8 элементов. Только JSON, без пояснений.`
     :`You are an expert in hotkeys, formulas and commands for desktop apps.
-The user is searching for: a specific action or formula in these apps: ${activeProgs}.
-ONLY return hotkeys or formulas STRICTLY RELATED TO THE QUERY.
-Do NOT return generic keys (Ctrl+C, Ctrl+V etc) unless the query is about copy/paste.
-Reply format — ONLY a JSON array, no markdown. Each item: {"keys":"...","desc":"short description","example":"usage example or formula","program":"app name"}.
-Keys for ${osName}. Maximum 8 results. JSON only, no explanations.`;
+Apps: ${activeProgs}. OS: ${osName}.
+${typeHint}
+Do NOT return irrelevant results.
+Reply format — ONLY a JSON array, no markdown. Example: ${chainExample}
+Fields per item: "keys", "desc", "example", "program"${tf==='chain'?', "step"':''}.
+Maximum 8 items. JSON only, no explanations.`;
 
-  // Промпт для GigaChat — максимально простой, только на русском
-  const gigaSystemPrompt=`Отвечай ТОЛЬКО валидным JSON массивом. Никакого текста до или после. Никакого markdown. Никаких пояснений.
-Формат каждого элемента: {"keys":"горячая клавиша","desc":"что делает","example":"пример","program":"приложение"}
-Приложения: ${activeProgs}. ОС: ${osName}.`;
-  const gigaUserPrompt=`Найди горячие клавиши или формулы для: ${query}
-Верни JSON массив из 3-6 элементов. ТОЛЬКО JSON, без слов.`;
+  // Промпт для GigaChat
+  const gigaSystemPrompt=`Отвечай ТОЛЬКО валидным JSON массивом. Никакого текста до или после. Никакого markdown.
+Формат: [{"keys":"...","desc":"...","example":"...","program":"..."}]
+Приложения: ${activeProgs}. ОС: ${osName}.
+${typeHint}`;
+  const gigaUserPrompt=`Запрос: ${query}
+${typeHint}
+Верни JSON массив из 3-6 элементов. ТОЛЬКО JSON.`;
 
   const systemPrompt=provider==='giga'?gigaSystemPrompt:claudePrompt;
 
@@ -1282,7 +1309,13 @@ Keys for ${osName}. Maximum 8 results. JSON only, no explanations.`;
       if(items.length===0) throw new Error('GigaChat ответил, но данные не распознаны. Ответ: '+text.slice(0,200));
     }
 
-    state.aiResult={items,query,provider};
+    // Если фильтр "Цепочки" и AI вернул шаги — преобразуем в chain-формат
+    if(tf==='chain' && items.some(i=>i.step!=null)){
+      items.sort((a,b)=>(a.step||0)-(b.step||0));
+      state.aiResult={items,query,provider,isChain:true};
+    } else {
+      state.aiResult={items,query,provider};
+    }
   }catch(e){
     const errMsg=typeof e==='string'?e:(e?.message||String(e));
     console.error('AI search error:',errMsg);
@@ -1587,11 +1620,20 @@ function renderResults(){
       err.textContent=state.aiResult.msg;sep.appendChild(err);
     } else {
       const aiLabel=el('p',"color:var(--text3);font-size:10px;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:8px");
-      aiLabel.innerHTML=`✦ AI · ${t.found(state.aiResult.items?.length||0)}`;
+      const itemCount=state.aiResult.items?.length||0;
+      aiLabel.innerHTML=`✦ AI · ${state.aiResult.isChain?( (settings.lang==='ru'?'Цепочка':'Chain')+' · '+itemCount+(settings.lang==='ru'?' шагов':' steps') ):t.found(itemCount)}`;
       sep.appendChild(aiLabel);
-      const aiList=el('div',"display:flex;flex-direction:column;gap:8px");
-      (state.aiResult.items||[]).forEach((item,i)=>aiList.appendChild(renderAiCard(item,i)));
-      sep.appendChild(aiList);
+      if(state.aiResult.isChain){
+        // Рендерим как action chain
+        const steps=(state.aiResult.items||[]).map((item,i)=>({
+          step:item.step||i+1, text:item.desc||item.keys, item:{...item,type:'hotkey'}
+        }));
+        sep.appendChild(renderActionChainCard(steps));
+      } else {
+        const aiList=el('div',"display:flex;flex-direction:column;gap:8px");
+        (state.aiResult.items||[]).forEach((item,i)=>aiList.appendChild(renderAiCard(item,i)));
+        sep.appendChild(aiList);
+      }
     }
     rw.appendChild(sep);
   }
@@ -1781,6 +1823,16 @@ function render(){
 
   const rw=el('div',"");rw.id='results-wrap';sw.appendChild(rw);
   wrap.appendChild(sw);app.appendChild(wrap);
+
+  // ── Version badge (bottom right) ──
+  const invoke=window.__TAURI__?.core?.invoke||window.__TAURI__?.tauri?.invoke;
+  const vBadge=el('div',"position:fixed;bottom:14px;right:16px;font-size:10px;font-weight:700;color:var(--text3);letter-spacing:0.5px;z-index:10;pointer-events:none");
+  vBadge.textContent='v1.0.0';
+  app.appendChild(vBadge);
+  if(invoke){
+    invoke('get_version').then(v=>{vBadge.textContent='v'+v;}).catch(()=>{});
+  }
+
   renderResults();
   setTimeout(()=>input.focus(),60);
 }
