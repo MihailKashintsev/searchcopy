@@ -179,17 +179,38 @@ input::placeholder,textarea::placeholder{color:var(--text3)}
 
 /* ── Light theme improvements ── */
 .light body{background:#f0f4ff;color:#0f172a}
-.light .pill{background:rgba(0,0,0,0.04);border-color:rgba(0,0,0,0.1);color:#64748b}
+.light .pill{background:rgba(0,0,0,0.04);border-color:rgba(0,0,0,0.1);color:#374151}
 .light .pill:hover{background:rgba(99,102,241,0.08);border-color:rgba(99,102,241,0.25);color:#4f46e5}
-.light .chip{background:rgba(0,0,0,0.03);color:#94a3b8;border-color:rgba(0,0,0,0.08)}
-.light .tab-btn{color:#64748b}
-.light .tab-btn:hover{background:rgba(99,102,241,0.06);color:#4f46e5}
-.light .tab-btn.active{background:rgba(99,102,241,0.1);border-color:rgba(99,102,241,0.25);color:#4f46e5}
-.light .sug{background:#fff;border-color:rgba(0,0,0,0.1);color:#64748b}
+.light .pill.active{color:#4338ca}
+.light .chip{background:rgba(0,0,0,0.05);color:#374151;border-color:rgba(0,0,0,0.12);font-weight:700}
+.light .chip.active{color:#3730a3}
+.light .tab-btn{color:#374151;font-weight:700}
+.light .tab-btn:hover{background:rgba(99,102,241,0.08);color:#3730a3}
+.light .tab-btn.active{background:rgba(99,102,241,0.12);border-color:rgba(99,102,241,0.3);color:#3730a3}
+.light .sug{background:#fff;border-color:rgba(0,0,0,0.12);color:#374151}
 .light .sug:hover{background:rgba(99,102,241,0.06);border-color:rgba(99,102,241,0.2);color:#4f46e5}
-.light .copy-btn{background:rgba(0,0,0,0.03);border-color:rgba(0,0,0,0.1);color:#94a3b8}
-.light .ai-btn{background:rgba(0,0,0,0.04);border-color:rgba(0,0,0,0.1);color:#64748b}
+.light .copy-btn{background:rgba(99,102,241,0.06);border-color:rgba(99,102,241,0.18);color:#4338ca}
+.light .copy-btn:hover{background:rgba(99,102,241,0.12);color:#3730a3}
+.light .ai-btn{background:rgba(0,0,0,0.04);border-color:rgba(0,0,0,0.12);color:#374151}
+.light .section-header{background:rgba(99,102,241,0.04);border-color:rgba(99,102,241,0.14)}
+.light .section-title{color:#374151}
+.light .section-badge{background:rgba(99,102,241,0.08);border-color:rgba(99,102,241,0.2);color:#4338ca}
+.light .section-toggle{color:#374151}
+.light .result-card{border-color:rgba(0,0,0,0.1)!important;background:#fff!important}
+.light .result-card p,.light .result-card div{color:#374151}
+.light .ai-card{background:#fafbff!important;border-color:rgba(99,102,241,0.2)!important}
 .light .spinner{border-color:rgba(99,102,241,0.2);border-top-color:#6366f1}
+/* Light theme text fixes */
+.light .result-card .section-title,.light [style*="color:var(--text2)"]{color:#374151!important}
+.light [style*="color:var(--text3)"]{color:#6b7280!important}
+.light [style*="color:#fcd34d"]{color:#b45309!important}
+.light [style*="color:#c7d2fe"]{color:#4338ca!important}
+.light [style*="color:#c084fc"]{color:#7c3aed!important}
+.light [style*="color:#a5f3fc"]{color:#0e7490!important}
+.light [style*="color:var(--code-color)"]{color:#3730a3!important}
+.light [style*="color:var(--formula-color)"]{color:#0369a1!important}
+.light [style*="color:#4ade80"]{color:#15803d!important}
+.light [style*="background:var(--chain-bg)"]{background:#f5f3ff!important;border-color:rgba(99,102,241,0.25)!important}
 
 /* ── Responsive ── */
 @media(max-width:640px){
@@ -263,7 +284,7 @@ function adaptKeys(keys){
 const T={
   ru:{
     tagline:"Горячие клавиши · Формулы · AI-поиск",
-    tabSearch:"⌘ Поиск",tabAbout:"◎ О приложении",tabSettings:"⚙ Настройки",
+    tabSearch:"⌘ Поиск",tabAsk:"✦ Спросить AI",tabAbout:"◎ О приложении",tabSettings:"⚙ Настройки",
     tryLabel:"Попробуй:",
     suggestions:["сумма столбца G и B","найти значение в таблице","удалить строку","новая вкладка","открыть терминал","скопировать форматирование"],
     placeholder:'Что хочешь сделать?',
@@ -303,7 +324,7 @@ const T={
   },
   en:{
     tagline:"Hotkeys · Formulas · AI Search",
-    tabSearch:"⌘ Search",tabAbout:"◎ About",tabSettings:"⚙ Settings",
+    tabSearch:"⌘ Search",tabAsk:"✦ Ask AI",tabAbout:"◎ About",tabSettings:"⚙ Settings",
     tryLabel:"Try:",
     suggestions:["sum column G and B","find value in table","delete row","new tab","open terminal","copy formatting"],
     placeholder:'What do you want to do?',
@@ -1686,6 +1707,198 @@ function renderAiCard(item,idx){
   card.appendChild(body);return card;
 }
 
+
+// ── Render Ask AI tab ──
+function renderAskAI(){
+  const t=T[settings.lang];
+  const wrap=el('div',"animation:fadeUp 0.35s ease both");
+
+  // ── Header ──
+  const hero=el('div',"background:linear-gradient(135deg,rgba(168,85,247,0.1),rgba(99,102,241,0.07));border:1px solid rgba(168,85,247,0.2);border-radius:16px;padding:20px 24px;margin-bottom:20px");
+  hero.innerHTML=`<div style="display:flex;align-items:center;gap:12px;margin-bottom:8px"><span style="font-size:22px">✦</span><div><div style="font-size:14px;font-weight:900;color:var(--text)">${settings.lang==='ru'?'Спросить AI об&nbsp;приложении':'Ask AI about an App'}</div><div style="font-size:11px;color:var(--text2);margin-top:2px">${settings.lang==='ru'?'Задай любой вопрос — получи ответ от AI':'Ask anything — get an AI answer'}</div></div></div>`;
+  wrap.appendChild(hero);
+
+  // ── OS filter ──
+  const osLabel=el('p',"color:var(--text3);font-size:10px;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:8px;font-weight:800",settings.lang==='ru'?'Платформа':'Platform');
+  wrap.appendChild(osLabel);
+  const osRow=el('div',"display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap");
+  const platforms=[
+    {val:'win',label:'Windows',icon:'⊟'},
+    {val:'mac',label:'macOS',icon:''},
+    {val:'linux',label:'Linux',icon:'🐧'}
+  ];
+  let askOS=settings.os||'win';
+  platforms.forEach(({val,label,icon})=>{
+    const btn=document.createElement('button');
+    btn.className='pill'+(askOS===val?' active':'');
+    btn.dataset.osval=val;
+    const c2=val==='win'?'#0ea5e9':val==='mac'?'#a855f7':'#10b981';
+    if(askOS===val){btn.style.setProperty('--pill-c',c2+'88');btn.style.setProperty('--pill-bg',c2+'1a');btn.style.setProperty('--pill-color',c2);}
+    btn.innerHTML=`<span>${icon}</span>${label}`;
+    btn.onclick=()=>{
+      askOS=val;
+      osRow.querySelectorAll('.pill[data-osval]').forEach(b=>{
+        const bval=b.dataset.osval;
+        const bc=bval==='win'?'#0ea5e9':bval==='mac'?'#a855f7':'#10b981';
+        b.classList.toggle('active',bval===val);
+        if(bval===val){b.style.setProperty('--pill-c',bc+'88');b.style.setProperty('--pill-bg',bc+'1a');b.style.setProperty('--pill-color',bc);}
+        else{b.style.removeProperty('--pill-c');b.style.removeProperty('--pill-bg');b.style.removeProperty('--pill-color');}
+      });
+    };
+    osRow.appendChild(btn);
+  });
+  wrap.appendChild(osRow);
+
+  // ── App filter ──
+  const appLabel=el('p',"color:var(--text3);font-size:10px;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:8px;font-weight:800",settings.lang==='ru'?'Приложение':'Application');
+  wrap.appendChild(appLabel);
+  const appRow=el('div',"display:flex;gap:6px;margin-bottom:20px;flex-wrap:wrap");
+  let askApp=state.progs[0]||'Excel';
+  PROGRAMS.forEach(p=>{
+    const color=COLORS[p]||'#818cf8';
+    const btn=document.createElement('button');
+    btn.className='pill'+(askApp===p?' active':'');
+    btn.dataset.appval=p;
+    if(askApp===p){btn.style.setProperty('--pill-c',color+'88');btn.style.setProperty('--pill-bg',color+'1a');btn.style.setProperty('--pill-color',color);}
+    btn.innerHTML=`<span>${ICONS[p]||'◉'}</span>${p}`;
+    btn.onclick=()=>{
+      askApp=p;
+      appRow.querySelectorAll('.pill[data-appval]').forEach(b=>{
+        const bval=b.dataset.appval;
+        const bc=COLORS[bval]||'#818cf8';
+        b.classList.toggle('active',bval===p);
+        if(bval===p){b.style.setProperty('--pill-c',bc+'88');b.style.setProperty('--pill-bg',bc+'1a');b.style.setProperty('--pill-color',bc);}
+        else{b.style.removeProperty('--pill-c');b.style.removeProperty('--pill-bg');b.style.removeProperty('--pill-color');}
+      });
+    };
+    appRow.appendChild(btn);
+  });
+  wrap.appendChild(appRow);
+
+  // ── Question input ──
+  const qLabel=el('p',"color:var(--text3);font-size:10px;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:8px;font-weight:800",settings.lang==='ru'?'Вопрос':'Question');
+  wrap.appendChild(qLabel);
+  const inputWrap=el('div',"position:relative;margin-bottom:12px");
+  const textarea=document.createElement('textarea');
+  textarea.style.cssText='width:100%;background:var(--input-bg);border:1px solid var(--border);border-radius:14px;padding:12px 14px;font-size:13px;color:var(--text);outline:none;transition:border-color 0.18s,box-shadow 0.18s;font-family:inherit;resize:vertical;min-height:90px;box-sizing:border-box;line-height:1.55';
+  textarea.placeholder=settings.lang==='ru'
+    ?'Например: как быстро переключаться между вкладками? Какие горячие клавиши для работы с файлами?'
+    :'E.g.: how to quickly switch between tabs? What are the hotkeys for working with files?';
+  textarea.onfocus=()=>{textarea.style.borderColor='rgba(168,85,247,0.5)';textarea.style.boxShadow='0 0 0 3px rgba(168,85,247,0.08)'};
+  textarea.onblur=()=>{textarea.style.borderColor='var(--border)';textarea.style.boxShadow='none'};
+  inputWrap.appendChild(textarea);
+  wrap.appendChild(inputWrap);
+
+  // ── Ask button ──
+  const askBtn=document.createElement('button');
+  askBtn.style.cssText='width:100%;background:linear-gradient(135deg,rgba(168,85,247,0.2),rgba(99,102,241,0.2));border:1px solid rgba(168,85,247,0.4);color:#c084fc;border-radius:12px;padding:12px;font-size:13px;font-weight:800;cursor:pointer;transition:all 0.2s;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:20px';
+  askBtn.innerHTML=`<span>✦</span>${settings.lang==='ru'?'Спросить AI':'Ask AI'}`;
+  askBtn.onmouseover=()=>askBtn.style.background='linear-gradient(135deg,rgba(168,85,247,0.3),rgba(99,102,241,0.3))';
+  askBtn.onmouseout=()=>askBtn.style.background='linear-gradient(135deg,rgba(168,85,247,0.2),rgba(99,102,241,0.2))';
+
+  // ── Results area ──
+  const resultArea=el('div',"");
+  resultArea.id='ask-results';
+  wrap.appendChild(askBtn);
+  wrap.appendChild(resultArea);
+
+  askBtn.onclick=async()=>{
+    const question=textarea.value.trim();
+    if(!question){textarea.focus();return;}
+    const provider=settings.aiProvider||'claude';
+    const hasKey=provider==='claude'?!!settings.aiKey:!!settings.gigaKey;
+    if(!hasKey){
+      resultArea.innerHTML=`<div style="background:rgba(239,68,68,0.06);border:1px solid rgba(239,68,68,0.2);border-radius:12px;padding:14px;color:#fca5a5;font-size:12px">${settings.lang==='ru'?'❌ Нет API ключа. Проверь ⚙ Настройки.':'❌ No API key. Check ⚙ Settings.'}</div>`;
+      return;
+    }
+    // Show loading
+    askBtn.innerHTML=`<div class="spinner"></div>${settings.lang==='ru'?'Думаю...':'Thinking...'}`;
+    askBtn.disabled=true;
+    resultArea.innerHTML=`<div style="display:flex;flex-direction:column;gap:6px">${[1,2,3].map(()=>'<div class="skeleton" style="height:52px;border-radius:12px"></div>').join('')}</div>`;
+
+    const osName=askOS==='mac'?'macOS':askOS==='linux'?'Linux':'Windows';
+    const osKeyInstr=askOS==='mac'
+      ?'Use Command instead of Ctrl, Option instead of Alt, Shift stays. Example: "Command+C".'
+      :askOS==='linux'?'Use Ctrl, Alt, Shift, Super. Example: "Ctrl+C".'
+      :'Use Ctrl, Alt, Shift, Win. Example: "Ctrl+C".';
+
+    const sysPrompt=settings.lang==='ru'
+      ?`Ты эксперт по приложению ${askApp} на ${osName}. Отвечай полезно, конкретно, на русском. ${osKeyInstr} Если перечисляешь клавиши — оформи в JSON массив: [{"keys":"...","desc":"...","example":""}]. Иначе отвечай обычным текстом.`
+      :`You are an expert on ${askApp} for ${osName}. Be helpful and specific. ${osKeyInstr} If listing shortcuts — return a JSON array: [{"keys":"...","desc":"...","example":""}]. Otherwise answer in plain text.`;
+
+    try{
+      let rawText='';
+      if(provider==='claude'){
+        const res=await fetch('https://api.anthropic.com/v1/messages',{
+          method:'POST',
+          headers:{'Content-Type':'application/json','x-api-key':settings.aiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+          body:JSON.stringify({model:'claude-haiku-4-5',max_tokens:1200,system:sysPrompt,messages:[{role:'user',content:question}]})
+        });
+        if(!res.ok)throw new Error('Claude API '+res.status);
+        const data=await res.json();
+        rawText=data.content?.[0]?.text||'';
+      } else {
+        const invoke=window.__TAURI__?.core?.invoke||window.__TAURI__?.tauri?.invoke;
+        if(!invoke)throw new Error('GigaChat только в десктоп-приложении');
+        const authKey=settings.gigaKey.startsWith('Basic ')?settings.gigaKey.slice(6).trim():settings.gigaKey;
+        rawText=await invoke('giga_search',{authKey,systemPrompt:sysPrompt,query:question});
+      }
+
+      // Try parse as JSON array, otherwise show as markdown-ish text
+      let items=null;
+      const fb=rawText.indexOf('['),lb=rawText.lastIndexOf(']');
+      if(fb!==-1&&lb>fb){
+        try{items=JSON.parse(rawText.slice(fb,lb+1));}catch{}
+      }
+
+      resultArea.innerHTML='';
+      if(items&&items.length>0){
+        const list=el('div',"display:flex;flex-direction:column;gap:8px;animation:fadeUp 0.3s ease");
+        items.forEach(item=>{
+          const card=el('div',"background:var(--card-bg);border:1px solid rgba(168,85,247,0.2);border-left:3px solid #a855f7;border-radius:12px;padding:14px 16px");
+          const kb=el('div',"background:rgba(168,85,247,0.15);border:1px solid rgba(168,85,247,0.3);border-radius:6px;padding:3px 10px;font-size:13px;color:#c084fc;font-weight:700;display:inline-block;margin-bottom:6px");
+          // Apply OS formatting
+          let keys=item.keys||'';
+          if(askOS==='mac') keys=keys.replace(/\bCommand\b/g,'⌘').replace(/\bOption\b/g,'⌥').replace(/\bShift\b/g,'⇧').replace(/\bCtrl\b/g,'⌘');
+          kb.textContent=keys;
+          card.appendChild(kb);
+          const desc=el('p',"margin:0 0 6px;color:var(--text2);font-size:12px");
+          desc.textContent=item.desc||'';
+          card.appendChild(desc);
+          if(item.example){
+            const ex=el('div',"background:var(--code-bg);border:1px solid var(--code-border);border-radius:7px;padding:6px 12px;font-size:12px;color:var(--code-color);font-weight:600");
+            ex.textContent=item.example;
+            card.appendChild(ex);
+          }
+          list.appendChild(card);
+        });
+        resultArea.appendChild(list);
+      } else {
+        // Plain text answer
+        const box=el('div',"background:var(--card-bg);border:1px solid rgba(168,85,247,0.2);border-radius:14px;padding:18px;animation:fadeUp 0.3s ease");
+        const badge=el('div',"display:inline-flex;align-items:center;gap:6px;background:rgba(168,85,247,0.1);border:1px solid rgba(168,85,247,0.25);border-radius:20px;padding:3px 10px;font-size:10px;color:#c084fc;font-weight:800;margin-bottom:12px");
+        badge.innerHTML=`✦ ${provider==='giga'?'GigaChat':'Claude'} · ${askApp} · ${osName}`;
+        const text=el('div',"font-size:13px;color:var(--text);line-height:1.7;white-space:pre-wrap");
+        text.textContent=rawText;
+        box.appendChild(badge);box.appendChild(text);
+        resultArea.appendChild(box);
+      }
+    }catch(e){
+      const msg=typeof e==='string'?e:(e?.message||String(e));
+      resultArea.innerHTML=`<div style="background:rgba(239,68,68,0.06);border:1px solid rgba(239,68,68,0.2);border-radius:12px;padding:14px;color:#fca5a5;font-size:12px">❌ ${msg.slice(0,200)}</div>`;
+    }
+    askBtn.innerHTML=`<span>✦</span>${settings.lang==='ru'?'Спросить AI':'Ask AI'}`;
+    askBtn.disabled=false;
+  };
+
+  // Enter in textarea = submit (Shift+Enter = newline)
+  textarea.onkeydown=e=>{
+    if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();askBtn.click();}
+  };
+
+  return wrap;
+}
+
 function renderAbout(){
   const t=T[settings.lang];
   const wrap=el('div',"animation:fadeUp 0.35s ease both");
@@ -1907,7 +2120,7 @@ function render(){
 
   // ── Tabs ──
   const tabs=el('div',"display:flex;background:var(--bg3);border:1px solid var(--border);border-radius:14px;padding:4px;gap:4px;margin-bottom:20px;animation:fadeUp 0.35s 0.05s cubic-bezier(.4,0,.2,1) both");
-  [{key:'search',label:t.tabSearch},{key:'about',label:t.tabAbout},{key:'settings',label:t.tabSettings}].forEach(({key,label})=>{
+  [{key:'search',label:t.tabSearch},{key:'ask',label:t.tabAsk},{key:'about',label:t.tabAbout},{key:'settings',label:t.tabSettings}].forEach(({key,label})=>{
     const btn=document.createElement('button');
     btn.className='tab-btn'+(state.tab===key?' active':'');
     btn.textContent=label;
@@ -1917,6 +2130,7 @@ function render(){
   wrap.appendChild(tabs);
 
   if(state.tab==='settings'){const s=renderSettings();s.style.animation='slideDown 0.25s cubic-bezier(.4,0,.2,1) both';wrap.appendChild(s);app.appendChild(wrap);return;}
+  if(state.tab==='ask'){const a=renderAskAI();a.style.animation='slideDown 0.25s cubic-bezier(.4,0,.2,1) both';wrap.appendChild(a);app.appendChild(wrap);return;}
   if(state.tab==='about'){const a=renderAbout();a.style.animation='slideDown 0.25s cubic-bezier(.4,0,.2,1) both';wrap.appendChild(a);app.appendChild(wrap);return;}
 
   const sw=el('div',"animation:fadeIn 0.2s ease both");
