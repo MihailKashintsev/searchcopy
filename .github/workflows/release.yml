@@ -10,6 +10,8 @@ permissions:
 
 jobs:
   release:
+    permissions:
+      contents: write
     strategy:
       fail-fast: false
       matrix:
@@ -57,16 +59,13 @@ jobs:
           NOTE=$(cat .changelog 2>/dev/null || echo "Обновление ${{ github.ref_name }}")
           echo "text=$NOTE" >> $GITHUB_OUTPUT
 
-      - name: Build and Publish
-        uses: tauri-apps/tauri-action@v0
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
-          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+      - name: Create Release (only once)
+        if: matrix.platform == 'macos-latest'
+        uses: softprops/action-gh-release@v2
         with:
-          tagName: ${{ github.ref_name }}
-          releaseName: "SearchCopy ${{ github.ref_name }}"
-          releaseBody: |
+          tag_name: ${{ github.ref_name }}
+          name: "SearchCopy ${{ github.ref_name }}"
+          body: |
             ## Что нового
             ${{ steps.changelog.outputs.text }}
 
@@ -84,11 +83,30 @@ jobs:
 
             ---
             SearchCopy by RENDERGAMES
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_PAT }}
+
+      - name: Build and Publish
+        uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_PAT }}
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+        with:
+          tagName: ${{ github.ref_name }}
+          releaseName: "SearchCopy ${{ github.ref_name }}"
+          releaseBody: |
+            ## Что нового
+            ${{ steps.changelog.outputs.text }}
           releaseDraft: false
           prerelease: false
           args: ${{ matrix.args }}
 
   android:
+    permissions:
+      contents: write
     runs-on: ubuntu-22.04
     needs: release
     steps:
@@ -164,3 +182,5 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: SearchCopy-release.apk
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_PAT }}
