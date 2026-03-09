@@ -372,28 +372,28 @@ const DB={
     // ── Формулы ──
     {id:1,keys:"SUM",type:"formula",template:"=SUM({col}:{col})",example:"=SUM(A:A)",
       desc:{ru:"Сумма столбца",en:"Sum of column"},
-      tags:{ru:["сумма","посчитать","столбец","итого","сложить","суммировать"],en:["sum","total","column","add"]}},
+      tags:{ru:["сумма","посчитать","столбец","итого","сложить","суммировать","сумм","=сумм","диапазон суммирования","сложить столбец","сложить числа"],en:["sum","total","column","add","=sum","range"]}},
     {id:2,keys:"AVERAGE",type:"formula",template:"=AVERAGE({col}:{col})",example:"=AVERAGE(A:A)",
       desc:{ru:"Среднее значение",en:"Average"},
-      tags:{ru:["среднее","средний","avg"],en:["average","mean","avg"]}},
+      tags:{ru:["среднее","средний","avg","=срзнач","среднее значение","средняя","среднее арифметическое","среднее по столбцу"],en:["average","mean","avg","=average","arithmetic mean"]}},
     {id:3,keys:"VLOOKUP / ВПР",type:"formula",template:"=VLOOKUP({col}2,B:C,2,0)",example:"=VLOOKUP(A2,B:C,2,0)",
       desc:{ru:"Поиск в таблице (ВПР)",en:"Table lookup (VLOOKUP)"},
-      tags:{ru:["впр","найти","поиск","подтянуть","справочник","подтянуть данные"],en:["vlookup","find","lookup","reference"]}},
+      tags:{ru:["впр","найти","поиск","подтянуть","справочник","подтянуть данные","искомое значение","место поиска","номер столбца","точное совпадение","истина","ложь","диапазон","возврат","впр формула","поиск по таблице","найти значение в таблице","вертикальный поиск"],en:["vlookup","find","lookup","reference","search value","lookup range","column index","exact match","true","false"]}},
     {id:4,keys:"IF / ЕСЛИ",type:"formula",template:'=IF({col}1>0,"Да","Нет")',example:'=IF(A1>0,"Yes","No")',
       desc:{ru:"Логическое условие",en:"Logical condition"},
-      tags:{ru:["если","условие","логика","ветвление"],en:["if","condition","logic"]}},
+      tags:{ru:["если","условие","логика","ветвление","=если","истина","ложь","значение если истина","значение если ложь","проверка условия","если больше","если равно"],en:["if","condition","logic","true","false","value if true","value if false"]}},
     {id:5,keys:"COUNTIF / СЧЁТЕСЛИ",type:"formula",template:'=COUNTIF({col}:{col},"условие")',example:'=COUNTIF(A:A,"да")',
       desc:{ru:"Подсчёт по условию",en:"Count by condition"},
-      tags:{ru:["посчитать","количество","счётесли","сколько","count"],en:["count","countif","how many"]}},
+      tags:{ru:["посчитать","количество","счётесли","сколько","count","=счётесли","диапазон","критерий","условие подсчёта","сколько ячеек","подсчёт по условию"],en:["count","countif","how many","range","criteria"]}},
     {id:6,keys:"SUMIF / СУММЕСЛИ",type:"formula",template:'=SUMIF({col}:{col},"условие",B:B)',example:'=SUMIF(A:A,"да",B:B)',
       desc:{ru:"Сумма по условию",en:"Sum by condition"},
-      tags:{ru:["сумма с условием","суммесли"],en:["sum if","sumif"]}},
+      tags:{ru:["сумма с условием","суммесли","=суммесли","диапазон условия","критерий","диапазон суммирования","сложить если","суммировать по условию"],en:["sum if","sumif","range","criteria","sum range"]}},
     {id:7,keys:"INDEX+MATCH",type:"formula",template:"=INDEX(B:B,MATCH({col}2,A:A,0))",example:"=INDEX(B:B,MATCH(A2,A:A,0))",
       desc:{ru:"Гибкий поиск (лучше ВПР)",en:"Flexible lookup (better than VLOOKUP)"},
-      tags:{ru:["гибкий поиск","индекс поискпоз","match"],en:["index match","flexible lookup"]}},
+      tags:{ru:["гибкий поиск","индекс поискпоз","match","=индекс","=поискпоз","массив","номер строки","лучше впр","двумерный поиск","поиск по строке и столбцу"],en:["index match","flexible lookup","array","row number","better than vlookup"]}},
     {id:8,keys:"IFERROR / ЕСЛИОШИБКА",type:"formula",template:'=IFERROR({col}1,"—")',example:'=IFERROR(A1,"—")',
       desc:{ru:"Скрыть ошибку",en:"Hide error"},
-      tags:{ru:["ошибка","скрыть ошибку","еслиошибка"],en:["error","hide error","iferror"]}},
+      tags:{ru:["ошибка","скрыть ошибку","еслиошибка","=еслиошибка","обработка ошибок","если ошибка","н/д","знач","дел0","скрыть нд"],en:["error","hide error","iferror","handle error","n/a","#value","#div0"]}},
     {id:9,keys:"CONCATENATE / СЦЕПИТЬ",type:"formula",template:'={col}1&" "&{col}2',example:'=A1&" "&B1',
       desc:{ru:"Склеить ячейки",en:"Merge cells text"},
       tags:{ru:["объединить","склеить","сцепить","соединить","concat"],en:["merge","join","concatenate","combine"]}},
@@ -1038,7 +1038,7 @@ function buildColumnChain(query,items){
 // ── Fuzzy & Synonym ──
 const SYNONYMS={
   'сцепить':['concatenate','объединить','склеить','соединить','слить','merge','join','concat'],
-  'впр':['vlookup','поиск таблице','подтянуть','подтянуть данные','поискпоз'],
+  'впр':['vlookup','поиск таблице','подтянуть','подтянуть данные','поискпоз','искомое значение','место поиска','номер столбца','диапазон поиска','вертикальный поиск','точное совпадение'],
   'сумм':['sum','сложить','итого','total','суммировать'],
   'если':['if','условие','condition','логика','ветвление'],
   'счётесли':['countif','посчитать','количество','сколько раз'],
@@ -1103,8 +1103,31 @@ function expandQuery(q){
   return [...words];
 }
 
+function extractFormulaName(query){
+  // Detect formula queries like "=ВПР(...)" or "=SUM(...)" or just "ВПР"
+  const formulaMatch = query.match(/^=?([A-ZА-ЯЁ][A-ZА-ЯЁ0-9]*)/i);
+  if(formulaMatch) return formulaMatch[1].toUpperCase();
+  return null;
+}
+
+const FORMULA_MAP={
+  'ВПР':'VLOOKUP','ВЛOOKUP':'VLOOKUP','СУММ':'SUM','СРЗНАЧ':'AVERAGE',
+  'ЕСЛИ':'IF','СЧЁТЕСЛИ':'COUNTIF','СУММЕСЛИ':'SUMIF','ИНДЕКС':'INDEX',
+  'ПОИСКПОЗ':'MATCH','ЕСЛИОШИБКА':'IFERROR','СЦЕПИТЬ':'CONCATENATE',
+  'СЕГОДНЯ':'TODAY','ОКРУГЛ':'ROUND','СЖПРОБЕЛЫ':'TRIM','ДЛСТР':'LEN',
+  'ТЕКСТ':'TEXT','СУММПРОИЗВ':'SUMPRODUCT','УНИКАЛЬНЫЕ':'UNIQUE',
+  'МАКС':'MAX','МИН':'MIN','ЛЕВСИМВ':'LEFT','ПРАВСИМВ':'RIGHT','ПСТР':'MID',
+};
+
 function scoreItem(query,item){
   if(!query||query.trim().length<2) return 0;
+  // Bonus: if query looks like a formula (=ВПР(...) or =SUM), match by name
+  const fname = extractFormulaName(query.trim());
+  if(fname){
+    const mapped = FORMULA_MAP[fname]||fname;
+    const keysStr = (typeof item.keys==='string'?item.keys:Object.values(item.keys||{}).join(' ')).toUpperCase();
+    if(keysStr.includes(mapped)||keysStr.includes(fname)) return 20;
+  }
   const q=query.toLowerCase().trim();
   const desc=getDesc(item).toLowerCase();
   const tags=getTags(item).join(' ').toLowerCase();
