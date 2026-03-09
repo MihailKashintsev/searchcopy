@@ -54,11 +54,8 @@ jobs:
         id: changelog
         shell: bash
         run: |
-          if [ -f .changelog ]; then
-            echo "text=$(cat .changelog)" >> $GITHUB_OUTPUT
-          else
-            echo "text=Обновление ${{ github.ref_name }}" >> $GITHUB_OUTPUT
-          fi
+          NOTE=$(cat .changelog 2>/dev/null || echo "Обновление ${{ github.ref_name }}")
+          echo "text=$NOTE" >> $GITHUB_OUTPUT
 
       - name: Build and Publish
         uses: tauri-apps/tauri-action@v0
@@ -83,7 +80,7 @@ jobs:
             | Windows | SearchCopy_*_x64-setup.exe |
             | Linux (универсальный) | SearchCopy_*_amd64.AppImage |
             | Linux (Debian/Ubuntu) | SearchCopy_*_amd64.deb |
-            | Android | app-universal-debug.apk |
+            | Android | SearchCopy-release.apk |
 
             ---
             SearchCopy by RENDERGAMES
@@ -125,18 +122,30 @@ jobs:
       - name: Init Tauri Android
         run: npm run tauri android init
 
-      - name: Find APK path
-        run: find src-tauri/gen/android -name "*.apk" 2>/dev/null || echo "No APK found"
+      - name: Decode keystore
+        run: |
+          echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 -d > searchcopy.jks
 
-      - name: Build Android APK
+      - name: Build Android Release APK
         env:
           NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
-        run: npm run tauri android build --apk --debug --debug
+        run: npm run tauri android build --apk
 
-      - name: Find APK
-        run: find src-tauri/gen/android -name "*.apk" | tee /tmp/apk_list.txt
+      - name: Sign APK
+        run: |
+          APK=$(find src-tauri/gen/android -name "*.apk" | grep -v signed | head -1)
+          echo "Signing: $APK"
+          BUILD_TOOLS=$ANDROID_SDK_ROOT/build-tools/$(ls $ANDROID_SDK_ROOT/build-tools | sort -V | tail -1)
+          $BUILD_TOOLS/apksigner sign \
+            --ks searchcopy.jks \
+            --ks-key-alias searchcopy \
+            --ks-pass pass:${{ secrets.ANDROID_STORE_PASSWORD }} \
+            --key-pass pass:${{ secrets.ANDROID_KEY_PASSWORD }} \
+            --out SearchCopy-release.apk \
+            "$APK"
+          $BUILD_TOOLS/apksigner verify --verbose SearchCopy-release.apk | head -3
 
       - name: Upload APK to Release
         uses: softprops/action-gh-release@v2
         with:
-          files: src-tauri/gen/android/app/build/outputs/apk/**/*.apk
+          files: SearchCopy-release.apk
