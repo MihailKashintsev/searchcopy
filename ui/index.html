@@ -19,16 +19,16 @@
   --shadow:0 8px 40px rgba(0,0,0,0.4);--shadow-focus:0 0 0 2px rgba(99,102,241,0.4),0 24px 60px rgba(0,0,0,0.55);
 }
 .light{
-  --bg:#f0f4ff;--bg2:#ffffff;--bg3:rgba(0,0,0,0.03);
-  --border:rgba(0,0,0,0.09);--border2:rgba(0,0,0,0.15);
-  --text:#0f172a;--text2:#475569;--text3:#94a3b8;--text4:#cbd5e1;
-  --input-bg:#ffffff;--card-bg:#ffffff;--chain-bg:#f8f7ff;
+  --bg:#f0f4ff;--bg2:#ffffff;--bg3:rgba(99,102,241,0.04);
+  --border:rgba(99,102,241,0.12);--border2:rgba(99,102,241,0.2);
+  --text:#0f172a;--text2:#374151;--text3:#6b7280;--text4:#d1d5db;
+  --input-bg:#ffffff;--card-bg:#ffffff;--chain-bg:#f5f3ff;
   --formula-bg:rgba(14,165,233,0.07);--formula-border:rgba(14,165,233,0.25);--formula-color:#0369a1;
-  --code-bg:rgba(99,102,241,0.04);--code-border:rgba(99,102,241,0.15);--code-color:#4338ca;
-  --copy-bg:rgba(0,0,0,0.04);--copy-border:rgba(0,0,0,0.1);--copy-color:#64748b;
-  --badge-bg:rgba(99,102,241,0.08);--badge-border:rgba(99,102,241,0.2);
-  --seg-bg:rgba(0,0,0,0.05);--toggle-off-bg:rgba(0,0,0,0.04);--empty-color:#94a3b8;
-  --shadow:0 4px 20px rgba(0,0,0,0.08);--shadow-focus:0 0 0 2px rgba(99,102,241,0.3),0 8px 30px rgba(0,0,0,0.12);
+  --code-bg:rgba(99,102,241,0.06);--code-border:rgba(99,102,241,0.18);--code-color:#4338ca;
+  --copy-bg:rgba(99,102,241,0.06);--copy-border:rgba(99,102,241,0.15);--copy-color:#6366f1;
+  --badge-bg:rgba(99,102,241,0.08);--badge-border:rgba(99,102,241,0.18);
+  --seg-bg:rgba(0,0,0,0.04);--toggle-off-bg:rgba(0,0,0,0.04);--empty-color:#9ca3af;
+  --shadow:0 4px 24px rgba(99,102,241,0.1);--shadow-focus:0 0 0 3px rgba(99,102,241,0.15),0 8px 30px rgba(99,102,241,0.1);
 }
 body{min-height:100vh;background:var(--bg);font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;color:var(--text);overflow-x:hidden;transition:background 0.3s,color 0.3s}
 input,button,textarea{font-family:inherit}button{cursor:pointer}
@@ -43,8 +43,120 @@ input::placeholder,textarea::placeholder{color:var(--text3)}
 .light .glow2{background:radial-gradient(ellipse,rgba(14,165,233,0.04) 0%,transparent 70%)}
 .wrap{position:relative;z-index:1;max-width:760px;margin:0 auto;padding:40px 20px 100px}
 .spinner{width:18px;height:18px;border:2px solid rgba(99,102,241,0.3);border-top-color:#818cf8;border-radius:50%;animation:spin 0.7s linear infinite;display:inline-block}
+
+/* ── Pill buttons (app filters) ── */
+.pill{
+  display:inline-flex;align-items:center;gap:5px;
+  border-radius:20px;padding:5px 12px;font-size:11px;font-weight:700;
+  border:1px solid var(--border);background:var(--bg3);color:var(--text2);
+  cursor:pointer;transition:background 0.15s,border-color 0.15s,color 0.15s;
+  white-space:nowrap;font-family:inherit;
+}
+.pill:hover{background:rgba(99,102,241,0.08);border-color:rgba(99,102,241,0.3);color:#a5b4fc}
+.pill.active{border-color:var(--pill-c,rgba(99,102,241,0.5));background:var(--pill-bg,rgba(99,102,241,0.15));color:var(--pill-color,#c7d2fe)}
+
+/* ── Type filter chips ── */
+.chip{
+  border-radius:16px;padding:4px 12px;font-size:10px;font-weight:800;
+  border:1px solid var(--border);background:var(--bg3);color:var(--text3);
+  cursor:pointer;transition:background 0.15s,border-color 0.15s,color 0.15s;
+  letter-spacing:0.3px;font-family:inherit;
+}
+.chip:hover{filter:brightness(1.15)}
+.chip.active{background:var(--chip-bg,rgba(99,102,241,0.15));border-color:var(--chip-border,rgba(99,102,241,0.4));color:var(--chip-color,#c7d2fe)}
+
+/* ── Tab buttons ── */
+.tab-btn{
+  flex:1;background:transparent;border:1px solid transparent;
+  border-radius:10px;padding:9px;font-size:12px;font-weight:800;
+  color:var(--text2);cursor:pointer;transition:background 0.18s,color 0.18s,border-color 0.18s;
+  display:flex;align-items:center;justify-content:center;gap:6px;font-family:inherit;
+}
+.tab-btn:hover{background:rgba(99,102,241,0.07);color:var(--text)}
+.tab-btn.active{background:rgba(99,102,241,0.18);border-color:rgba(99,102,241,0.35);color:#c7d2fe}
+
+/* ── Suggestion chips ── */
+.sug{
+  background:var(--bg3);border:1px solid var(--border);border-radius:7px;
+  padding:5px 11px;font-size:11px;color:var(--text2);cursor:pointer;
+  transition:background 0.15s,border-color 0.15s,color 0.15s;font-family:inherit;
+}
+.sug:hover{color:#a5b4fc;border-color:rgba(99,102,241,0.35);background:rgba(99,102,241,0.07)}
+
+/* ── Copy button ── */
+.copy-btn{
+  background:var(--copy-bg);border:1px solid var(--copy-border);color:var(--copy-color);
+  border-radius:7px;padding:5px 11px;font-size:11px;cursor:pointer;font-weight:700;
+  transition:background 0.15s,color 0.15s,border-color 0.15s;flex-shrink:0;font-family:inherit;
+}
+.copy-btn:hover{background:rgba(99,102,241,0.1);border-color:rgba(99,102,241,0.3);color:#c7d2fe}
+.copy-btn.copied{background:rgba(34,197,94,0.15);border-color:rgba(34,197,94,0.4);color:#4ade80}
+
+/* ── AI toggle button ── */
+.ai-btn{
+  border-radius:14px;padding:0 16px;height:44px;font-size:11px;font-weight:800;
+  cursor:pointer;transition:all 0.2s;white-space:nowrap;
+  display:flex;align-items:center;gap:6px;font-family:inherit;
+  background:var(--bg3);border:1px solid var(--border);color:var(--text2);
+}
+.ai-btn:hover{background:rgba(168,85,247,0.1);border-color:rgba(168,85,247,0.35);color:#c084fc}
+.ai-btn.active{background:rgba(168,85,247,0.18);border-color:rgba(168,85,247,0.5);color:#c084fc}
+
+/* ── Light theme improvements ── */
+.light body{background:#f0f4ff;color:#0f172a}
+.light .pill{background:rgba(0,0,0,0.04);border-color:rgba(0,0,0,0.1);color:#64748b}
+.light .pill:hover{background:rgba(99,102,241,0.08);border-color:rgba(99,102,241,0.25);color:#4f46e5}
+.light .chip{background:rgba(0,0,0,0.03);color:#94a3b8;border-color:rgba(0,0,0,0.08)}
+.light .tab-btn{color:#64748b}
+.light .tab-btn:hover{background:rgba(99,102,241,0.06);color:#4f46e5}
+.light .tab-btn.active{background:rgba(99,102,241,0.1);border-color:rgba(99,102,241,0.25);color:#4f46e5}
+.light .sug{background:#fff;border-color:rgba(0,0,0,0.1);color:#64748b}
+.light .sug:hover{background:rgba(99,102,241,0.06);border-color:rgba(99,102,241,0.2);color:#4f46e5}
+.light .copy-btn{background:rgba(0,0,0,0.03);border-color:rgba(0,0,0,0.1);color:#94a3b8}
+.light .ai-btn{background:rgba(0,0,0,0.04);border-color:rgba(0,0,0,0.1);color:#64748b}
+.light .spinner{border-color:rgba(99,102,241,0.2);border-top-color:#6366f1}
 </style>
+<body>
+<div id="app"></div>
 <script>
+
+// ── Settings persistence ──
+function loadSettings(){
+  try{ return JSON.parse(localStorage.getItem('sc_settings_v2')||'{}'); }catch{ return {}; }
+}
+function saveSettings(s){
+  try{ localStorage.setItem('sc_settings_v2', JSON.stringify(s)); }catch{}
+}
+
+// ── OS detection ──
+const detectedOS=(()=>{
+  const ua=navigator.userAgent+navigator.platform;
+  if(/Mac/.test(ua)) return 'mac';
+  if(/Linux/.test(ua)) return 'linux';
+  return 'win';
+})();
+
+// ── Settings state ──
+let settings = Object.assign(
+  {lang:'ru', theme:'dark', os:detectedOS, autoUpdate:true, aiKey:'', gigaKey:'', aiProvider:'claude'},
+  loadSettings()
+);
+
+// ── Theme ──
+function applyTheme(){
+  const dark = settings.theme !== 'light';
+  document.documentElement.classList.toggle('light', !dark);
+  document.body.classList.toggle('light', !dark);
+}
+
+// ── Keys adapter ──
+function adaptKeys(keys){
+  if(typeof keys==='string') return keys;
+  if(!keys) return '';
+  const os = settings.os || 'win';
+  return keys[os] || keys.win || keys.mac || Object.values(keys)[0] || '';
+}
+
 
 const T={
   ru:{
@@ -887,13 +999,13 @@ function doSearch(query,progs,typeFilter){
 // ── Render cards ──
 function copyText(text,btn){
   navigator.clipboard.writeText(text).then(()=>{
-    btn.textContent="✓";btn.style.color="#4ade80";btn.style.borderColor="rgba(34,197,94,0.5)";btn.style.background="rgba(34,197,94,0.2)";
-    setTimeout(()=>{btn.textContent="⎘";btn.style.color="";btn.style.borderColor="";btn.style.background="";},1400);
+    const orig=btn.textContent;btn.textContent="✓";btn.classList.add('copied');
+    setTimeout(()=>{btn.textContent="⎘";btn.classList.remove('copied');},1400);
   });
 }
 function makeCopyBtn(text){
   const btn=document.createElement('button');btn.textContent="⎘";
-  btn.style.cssText="background:var(--copy-bg);border:1px solid var(--copy-border);color:var(--copy-color);border-radius:7px;padding:5px 11px;font-size:11px;cursor:pointer;font-weight:700;transition:all 0.18s;flex-shrink:0;font-family:inherit";
+  btn.className='copy-btn';
   btn.onclick=()=>copyText(text,btn);return btn;
 }
 function el(tag,style,html){
@@ -1489,22 +1601,30 @@ function render(){
   const t=T[settings.lang];
   const app=document.getElementById('app');
   app.innerHTML='';
-  const wrap=el('div',"max-width:780px;margin:0 auto;padding:20px 16px 40px");
 
-  // Header
+  const glow1=document.createElement('div');glow1.className='glow1';app.appendChild(glow1);
+  const glow2=document.createElement('div');glow2.className='glow2';app.appendChild(glow2);
+
+  const wrap=el('div',"position:relative;z-index:1;max-width:760px;margin:0 auto;padding:32px 20px 80px");
+
+  // ── Header ──
   const header=el('div',"text-align:center;margin-bottom:28px");
+  const isDark=settings.theme!=='light';
+  const h1grad=isDark
+    ?'linear-gradient(135deg,#fff 40%,#a5b4fc)'
+    :'linear-gradient(135deg,#1e1b4b 30%,#4f46e5)';
   header.innerHTML=`
-    <div style="display:inline-flex;align-items:center;gap:6px;background:rgba(99,102,241,0.12);border:1px solid rgba(99,102,241,0.25);border-radius:20px;padding:4px 12px;margin-bottom:14px;font-size:10px;font-weight:800;letter-spacing:2px;color:#818cf8">◉ RENDERGAMES</div>
-    <h1 style="font-size:clamp(32px,7vw,54px);font-weight:900;letter-spacing:-2px;margin:0 0 6px;background:linear-gradient(135deg,#fff 40%,#a5b4fc);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">SearchCopy</h1>
-    <p style="font-size:12px;color:var(--text3);letter-spacing:3px;text-transform:uppercase;margin:0">${t.subtitle}</p>`;
+    <div style="display:inline-flex;align-items:center;gap:6px;background:rgba(99,102,241,0.1);border:1px solid rgba(99,102,241,0.2);border-radius:20px;padding:3px 12px;margin-bottom:14px;font-size:10px;font-weight:800;letter-spacing:2px;color:#818cf8">RENDERGAMES</div>
+    <h1 style="font-size:clamp(32px,7vw,52px);font-weight:900;letter-spacing:-2px;margin:0 0 6px;background:${h1grad};-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">SearchCopy</h1>
+    <p style="font-size:11px;color:var(--text3);letter-spacing:3px;text-transform:uppercase;margin:0">${t.subtitle}</p>`;
   wrap.appendChild(header);
 
-  // Tabs
-  const tabs=el('div',"display:flex;background:var(--tab-bg);border:1px solid var(--border);border-radius:14px;padding:4px;gap:4px;margin-bottom:20px");
-  [{key:'search',icon:'⌘',label:t.tabSearch},{key:'about',icon:'○',label:t.tabAbout},{key:'settings',icon:'⊙',label:t.tabSettings}].forEach(({key,icon,label})=>{
-    const on=state.tab===key;
-    const btn=el('button',`flex:1;background:${on?'rgba(99,102,241,0.2)':'transparent'};border:1px solid ${on?'rgba(99,102,241,0.4)':'transparent'};border-radius:10px;padding:9px;font-size:12px;font-weight:800;color:${on?'#c7d2fe':'var(--text2)'};cursor:pointer;transition:all 0.18s;display:flex;align-items:center;justify-content:center;gap:6px;font-family:inherit`);
-    btn.innerHTML=`<span>${icon}</span><span>${label}</span>`;
+  // ── Tabs ──
+  const tabs=el('div',"display:flex;background:var(--bg3);border:1px solid var(--border);border-radius:14px;padding:4px;gap:4px;margin-bottom:20px");
+  [{key:'search',label:t.tabSearch},{key:'about',label:t.tabAbout},{key:'settings',label:t.tabSettings}].forEach(({key,label})=>{
+    const btn=document.createElement('button');
+    btn.className='tab-btn'+(state.tab===key?' active':'');
+    btn.textContent=label;
     btn.onclick=()=>{state.tab=key;render();};
     tabs.appendChild(btn);
   });
@@ -1516,126 +1636,144 @@ function render(){
   const sw=el('div',"");
 
   // ── App filter pills ──
-  const progRow=el('div',"display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px");
+  const progRow=el('div',"display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px");
+
+  function updatePills(){
+    progRow.querySelectorAll('.pill[data-prog]').forEach(b=>{
+      const p=b.dataset.prog;
+      const active=state.progs.includes(p);
+      const c=COLORS[p]||'#818cf8';
+      b.classList.toggle('active',active);
+      if(active){b.style.setProperty('--pill-c',c+'88');b.style.setProperty('--pill-bg',c+'1a');b.style.setProperty('--pill-color',c);}
+      else{b.style.removeProperty('--pill-c');b.style.removeProperty('--pill-bg');b.style.removeProperty('--pill-color');}
+    });
+    const allBtn=progRow.querySelector('.pill-all');
+    if(allBtn)allBtn.classList.toggle('active',state.progs.length===PROGRAMS.length);
+  }
+
   PROGRAMS.forEach(p=>{
-    const on=state.progs.includes(p);const c=COLORS[p]||'#818cf8';
-    const btn=el('button',`background:${on?`${c}22`:'var(--bg3)'};border:1px solid ${on?`${c}55`:'var(--border)'};color:${on?c:'var(--text2)'};border-radius:20px;padding:5px 12px;font-size:11px;font-weight:700;cursor:pointer;transition:all 0.18s;white-space:nowrap;display:flex;align-items:center;gap:5px`);
-    btn.innerHTML=`<span style="font-size:10px">${ICONS[p]||'◉'}</span><span>${p}</span>`;
+    const c=COLORS[p]||'#818cf8';
+    const active=state.progs.includes(p);
+    const btn=document.createElement('button');
+    btn.className='pill'+(active?' active':'');
+    btn.dataset.prog=p;
+    if(active){btn.style.setProperty('--pill-c',c+'88');btn.style.setProperty('--pill-bg',c+'1a');btn.style.setProperty('--pill-color',c);}
+    btn.innerHTML=`<span>${ICONS[p]||'◉'}</span> ${p}`;
     btn.onclick=()=>{
-      if(on&&state.progs.length===1)return;
-      state.progs=on?state.progs.filter(x=>x!==p):[...state.progs,p];
-      if(state.query) renderResults(); else render();
+      if(state.progs.includes(p)&&state.progs.length===1)return;
+      state.progs=state.progs.includes(p)?state.progs.filter(x=>x!==p):[...state.progs,p];
+      updatePills();
+      renderResults();
     };
     progRow.appendChild(btn);
   });
-  // Кнопка "Все"
-  const allOn=state.progs.length===PROGRAMS.length;
-  const allBtn=el('button',`background:${allOn?'rgba(99,102,241,0.15)':'var(--bg3)'};border:1px solid ${allOn?'rgba(99,102,241,0.4)':'var(--border)'};color:${allOn?'#a5b4fc':'var(--text3)'};border-radius:20px;padding:5px 12px;font-size:11px;font-weight:700;cursor:pointer;transition:all 0.18s`);
+
+  const allBtn=document.createElement('button');
+  allBtn.className='pill pill-all'+(state.progs.length===PROGRAMS.length?' active':'');
   allBtn.textContent=settings.lang==='ru'?'Все':'All';
-  allBtn.onclick=()=>{state.progs=allOn?['Excel']:[...PROGRAMS];if(state.query)renderResults();else render();};
+  allBtn.onclick=()=>{
+    state.progs=state.progs.length===PROGRAMS.length?['Excel']:[...PROGRAMS];
+    updatePills();
+    renderResults();
+  };
   progRow.appendChild(allBtn);
   sw.appendChild(progRow);
 
-  // ── Type filter ──
-  const typeRow=el('div',"display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap");
-  const typeLabel=el('span',"font-size:10px;color:var(--text3);align-self:center;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-right:4px");
+  // ── Type filter chips ──
+  const typeRow=el('div',"display:flex;align-items:center;gap:6px;margin-bottom:14px;flex-wrap:wrap");
+  const typeLabel=el('span',"font-size:10px;color:var(--text3);font-weight:700;letter-spacing:1px;text-transform:uppercase");
   typeLabel.textContent=settings.lang==='ru'?'Тип:':'Type:';
   typeRow.appendChild(typeLabel);
-  [{val:'all',label:settings.lang==='ru'?'Всё':'All',color:'#818cf8'},
-   {val:'hotkey',label:settings.lang==='ru'?'Клавиши':'Hotkeys',color:'#c7d2fe'},
-   {val:'formula',label:settings.lang==='ru'?'Формулы':'Formulas',color:'#4ade80'},
-   {val:'chain',label:settings.lang==='ru'?'Цепочки':'Chains',color:'#fcd34d'}
-  ].forEach(({val,label,color})=>{
-    const on=state.typeFilter===val;
-    const btn=el('button',`background:${on?`${color}22`:'var(--bg3)'};border:1px solid ${on?`${color}55`:'var(--border)'};color:${on?color:'var(--text3)'};border-radius:16px;padding:4px 12px;font-size:10px;font-weight:800;cursor:pointer;transition:all 0.15s;letter-spacing:0.3px`);
+
+  [{val:'all',   label:settings.lang==='ru'?'Всё':'All',       color:'#a5b4fc',bg:'rgba(99,102,241,0.14)', border:'rgba(99,102,241,0.38)'},
+   {val:'hotkey',label:settings.lang==='ru'?'Клавиши':'Hotkeys',color:'#c7d2fe',bg:'rgba(99,102,241,0.1)',  border:'rgba(99,102,241,0.3)'},
+   {val:'formula',label:settings.lang==='ru'?'Формулы':'Formulas',color:'#4ade80',bg:'rgba(34,197,94,0.12)', border:'rgba(34,197,94,0.32)'},
+   {val:'chain', label:settings.lang==='ru'?'Цепочки':'Chains', color:'#fcd34d',bg:'rgba(245,158,11,0.12)',border:'rgba(245,158,11,0.32)'}
+  ].forEach(({val,label,color,bg,border})=>{
+    const btn=document.createElement('button');
+    btn.className='chip'+(state.typeFilter===val?' active':'');
+    btn.dataset.filter=val;
+    btn.style.setProperty('--chip-color',color);
+    btn.style.setProperty('--chip-bg',bg);
+    btn.style.setProperty('--chip-border',border);
     btn.textContent=label;
-    btn.onclick=()=>{state.typeFilter=val;if(state.query)renderResults();else render();};
+    btn.onclick=()=>{
+      state.typeFilter=val;
+      typeRow.querySelectorAll('.chip').forEach(b=>b.classList.toggle('active',b.dataset.filter===val));
+      renderResults();
+    };
     typeRow.appendChild(btn);
   });
   sw.appendChild(typeRow);
 
   // ── Search input ──
-  const inputRow=el('div',"display:flex;gap:8px;margin-bottom:14px;align-items:center");
+  const inputRow=el('div',"display:flex;gap:8px;margin-bottom:12px;align-items:center");
   const inputWrap=el('div',"flex:1;position:relative;display:flex;align-items:center");
-  const icon=el('span',"position:absolute;left:14px;font-size:15px;color:var(--text3);pointer-events:none;font-family:var(--mono)");
-  icon.textContent=state.aiMode?'✦':'⌘';
-  const input=el('input',"width:100%;background:var(--input-bg);border:1px solid "+(state.aiMode?'rgba(168,85,247,0.5)':'var(--border)')+";border-radius:14px;padding:13px 40px 13px 40px;font-size:14px;font-weight:500;color:var(--text);outline:none;transition:border 0.2s;font-family:inherit;box-sizing:border-box");
+
+  const prefixIcon=el('span',"position:absolute;left:14px;font-size:14px;color:var(--text3);pointer-events:none");
+  prefixIcon.textContent=state.aiMode?'✦':'⌕';
+
+  const input=document.createElement('input');
+  input.style.cssText='width:100%;background:var(--input-bg);border:1px solid var(--border);border-radius:14px;padding:12px 36px 12px 38px;font-size:13px;font-weight:500;color:var(--text);outline:none;transition:border-color 0.18s,box-shadow 0.18s;font-family:inherit;box-sizing:border-box';
   input.placeholder=state.aiMode?t.aiPlaceholder:t.placeholder;
   input.value=state.query;
-  input.onfocus=()=>input.style.borderColor=state.aiMode?'rgba(168,85,247,0.7)':'rgba(99,102,241,0.6)';
-  input.onblur=()=>input.style.borderColor=state.aiMode?'rgba(168,85,247,0.5)':'var(--border)';
+  input.onfocus=()=>{input.style.borderColor=state.aiMode?'rgba(168,85,247,0.6)':'rgba(99,102,241,0.5)';input.style.boxShadow=state.aiMode?'0 0 0 3px rgba(168,85,247,0.1)':'0 0 0 3px rgba(99,102,241,0.08)'};
+  input.onblur=()=>{input.style.borderColor='var(--border)';input.style.boxShadow='none'};
   input.oninput=e=>{
     state.query=e.target.value;
-    state.aiResult=null; // Сбрасываем AI при новом вводе
+    state.aiResult=null;
+    clrBtn.style.opacity=state.query?'1':'0';
     renderResults();
-    const clrBtn=document.getElementById('clr-btn');
-    if(clrBtn) clrBtn.style.opacity=state.query?'1':'0';
   };
   input.onkeydown=e=>{
     if(e.key==='Enter'&&state.query.trim()){
       e.preventDefault();
-      if(state.aiMode){
-        state.aiLoading=true;state.aiResult=null;
-        renderResults();
-        doAiSearch(state.query.trim());
-      }
+      if(state.aiMode){state.aiLoading=true;state.aiResult=null;renderResults();doAiSearch(state.query.trim());}
     }
   };
-  const clrBtn=el('button',"position:absolute;right:12px;background:transparent;border:none;color:var(--text3);cursor:pointer;font-size:14px;padding:4px;opacity:"+(state.query?'1':'0')+";transition:opacity 0.2s");
+
+  const clrBtn=el('button',"position:absolute;right:10px;background:transparent;border:none;color:var(--text3);cursor:pointer;font-size:16px;line-height:1;padding:4px;opacity:"+(state.query?'1':'0')+";transition:opacity 0.15s");
   clrBtn.id='clr-btn';clrBtn.textContent='×';
-  clrBtn.onclick=()=>{state.query='';state.aiResult=null;input.value='';renderResults();clrBtn.style.opacity='0';input.focus();};
-  inputWrap.appendChild(icon);inputWrap.appendChild(input);inputWrap.appendChild(clrBtn);
+  clrBtn.onclick=()=>{state.query='';state.aiResult=null;input.value='';clrBtn.style.opacity='0';renderResults();input.focus();};
+
+  inputWrap.appendChild(prefixIcon);inputWrap.appendChild(input);inputWrap.appendChild(clrBtn);
   inputRow.appendChild(inputWrap);
 
-  // AI toggle button
+  // ── AI button ──
   const providerLabel=settings.aiProvider==='giga'?'GigaChat':'Claude';
-  const aiBtn=el('button',`background:${state.aiMode?'rgba(168,85,247,0.2)':'var(--bg3)'};border:1px solid ${state.aiMode?'rgba(168,85,247,0.5)':'var(--border)'};color:${state.aiMode?'#c084fc':'var(--text2)'};border-radius:14px;padding:0 16px;height:44px;font-size:11px;font-weight:800;cursor:pointer;transition:all 0.2s;white-space:nowrap;display:flex;align-items:center;gap:6px;font-family:inherit`);
-  aiBtn.innerHTML=state.aiMode?`✦ ${providerLabel}`:t.aiSearch;
+  const aiBtn=document.createElement('button');
+  aiBtn.className='ai-btn'+(state.aiMode?' active':'');
+  aiBtn.innerHTML=state.aiMode?('✦ '+providerLabel):t.aiSearch;
   aiBtn.onclick=()=>{
-    state.aiMode=!state.aiMode;state.aiResult=null;state.aiLoading=false;
-    // Update button appearance
-    aiBtn.style.background=state.aiMode?'rgba(168,85,247,0.2)':'var(--bg3)';
-    aiBtn.style.borderColor=state.aiMode?'rgba(168,85,247,0.5)':'var(--border)';
-    aiBtn.style.color=state.aiMode?'#c084fc':'var(--text2)';
-    aiBtn.innerHTML=state.aiMode?'✦ '+providerLabel:t.aiSearch;
-    // Update input border
-    input.style.borderColor=state.aiMode?'rgba(168,85,247,0.5)':'var(--border)';
+    state.aiMode=!state.aiMode;
+    state.aiResult=null;state.aiLoading=false;
+    aiBtn.classList.toggle('active',state.aiMode);
+    aiBtn.innerHTML=state.aiMode?('✦ '+providerLabel):t.aiSearch;
+    prefixIcon.textContent=state.aiMode?'✦':'⌕';
     input.placeholder=state.aiMode?t.aiPlaceholder:t.placeholder;
-    icon.textContent=state.aiMode?'✦':'⌘';
-    // Show/hide AI hint
-    const existingHint=document.getElementById('ai-hint');
-    if(state.aiMode && !existingHint){
-      const hint=el('div',"background:rgba(168,85,247,0.06);border:1px solid rgba(168,85,247,0.18);border-radius:10px;padding:9px 14px;margin-bottom:12px;font-size:11px;color:#c084fc;display:flex;align-items:center;gap:7px");
-      hint.id='ai-hint';
-      hint.innerHTML='<span>✦</span><span>'+(settings.lang==='ru'?'Нажми Enter для ИИ-поиска — результаты появятся вместе с базой':'Press Enter for AI search — results shown alongside database')+'</span>';
-      inputRow.parentNode.insertBefore(hint, document.getElementById('results-wrap'));
-    } else if(!state.aiMode && existingHint){
-      existingHint.remove();
-    }
+    input.style.borderColor='var(--border)';
+    aiHint.style.display=state.aiMode?'flex':'none';
     renderResults();
     input.focus();
   };
   inputRow.appendChild(aiBtn);
   sw.appendChild(inputRow);
 
-  // AI hint
-  if(state.aiMode){
-    const hint=el('div',"background:rgba(168,85,247,0.06);border:1px solid rgba(168,85,247,0.18);border-radius:10px;padding:9px 14px;margin-bottom:12px;font-size:11px;color:#c084fc;display:flex;align-items:center;gap:7px");
-    hint.innerHTML=`<span>✦</span><span>${settings.lang==='ru'?'Нажми Enter для ИИ-поиска — результаты появятся вместе с базой':'Press Enter for AI search — results shown alongside database'}</span>`;
-    sw.appendChild(hint);
-  }
+  // ── AI hint ──
+  const aiHint=el('div',"background:rgba(168,85,247,0.06);border:1px solid rgba(168,85,247,0.18);border-radius:10px;padding:8px 14px;margin-bottom:12px;font-size:11px;color:#c084fc;display:flex;align-items:center;gap:7px");
+  aiHint.style.display=state.aiMode?'flex':'none';
+  aiHint.innerHTML='<span>✦</span><span>'+(settings.lang==='ru'?'Нажми Enter для ИИ-поиска — результаты появятся вместе с базой':'Press Enter for AI search — shown alongside local results')+'</span>';
+  sw.appendChild(aiHint);
 
-  // Suggestions (если пусто)
-  if(!state.query && !state.aiMode){
-    const sugWrap=el('div',"margin-bottom:24px");
+  // ── Suggestions ──
+  if(!state.query&&!state.aiMode){
+    const sugWrap=el('div',"margin-bottom:20px");
     sugWrap.appendChild(el('p',"color:var(--text3);font-size:10px;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:8px",t.tryLabel));
     const sugRow=el('div',"display:flex;flex-wrap:wrap;gap:6px");
     t.suggestions.forEach(s=>{
-      const btn=el('button',"background:var(--bg3);border:1px solid var(--border);border-radius:7px;padding:5px 11px;font-size:11px;color:var(--text2);cursor:pointer;transition:all 0.15s");
-      btn.textContent=s;
-      btn.onmouseenter=()=>{btn.style.color='#a5b4fc';btn.style.borderColor='rgba(99,102,241,0.35)';btn.style.background='rgba(99,102,241,0.07)'};
-      btn.onmouseleave=()=>{btn.style.color='';btn.style.borderColor='';btn.style.background=''};
-      btn.onclick=()=>{state.query=s;render();setTimeout(()=>document.querySelector('input')?.focus(),50)};
+      const btn=document.createElement('button');
+      btn.className='sug';btn.textContent=s;
+      btn.onclick=()=>{state.query=s;input.value=s;renderResults();input.focus();};
       sugRow.appendChild(btn);
     });
     sugWrap.appendChild(sugRow);sw.appendChild(sugWrap);
@@ -1644,7 +1782,7 @@ function render(){
   const rw=el('div',"");rw.id='results-wrap';sw.appendChild(rw);
   wrap.appendChild(sw);app.appendChild(wrap);
   renderResults();
-  setTimeout(()=>document.querySelector('input')?.focus(),80);
+  setTimeout(()=>input.focus(),60);
 }
 
 
@@ -1783,8 +1921,12 @@ function showUpdateBanner(version,url,fileName){
   document.body.appendChild(banner);
 }
 
-render();
-if(settings.autoUpdate!==false) checkForUpdates(true);
+document.addEventListener("DOMContentLoaded",()=>{
+  applyTheme();
+  render();
+  if(settings.autoUpdate!==false) checkForUpdates(true);
+});
+if(document.readyState!=="loading"){applyTheme();render();if(settings.autoUpdate!==false)checkForUpdates(true);}
 </script>
 </body>
 </html>
