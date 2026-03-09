@@ -76,7 +76,7 @@ pub async fn download_and_install(url: String, platform: String) -> Result<Strin
             let app_name = app_src.file_name().unwrap().to_string_lossy().to_string();
             let app_dest = PathBuf::from("/Applications").join(&app_name);
 
-            // 3. Удаляем старую версию из Applications (настройки НЕ трогаем — они в ~/Library)
+            // 3. Удаляем старую версию
             if app_dest.exists() {
                 Command::new("rm")
                     .args(["-rf", app_dest.to_str().unwrap()])
@@ -92,7 +92,6 @@ pub async fn download_and_install(url: String, platform: String) -> Result<Strin
 
             if !cp.status.success() {
                 let err = String::from_utf8_lossy(&cp.stderr);
-                // Размонтируем даже при ошибке
                 let _ = Command::new("hdiutil")
                     .args(["detach", &vol_path, "-quiet", "-force"])
                     .output();
@@ -107,8 +106,17 @@ pub async fn download_and_install(url: String, platform: String) -> Result<Strin
             // 6. Удаляем скачанный DMG
             let _ = std::fs::remove_file(&dmg_path);
 
-            // Возвращаем "installed" → JS перезапустит приложение
-            Ok("installed".to_string())
+            // 7. Запускаем НОВОЕ приложение из /Applications
+            //    и возвращаем "launch_and_exit" — JS вызовет exit(0)
+            //    open -n запускает новый экземпляр даже если уже открыт
+            let _ = Command::new("open")
+                .args(["-n", app_dest.to_str().unwrap()])
+                .spawn();
+
+            // Небольшая пауза чтобы новый процесс успел запуститься
+            std::thread::sleep(std::time::Duration::from_millis(1500));
+
+            Ok("launch_and_exit".to_string())
         }
 
         "win" => {
@@ -116,7 +124,7 @@ pub async fn download_and_install(url: String, platform: String) -> Result<Strin
             std::fs::write(&exe_path, &bytes)
                 .map_err(|e| format!("Не удалось сохранить файл: {}", e))?;
 
-            // Тихая установка NSIS /S
+            // Тихая установка NSIS /S — установщик сам закроет старую версию
             Command::new(exe_path.to_str().unwrap())
                 .arg("/S")
                 .spawn()
