@@ -908,10 +908,25 @@ function getDesc(item){return typeof item.desc==='object'?item.desc[settings.lan
 function getTags(item){return typeof item.tags==='object'?(item.tags[settings.lang]||[]):(item.tags||[])}
 function getKeys(item){return adaptKeys(item.keys)}
 function adaptKeys(keys){
-  if(typeof keys==='string') return keys;
   if(!keys) return '';
   const os=settings.os||'win';
-  return keys[os]||keys.win||keys.mac||Object.values(keys)[0]||'';
+  if(typeof keys==='object'){
+    return keys[os]||keys.win||keys.mac||Object.values(keys)[0]||'';
+  }
+  // String shortcut — adapt for macOS/Linux
+  if(os==='mac'){
+    return keys
+      .replace(/\bCtrl\b/g,'⌘')
+      .replace(/\bAlt\b/g,'⌥')
+      .replace(/\bShift\b/g,'⇧')
+      .replace(/\bWin\b/g,'⌘')
+      .replace(/\bEnter\b/g,'↩')
+      .replace(/\bDelete\b/g,'⌫');
+  }
+  if(os==='linux'){
+    return keys.replace(/\bWin\b/g,'Super');
+  }
+  return keys;
 }
 
 // ── Детектор цепочки действий ──
@@ -1336,22 +1351,42 @@ async function doAiSearch(query){
   };
   const typeHint=typeInstructions[lang]?.[tf]||typeInstructions[lang].all;
 
+  // ── OS key format hint ──
+  const osKeyHint={
+    ru:{
+      win:'ВАЖНО: Клавиши в формате Windows: Ctrl, Alt, Shift, Win. Пример: "Ctrl+C", "Win+E".',
+      mac:'ВАЖНО: Клавиши в формате macOS: ⌘ вместо Ctrl, ⌥ вместо Alt, ⇧ вместо Shift. Пример: "⌘+C", "⌘+⇧+P", "⌥+↑". НЕ используй Ctrl.',
+      linux:'ВАЖНО: Клавиши в формате Linux: Ctrl, Alt, Shift, Super. Пример: "Ctrl+C", "Super+E".'
+    },
+    en:{
+      win:'IMPORTANT: Keys in Windows format: Ctrl, Alt, Shift, Win. Example: "Ctrl+C", "Win+E".',
+      mac:'IMPORTANT: Keys in macOS format: ⌘ instead of Ctrl, ⌥ instead of Alt, ⇧ instead of Shift. Example: "⌘+C", "⌘+⇧+P", "⌥+↑". Do NOT use Ctrl.',
+      linux:'IMPORTANT: Keys in Linux format: Ctrl, Alt, Shift, Super. Example: "Ctrl+C", "Super+E".'
+    }
+  };
+  const osHint=osKeyHint[lang][settings.os||'win'];
+
   // ── Пример JSON для цепочки ──
-  const chainExample=tf==='chain'
-    ?'[{"step":1,"keys":"Ctrl+C","desc":"Копировать","example":"","program":"Excel"},{"step":2,"keys":"Ctrl+V","desc":"Вставить","example":"","program":"Excel"}]'
-    :'[{"keys":"Ctrl+C","desc":"Копировать","example":"","program":"Excel"}]';
+  const macChainEx='[{"step":1,"keys":"⌘+C","desc":"Копировать","example":"","program":"Excel"},{"step":2,"keys":"⌘+V","desc":"Вставить","example":"","program":"Excel"}]';
+  const winChainEx='[{"step":1,"keys":"Ctrl+C","desc":"Копировать","example":"","program":"Excel"},{"step":2,"keys":"Ctrl+V","desc":"Вставить","example":"","program":"Excel"}]';
+  const macEx='[{"keys":"⌘+C","desc":"Копировать","example":"","program":"Excel"}]';
+  const winEx='[{"keys":"Ctrl+C","desc":"Копировать","example":"","program":"Excel"}]';
+  const isMacOS=settings.os==='mac';
+  const chainExample=tf==='chain'?(isMacOS?macChainEx:winChainEx):(isMacOS?macEx:winEx);
 
   // Промпт для Claude
   const claudePrompt=lang==='ru'
     ?`Ты эксперт по горячим клавишам, формулам и командам для десктопных приложений.
-Приложения: ${activeProgs}. ОС: ${osName}.
+Приложения: ${activeProgs}. ОС пользователя: ${osName}.
+${osHint}
 ${typeHint}
 НЕ выдавай нерелевантные клавиши.
 Формат ответа — ТОЛЬКО JSON массив без markdown. Пример: ${chainExample}
 Поля каждого элемента: "keys", "desc", "example", "program"${tf==='chain'?', "step"':''}.
 Максимум 8 элементов. Только JSON, без пояснений.`
     :`You are an expert in hotkeys, formulas and commands for desktop apps.
-Apps: ${activeProgs}. OS: ${osName}.
+Apps: ${activeProgs}. User OS: ${osName}.
+${osHint}
 ${typeHint}
 Do NOT return irrelevant results.
 Reply format — ONLY a JSON array, no markdown. Example: ${chainExample}
@@ -1361,10 +1396,11 @@ Maximum 8 items. JSON only, no explanations.`;
   // Промпт для GigaChat
   const gigaSystemPrompt=`Отвечай ТОЛЬКО валидным JSON массивом. Никакого текста до или после. Никакого markdown.
 Формат: [{"keys":"...","desc":"...","example":"...","program":"..."}]
-Приложения: ${activeProgs}. ОС: ${osName}.
+Приложения: ${activeProgs}. ОС пользователя: ${osName}.
+${osHint}
 ${typeHint}`;
   const gigaUserPrompt=`Запрос: ${query}
-${typeHint}
+${osHint}
 Верни JSON массив из 3-6 элементов. ТОЛЬКО JSON.`;
 
   const systemPrompt=provider==='giga'?gigaSystemPrompt:claudePrompt;
