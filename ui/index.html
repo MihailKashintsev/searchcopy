@@ -2192,22 +2192,42 @@ function isDismissedUpdate(version){
 // ── Check for updates ──
 async function checkForUpdates(silent=false){
   const invoke=window.__TAURI__?.core?.invoke||window.__TAURI__?.tauri?.invoke;
-  if(!invoke)return;
+  if(!invoke){console.log('[Updater] no Tauri invoke');return;}
   try{
     const currentVersion=await invoke('get_version');
+    console.log('[Updater] current:',currentVersion);
     const res=await fetch('https://api.github.com/repos/MihailKashintsev/searchcopy/releases/latest');
-    if(!res.ok)return;
+    if(!res.ok){console.log('[Updater] GitHub API error:',res.status);return;}
     const data=await res.json();
     const latest=data.tag_name?.replace('v','').trim();
+    console.log('[Updater] latest:',latest,'dismissed:',isDismissedUpdate(latest));
     if(!latest||latest===currentVersion.trim()||isDismissedUpdate(latest))return;
-    // Find asset URL
+    // Find asset — search by platform keywords, not just extension
     const ua=navigator.userAgent+navigator.platform;
     const isMac=/Mac/.test(ua);const isWin=/Win/.test(ua);
-    const ext=isMac?'.dmg':isWin?'.exe':'.AppImage';
-    const asset=data.assets?.find(a=>a.name.endsWith(ext));
-    if(!asset)return;
+    const assets=data.assets||[];
+    console.log('[Updater] assets:',assets.map(a=>a.name));
+    let asset;
+    if(isMac){
+      asset=assets.find(a=>a.name.endsWith('.dmg'))||
+            assets.find(a=>a.name.toLowerCase().includes('universal')&&a.name.endsWith('.dmg'))||
+            assets.find(a=>a.name.toLowerCase().includes('mac'));
+    } else if(isWin){
+      asset=assets.find(a=>a.name.endsWith('.exe'))||
+            assets.find(a=>a.name.toLowerCase().includes('setup'));
+    } else {
+      asset=assets.find(a=>a.name.endsWith('.AppImage'))||
+            assets.find(a=>a.name.endsWith('.appimage'))||
+            assets.find(a=>a.name.toLowerCase().includes('appimage'));
+    }
+    console.log('[Updater] chosen asset:',asset?.name);
+    if(!asset){
+      // Fallback: show banner with release page link
+      showUpdateBanner(latest,data.html_url,'release page');
+      return;
+    }
     showUpdateBanner(latest,asset.browser_download_url,asset.name);
-  }catch(e){console.log('Update check failed:',e);}
+  }catch(e){console.log('[Updater] failed:',e);}
 }
 
 function showUpdateBanner(version,url,fileName){
