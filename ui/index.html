@@ -34,9 +34,84 @@ body{min-height:100vh;background:var(--bg);font-family:ui-monospace,'SF Mono',Me
 input,button,textarea{font-family:inherit}button{cursor:pointer}
 ::-webkit-scrollbar{width:4px}::-webkit-scrollbar-thumb{background:rgba(99,102,241,0.3);border-radius:4px}
 input::placeholder,textarea::placeholder{color:var(--text3)}
-@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes slideDown{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
+@keyframes slideUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@keyframes scaleIn{from{opacity:0;transform:scale(0.94)}to{opacity:1;transform:scale(1)}}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.3}}
+@keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
 @keyframes spin{to{transform:rotate(360deg)}}
+@keyframes bounceIn{0%{transform:scale(0.8);opacity:0}60%{transform:scale(1.04)}100%{transform:scale(1);opacity:1}}
+@keyframes ripple{0%{transform:scale(0);opacity:0.4}100%{transform:scale(2.5);opacity:0}}
+
+/* Stagger children */
+.stagger-list > *{animation:slideUp 0.22s ease both}
+.stagger-list > *:nth-child(1){animation-delay:0.02s}
+.stagger-list > *:nth-child(2){animation-delay:0.06s}
+.stagger-list > *:nth-child(3){animation-delay:0.10s}
+.stagger-list > *:nth-child(4){animation-delay:0.13s}
+.stagger-list > *:nth-child(5){animation-delay:0.16s}
+.stagger-list > *:nth-child(n+6){animation-delay:0.19s}
+
+/* Collapsible section */
+.section-wrap{margin-bottom:8px}
+.section-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:8px 12px;border-radius:10px;cursor:pointer;
+  user-select:none;transition:background 0.15s;
+  background:var(--bg3);border:1px solid var(--border);
+  margin-bottom:6px;
+}
+.section-header:hover{background:rgba(99,102,241,0.06);border-color:rgba(99,102,241,0.2)}
+.section-title{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:var(--text3);display:flex;align-items:center;gap:8px}
+.section-badge{background:rgba(99,102,241,0.12);border:1px solid rgba(99,102,241,0.2);color:#a5b4fc;border-radius:20px;padding:1px 8px;font-size:9px;font-weight:800}
+.section-toggle{font-size:11px;color:var(--text3);transition:transform 0.25s cubic-bezier(.4,0,.2,1);display:inline-block}
+.section-toggle.collapsed{transform:rotate(-90deg)}
+.section-body{overflow:hidden;transition:max-height 0.32s cubic-bezier(.4,0,.2,1),opacity 0.25s ease}
+.section-body.collapsed{max-height:0!important;opacity:0}
+
+/* Card hover lift */
+.result-card{transition:transform 0.18s cubic-bezier(.4,0,.2,1),box-shadow 0.18s ease,border-color 0.18s ease}
+.result-card:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(0,0,0,0.25);border-color:rgba(99,102,241,0.3)}
+.result-card:active{transform:translateY(0) scale(0.99)}
+.light .result-card:hover{box-shadow:0 6px 24px rgba(99,102,241,0.12)}
+
+/* AI card glow on hover */
+.ai-card{transition:transform 0.18s cubic-bezier(.4,0,.2,1),box-shadow 0.18s ease,border-color 0.18s ease}
+.ai-card:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(168,85,247,0.2);border-color:rgba(168,85,247,0.4)}
+.ai-card:active{transform:translateY(0) scale(0.99)}
+
+/* Section header press */
+.section-header:active{transform:scale(0.99)}
+
+/* Tab switch animation */
+.tab-content-enter{animation:tabEnter 0.2s cubic-bezier(.4,0,.2,1) both}
+@keyframes tabEnter{from{opacity:0;transform:translateY(6px) scale(0.99)}to{opacity:1;transform:none}}
+
+/* Floating glow animation */
+@keyframes floatGlow{0%,100%{transform:translateX(-50%) translateY(0)}50%{transform:translateX(-50%) translateY(-18px)}}
+.glow1{animation:floatGlow 8s ease-in-out infinite}
+@keyframes floatGlow2{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
+.glow2{animation:floatGlow2 10s ease-in-out infinite}
+
+/* Input focus ring */
+@keyframes focusRing{from{box-shadow:0 0 0 0 rgba(99,102,241,0.4)}to{box-shadow:0 0 0 4px rgba(99,102,241,0.08)}}
+
+/* Copy button success */
+@keyframes copyPop{0%{transform:scale(1)}50%{transform:scale(1.2)}100%{transform:scale(1)}}
+.copy-btn.copied{animation:copyPop 0.25s ease}
+
+/* Badge pulse on new AI result */
+@keyframes badgePulse{0%,100%{box-shadow:none}50%{box-shadow:0 0 12px rgba(192,132,252,0.5)}}
+.ai-result-new{animation:badgePulse 1s ease 2}
+
+/* Step number bounce */
+@keyframes stepBounce{0%{transform:scale(0.7);opacity:0}70%{transform:scale(1.1)}100%{transform:scale(1);opacity:1}}
+.chain-step-num{animation:stepBounce 0.3s cubic-bezier(.4,0,.2,1) both}
+
+/* Loading shimmer */
+.skeleton{background:linear-gradient(90deg,var(--bg3) 25%,rgba(99,102,241,0.08) 50%,var(--bg3) 75%);background-size:200% 100%;animation:shimmer 1.4s infinite;border-radius:8px}
 .glow1{position:fixed;top:-250px;left:50%;transform:translateX(-50%);width:900px;height:500px;background:radial-gradient(ellipse,rgba(79,70,229,0.13) 0%,transparent 65%);pointer-events:none;z-index:0}
 .glow2{position:fixed;bottom:-150px;right:-80px;width:450px;height:350px;background:radial-gradient(ellipse,rgba(14,165,233,0.07) 0%,transparent 70%);pointer-events:none;z-index:0}
 .light .glow1{background:radial-gradient(ellipse,rgba(99,102,241,0.06) 0%,transparent 65%)}
@@ -1014,7 +1089,7 @@ function el(tag,style,html){
 }
 
 function renderResultCard(item,idx,detectedCols){
-  const card=el('div',`animation:fadeUp ${0.07+idx*0.04}s ease both;background:var(--card-bg);border:1px solid var(--card-border);border-radius:14px;padding:14px 16px;display:flex;flex-direction:column;gap:8px`);
+  const card=document.createElement('div');card.className='result-card';card.style.cssText='background:var(--card-bg);border:1px solid var(--card-border);border-radius:14px;padding:14px 16px;display:flex;flex-direction:column;gap:8px';
   const top=el('div',"display:flex;align-items:flex-start;justify-content:space-between;gap:12px");
   const info=el('div',"flex:1;min-width:0");
   const keysBadge=el('div',"display:inline-flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:6px");
@@ -1110,7 +1185,7 @@ function renderColumnChainCard(chain){
 }
 
 function renderAiCard(item,idx){
-  const card=el('div',`animation:fadeUp ${0.07+idx*0.04}s ease both;background:rgba(168,85,247,0.05);border:1px solid rgba(168,85,247,0.2);border-radius:14px;padding:14px 16px;display:flex;flex-direction:column;gap:6px`);
+  const card=document.createElement('div');card.className='ai-card';card.style.cssText='background:rgba(168,85,247,0.05);border:1px solid rgba(168,85,247,0.2);border-radius:14px;padding:14px 16px;display:flex;flex-direction:column;gap:6px';
   const top=el('div',"display:flex;align-items:flex-start;justify-content:space-between;gap:12px");
   const info=el('div',"flex:1;min-width:0");
   const keysRow=el('div',"display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:5px");
@@ -1472,7 +1547,7 @@ function renderChainCard(chain){
   chain.forEach(step=>{
     const row=el('div',"display:flex;align-items:flex-start;gap:12px");
     const num=el('div',`width:28px;height:28px;border-radius:50%;flex-shrink:0;margin-top:2px;background:${color}20;border:1.5px solid ${color}60;display:flex;align-items:center;justify-content:center;font-size:12px;color:${color};font-weight:800`);
-    num.textContent=step.step;row.appendChild(num);
+    num.className='chain-step-num';num.style.animationDelay=(idx*0.07)+'s';num.textContent=step.step;row.appendChild(num);
     const content=el('div',"flex:1");
     const meta=el('div',"display:flex;align-items:center;gap:8px;margin-bottom:6px;flex-wrap:wrap");
     meta.innerHTML=`<span style="background:rgba(99,102,241,0.18);border:1px solid rgba(99,102,241,0.4);border-radius:6px;padding:3px 10px;font-size:12px;color:#c7d2fe;font-weight:700">${t.chainCol(step.col)}</span><span style="font-size:11px;color:var(--text2)">${step.desc}</span>`;
@@ -1499,7 +1574,8 @@ function renderResultCard(item,idx,detectedCols){
   if(item.template&&detectedCols.length>0&&!item.complex){
     display=item.template.replace(/\{col\}/g,detectedCols[0]);adapted=true;
   }
-  const card=el('div',`background:var(--card-bg);border:1px solid var(--border);border-left:3px solid ${color};border-radius:12px;padding:14px 18px;display:flex;align-items:flex-start;gap:14px;animation:fadeUp 0.3s ease ${idx*0.04}s both`);
+  const card=el('div',`background:var(--card-bg);border:1px solid var(--border);border-left:3px solid ${color};border-radius:12px;padding:14px 18px;display:flex;align-items:flex-start;gap:14px`);
+  card.className='result-card';
   const progTag=el('div',`background:${color}14;border:1px solid ${color}40;border-radius:7px;padding:3px 8px;font-size:10px;color:${color};font-weight:800;text-transform:uppercase;white-space:nowrap;margin-top:2px`);
   progTag.textContent=`${ICONS[item.program]||'◆'} ${item.program}`;card.appendChild(progTag);
   const body=el('div',"flex:1;min-width:0");
@@ -1523,7 +1599,8 @@ function renderResultCard(item,idx,detectedCols){
 
 function renderAiCard(item,idx){
   const color="#818cf8";
-  const card=el('div',`background:var(--card-bg);border:1px solid rgba(99,102,241,0.25);border-left:3px solid ${color};border-radius:12px;padding:14px 18px;display:flex;align-items:flex-start;gap:14px;animation:fadeUp 0.3s ease ${idx*0.04}s both`);
+  const card=el('div',`background:var(--card-bg);border:1px solid rgba(99,102,241,0.25);border-left:3px solid ${color};border-radius:12px;padding:14px 18px;display:flex;align-items:flex-start;gap:14px`);
+  card.className='ai-card';
   const badge=el('div',"background:rgba(99,102,241,0.15);border:1px solid rgba(99,102,241,0.3);border-radius:7px;padding:3px 8px;font-size:10px;color:#a78bfa;font-weight:800;white-space:nowrap;margin-top:2px");
   badge.textContent=`✦ ${item.program||'AI'}`;card.appendChild(badge);
   const body=el('div',"flex:1;min-width:0");
@@ -1563,79 +1640,175 @@ function renderAbout(){
   return wrap;
 }
 
+// ── Collapsible section helper ──
+function makeSection(emoji, titleText, badge, color, contentEl, storageKey){
+  const isCollapsed = localStorage.getItem('sc_collapse_'+storageKey)==='1';
+  const wrap = document.createElement('div');
+  wrap.className = 'section-wrap';
+  wrap.style.animation = 'scaleIn 0.22s cubic-bezier(.4,0,.2,1) both';
+
+  const header = document.createElement('div');
+  header.className = 'section-header';
+  const titleWrap = document.createElement('span');
+  titleWrap.className = 'section-title';
+
+  const emojiSpan = document.createElement('span');
+  emojiSpan.textContent = emoji;
+  emojiSpan.style.cssText = 'font-size:13px';
+
+  const textSpan = document.createElement('span');
+  textSpan.textContent = titleText;
+
+  const badgeSpan = document.createElement('span');
+  badgeSpan.className = 'section-badge';
+  badgeSpan.textContent = badge;
+  if(color){
+    badgeSpan.style.background = color+'18';
+    badgeSpan.style.borderColor = color+'44';
+    badgeSpan.style.color = color;
+  }
+
+  titleWrap.appendChild(emojiSpan);
+  titleWrap.appendChild(textSpan);
+  titleWrap.appendChild(badgeSpan);
+
+  const toggle = document.createElement('span');
+  toggle.className = 'section-toggle' + (isCollapsed ? ' collapsed' : '');
+  toggle.textContent = '▾';
+
+  header.appendChild(titleWrap);
+  header.appendChild(toggle);
+
+  const body = document.createElement('div');
+  body.className = 'section-body' + (isCollapsed ? ' collapsed' : '');
+  body.style.maxHeight = isCollapsed ? '0' : '4000px';
+  body.appendChild(contentEl);
+
+  header.onclick = () => {
+    const now = body.classList.contains('collapsed');
+    body.classList.toggle('collapsed', !now);
+    toggle.classList.toggle('collapsed', !now);
+    body.style.maxHeight = now ? '4000px' : '0';
+    localStorage.setItem('sc_collapse_'+storageKey, now ? '0' : '1');
+    // ripple effect on header
+    const rpl = document.createElement('span');
+    rpl.style.cssText='position:absolute;width:30px;height:30px;border-radius:50%;background:rgba(99,102,241,0.25);pointer-events:none;animation:ripple 0.5s ease forwards;left:50%;top:50%;transform-origin:center';
+    header.style.position='relative';header.style.overflow='hidden';
+    header.appendChild(rpl);setTimeout(()=>rpl.remove(),500);
+  };
+
+  wrap.appendChild(header);
+  wrap.appendChild(body);
+  return wrap;
+}
+
 // ── Main render ──
 // ── Main render ──
 function renderResults(){
   const rw=document.getElementById('results-wrap');if(!rw)return;rw.innerHTML='';
   const t=T[settings.lang];
   const q=state.query.trim();
+  const lang=settings.lang;
 
-  // ── Пустое состояние ──
   if(!q && !state.aiResult){return;}
 
-  // ── Локальный поиск ──
   const localResults = q.length>=2 ? doSearch(q, state.progs, state.typeFilter) : [];
-  const actionChain = q.length>=4 && state.typeFilter!=='hotkey' && state.typeFilter!=='formula'
+  const actionChain  = q.length>=4 && state.typeFilter!=='hotkey' && state.typeFilter!=='formula'
     ? buildActionChain(q, state.progs) : null;
-  const colChain = q.length>=2 && state.typeFilter!=='hotkey'
+  const colChain     = q.length>=2 && state.typeFilter!=='hotkey'
     ? buildColumnChain(q, localResults) : null;
   const detectedCols = extractColumns(q);
 
-  // Показываем цепочку действий если есть
+  let sectionIndex = 0;
+
+  // ── Цепочка действий ──
   if(actionChain){
-    const chainLabel=el('p',"color:var(--text3);font-size:10px;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:8px");
-    chainLabel.innerHTML=`⛓ ${settings.lang==='ru'?'Цепочка действий':'Action chain'} · ${actionChain.length} ${settings.lang==='ru'?'шагов':'steps'}`;
-    rw.appendChild(chainLabel);
-    rw.appendChild(renderActionChainCard(actionChain));
+    const inner = document.createElement('div');
+    inner.appendChild(renderActionChainCard(actionChain));
+    const label = lang==='ru'?'Цепочка действий':'Action chain';
+    const badge = actionChain.length+(lang==='ru'?' шагов':' steps');
+    const sec = makeSection('⛓', label, badge, '#fcd34d', inner, 'chain');
+    sec.style.animationDelay = (sectionIndex++*0.07)+'s';
+    rw.appendChild(sec);
   } else if(colChain){
-    rw.appendChild(renderColumnChainCard(colChain));
+    const inner = document.createElement('div');
+    inner.appendChild(renderColumnChainCard(colChain));
+    const sec = makeSection('⛓', lang==='ru'?'Цепочка столбцов':'Column chain', colChain.length+(lang==='ru'?' шагов':' steps'), '#fcd34d', inner, 'colchain');
+    sec.style.animationDelay = (sectionIndex++*0.07)+'s';
+    rw.appendChild(sec);
   }
 
-  // Локальные результаты
+  // ── База знаний ──
   if(localResults.length>0){
-    const label=el('p',"color:var(--text3);font-size:10px;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:8px;margin-top:"+(actionChain||colChain?"16px":"0"));
-    label.innerHTML=`📚 ${settings.lang==='ru'?'База':'Database'} · ${t.found(localResults.length)}`;
-    rw.appendChild(label);
-    const list=el('div',"display:flex;flex-direction:column;gap:8px");
+    const list = document.createElement('div');
+    list.className = 'stagger-list';
+    list.style.cssText = 'display:flex;flex-direction:column;gap:8px';
     localResults.forEach((item,i)=>list.appendChild(renderResultCard(item,i,detectedCols)));
-    rw.appendChild(list);
-  } else if(q.length>=2 && !actionChain && !colChain){
-    const empty=el('div',"text-align:center;padding:30px 20px;color:var(--empty-color)");
-    empty.innerHTML=`<div style="font-size:30px;margin-bottom:10px;opacity:0.4">⌕</div><p style="margin:0;font-size:13px">${t.notFound(q)}</p><p style="margin:5px 0 0;font-size:11px;opacity:0.6">${t.notFoundHint}</p>`;
+    const sec = makeSection('📚', lang==='ru'?'База':'Database', t.found(localResults.length), '#818cf8', list, 'db');
+    sec.style.animationDelay = (sectionIndex++*0.07)+'s';
+    rw.appendChild(sec);
+  } else if(q.length>=2 && !actionChain && !colChain && !state.aiLoading){
+    const empty = document.createElement('div');
+    empty.style.cssText = 'text-align:center;padding:28px 20px;color:var(--empty-color);animation:fadeIn 0.3s ease';
+    empty.innerHTML = '<div style="font-size:28px;margin-bottom:10px;opacity:0.35">⌕</div><p style="margin:0;font-size:13px">'+t.notFound(q)+'</p><p style="margin:5px 0 0;font-size:11px;opacity:0.55">'+t.notFoundHint+'</p>';
     rw.appendChild(empty);
   }
 
-  // ── AI результаты ──
+  // ── AI загрузка ──
   if(state.aiLoading){
-    const sep=el('div',"margin-top:20px");
-    const loading=el('div',"display:flex;align-items:center;gap:10px;padding:20px;background:rgba(168,85,247,0.05);border:1px solid rgba(168,85,247,0.15);border-radius:12px;color:var(--text2)");
-    loading.innerHTML=`<div class="spinner"></div><span style="font-size:12px">${t.aiSearching}</span>`;
-    sep.appendChild(loading);rw.appendChild(sep);
+    const loading = document.createElement('div');
+    loading.style.cssText = 'margin-top:12px;animation:fadeIn 0.2s ease';
+    loading.innerHTML = `
+      <div style="display:flex;align-items:center;gap:10px;padding:16px;background:rgba(168,85,247,0.05);border:1px solid rgba(168,85,247,0.18);border-radius:12px;color:var(--text2)">
+        <div class="spinner"></div>
+        <div style="flex:1">
+          <div style="font-size:12px;font-weight:700;color:#c084fc;margin-bottom:4px">${t.aiSearching}</div>
+          <div style="display:flex;gap:6px">
+            <div class="skeleton" style="height:8px;width:140px"></div>
+            <div class="skeleton" style="height:8px;width:80px"></div>
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:6px;margin-top:8px">
+        ${[1,2,3].map(()=>'<div class="skeleton" style="height:52px;border-radius:12px"></div>').join('')}
+      </div>`;
+    rw.appendChild(loading);
   }
 
+  // ── AI результаты ──
   if(state.aiResult && !state.aiLoading){
-    const sep=el('div',"margin-top:"+(localResults.length>0||actionChain?"20px":"0"));
     if(state.aiResult.error){
-      const err=el('div',"background:rgba(239,68,68,0.06);border:1px solid rgba(239,68,68,0.2);border-radius:12px;padding:14px;color:#fca5a5;font-size:12px");
-      err.textContent=state.aiResult.msg;sep.appendChild(err);
+      const err = document.createElement('div');
+      err.style.cssText = 'margin-top:12px;background:rgba(239,68,68,0.06);border:1px solid rgba(239,68,68,0.2);border-radius:12px;padding:14px;color:#fca5a5;font-size:12px;animation:fadeIn 0.25s ease';
+      err.textContent = state.aiResult.msg;
+      rw.appendChild(err);
     } else {
-      const aiLabel=el('p',"color:var(--text3);font-size:10px;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:8px");
-      const itemCount=state.aiResult.items?.length||0;
-      aiLabel.innerHTML=`✦ AI · ${state.aiResult.isChain?( (settings.lang==='ru'?'Цепочка':'Chain')+' · '+itemCount+(settings.lang==='ru'?' шагов':' steps') ):t.found(itemCount)}`;
-      sep.appendChild(aiLabel);
+      const itemCount = state.aiResult.items?.length||0;
+      const providerLabel = state.aiResult.provider==='giga'?'GigaChat':'Claude AI';
+      const badge = state.aiResult.isChain
+        ? (itemCount+(lang==='ru'?' шагов':' steps'))
+        : t.found(itemCount);
+
+      let inner;
       if(state.aiResult.isChain){
-        // Рендерим как action chain
+        inner = document.createElement('div');
         const steps=(state.aiResult.items||[]).map((item,i)=>({
           step:item.step||i+1, text:item.desc||item.keys, item:{...item,type:'hotkey'}
         }));
-        sep.appendChild(renderActionChainCard(steps));
+        inner.appendChild(renderActionChainCard(steps));
       } else {
-        const aiList=el('div',"display:flex;flex-direction:column;gap:8px");
-        (state.aiResult.items||[]).forEach((item,i)=>aiList.appendChild(renderAiCard(item,i)));
-        sep.appendChild(aiList);
+        inner = document.createElement('div');
+        inner.className = 'stagger-list';
+        inner.style.cssText = 'display:flex;flex-direction:column;gap:8px';
+        (state.aiResult.items||[]).forEach((item,i)=>inner.appendChild(renderAiCard(item,i)));
       }
+
+      const sec = makeSection('✦', providerLabel, badge, '#c084fc', inner, 'ai');
+      sec.style.animationDelay = (sectionIndex++*0.07)+'s';
+      sec.classList.add('ai-result-new');
+      sec.style.marginTop = (localResults.length>0||actionChain||colChain)?'8px':'0';
+      rw.appendChild(sec);
     }
-    rw.appendChild(sep);
   }
 }
 
@@ -1650,7 +1823,7 @@ function render(){
   const wrap=el('div',"position:relative;z-index:1;max-width:760px;margin:0 auto;padding:32px 20px 80px");
 
   // ── Header ──
-  const header=el('div',"text-align:center;margin-bottom:28px");
+  const header=el('div',"text-align:center;margin-bottom:28px;animation:fadeUp 0.4s cubic-bezier(.4,0,.2,1) both");
   const isDark=settings.theme!=='light';
   const h1grad=isDark
     ?'linear-gradient(135deg,#fff 40%,#a5b4fc)'
@@ -1662,7 +1835,7 @@ function render(){
   wrap.appendChild(header);
 
   // ── Tabs ──
-  const tabs=el('div',"display:flex;background:var(--bg3);border:1px solid var(--border);border-radius:14px;padding:4px;gap:4px;margin-bottom:20px");
+  const tabs=el('div',"display:flex;background:var(--bg3);border:1px solid var(--border);border-radius:14px;padding:4px;gap:4px;margin-bottom:20px;animation:fadeUp 0.35s 0.05s cubic-bezier(.4,0,.2,1) both");
   [{key:'search',label:t.tabSearch},{key:'about',label:t.tabAbout},{key:'settings',label:t.tabSettings}].forEach(({key,label})=>{
     const btn=document.createElement('button');
     btn.className='tab-btn'+(state.tab===key?' active':'');
@@ -1672,13 +1845,13 @@ function render(){
   });
   wrap.appendChild(tabs);
 
-  if(state.tab==='settings'){wrap.appendChild(renderSettings());app.appendChild(wrap);return;}
-  if(state.tab==='about'){wrap.appendChild(renderAbout());app.appendChild(wrap);return;}
+  if(state.tab==='settings'){const s=renderSettings();s.style.animation='slideDown 0.25s cubic-bezier(.4,0,.2,1) both';wrap.appendChild(s);app.appendChild(wrap);return;}
+  if(state.tab==='about'){const a=renderAbout();a.style.animation='slideDown 0.25s cubic-bezier(.4,0,.2,1) both';wrap.appendChild(a);app.appendChild(wrap);return;}
 
-  const sw=el('div',"");
+  const sw=el('div',"animation:fadeIn 0.2s ease both");
 
   // ── App filter pills ──
-  const progRow=el('div',"display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px");
+  const progRow=el('div',"display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;animation:fadeUp 0.3s 0.1s cubic-bezier(.4,0,.2,1) both");
 
   function updatePills(){
     progRow.querySelectorAll('.pill[data-prog]').forEach(b=>{
@@ -1749,7 +1922,7 @@ function render(){
   sw.appendChild(typeRow);
 
   // ── Search input ──
-  const inputRow=el('div',"display:flex;gap:8px;margin-bottom:12px;align-items:center");
+  const inputRow=el('div',"display:flex;gap:8px;margin-bottom:12px;align-items:center;animation:fadeUp 0.3s 0.18s cubic-bezier(.4,0,.2,1) both");
   const inputWrap=el('div',"flex:1;position:relative;display:flex;align-items:center");
 
   const prefixIcon=el('span',"position:absolute;left:14px;font-size:14px;color:var(--text3);pointer-events:none");
