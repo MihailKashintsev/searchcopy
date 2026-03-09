@@ -155,9 +155,9 @@ jobs:
           find . -name "*.apk" 2>/dev/null | head -20 || echo "none"
 
           # Tauri кладёт APK в release или debug подпапку
-          APK=$(find src-tauri/gen/android/app/build/outputs/apk -name "*.apk" 2>/dev/null | grep -v signed | head -1)
+          APK=$(find src-tauri/gen/android/app/build/outputs/apk -name "*.apk" 2>/dev/null | grep -v "\-signed" | head -1)
           if [ -z "$APK" ]; then
-            APK=$(find . -name "*.apk" 2>/dev/null | grep -v signed | head -1)
+            APK=$(find . -name "*.apk" 2>/dev/null | grep -v "\-signed" | head -1)
           fi
 
           if [ -z "$APK" ]; then
@@ -178,6 +178,7 @@ jobs:
 
           $BUILD_TOOLS/apksigner verify --verbose SearchCopy-release.apk | head -3
           echo "=== Done ==="
+
       - name: Upload APK to Release
         uses: softprops/action-gh-release@v2
         with:
