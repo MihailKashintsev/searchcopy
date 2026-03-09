@@ -94,6 +94,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GH_PAT }}
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+          # macOS: ad-hoc signing, без Apple Developer сертификата
+          APPLE_SIGNING_IDENTITY: "-"
         with:
           tagName: ${{ github.ref_name }}
           releaseName: "SearchCopy ${{ github.ref_name }}"
@@ -154,7 +156,6 @@ jobs:
           echo "=== All APK files ==="
           find . -name "*.apk" 2>/dev/null | head -20 || echo "none"
 
-          # Tauri кладёт APK в release или debug подпапку
           APK=$(find src-tauri/gen/android/app/build/outputs/apk -name "*.apk" 2>/dev/null | grep -v "\-signed" | head -1)
           if [ -z "$APK" ]; then
             APK=$(find . -name "*.apk" 2>/dev/null | grep -v "\-signed" | head -1)
@@ -180,8 +181,7 @@ jobs:
           echo "=== Done ==="
 
       - name: Upload APK to Release
-        uses: softprops/action-gh-release@v2
-        with:
-          files: SearchCopy-release.apk
+        run: |
+          gh release upload "${{ github.ref_name }}" SearchCopy-release.apk --clobber
         env:
-          GITHUB_TOKEN: ${{ secrets.GH_PAT }}
+          GH_TOKEN: ${{ secrets.GH_PAT }}
