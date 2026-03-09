@@ -131,11 +131,25 @@ jobs:
           NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
         run: npm run tauri android build --apk
 
-      - name: Sign APK
+      - name: Find and Sign APK
         run: |
-          APK=$(find src-tauri/gen/android -name "*.apk" | grep -v signed | head -1)
-          echo "Signing: $APK"
+          echo "=== All APK files ==="
+          find . -name "*.apk" 2>/dev/null | head -20 || echo "none"
+
+          # Tauri кладёт APK в release или debug подпапку
+          APK=$(find src-tauri/gen/android/app/build/outputs/apk -name "*.apk" 2>/dev/null | grep -v signed | head -1)
+          if [ -z "$APK" ]; then
+            APK=$(find . -name "*.apk" 2>/dev/null | grep -v signed | head -1)
+          fi
+
+          if [ -z "$APK" ]; then
+            echo "ERROR: APK not found!"
+            exit 1
+          fi
+          echo "=== Signing: $APK ==="
+
           BUILD_TOOLS=$ANDROID_SDK_ROOT/build-tools/$(ls $ANDROID_SDK_ROOT/build-tools | sort -V | tail -1)
+
           $BUILD_TOOLS/apksigner sign \
             --ks searchcopy.jks \
             --ks-key-alias searchcopy \
@@ -143,8 +157,9 @@ jobs:
             --key-pass pass:${{ secrets.ANDROID_KEY_PASSWORD }} \
             --out SearchCopy-release.apk \
             "$APK"
-          $BUILD_TOOLS/apksigner verify --verbose SearchCopy-release.apk | head -3
 
+          $BUILD_TOOLS/apksigner verify --verbose SearchCopy-release.apk | head -3
+          echo "=== Done ==="
       - name: Upload APK to Release
         uses: softprops/action-gh-release@v2
         with:
