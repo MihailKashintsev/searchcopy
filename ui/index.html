@@ -190,6 +190,33 @@ input::placeholder,textarea::placeholder{color:var(--text3)}
 .light .copy-btn{background:rgba(0,0,0,0.03);border-color:rgba(0,0,0,0.1);color:#94a3b8}
 .light .ai-btn{background:rgba(0,0,0,0.04);border-color:rgba(0,0,0,0.1);color:#64748b}
 .light .spinner{border-color:rgba(99,102,241,0.2);border-top-color:#6366f1}
+
+/* ── Responsive ── */
+@media(max-width:640px){
+  .wrap{padding:20px 12px 80px!important}
+  h1{font-size:clamp(26px,10vw,40px)!important;letter-spacing:-1px!important}
+  .pill{font-size:10px!important;padding:4px 9px!important}
+  .pill span{display:none}
+  .chip{font-size:9px!important;padding:3px 9px!important}
+  .tab-btn{font-size:11px!important;padding:7px 4px!important;gap:3px!important}
+  .result-card,.ai-card{padding:11px 12px!important}
+  .copy-btn{padding:4px 8px!important;font-size:10px!important}
+  .ai-btn{padding:0 10px!important;font-size:10px!important;height:40px!important}
+  #prog-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:4px;scrollbar-width:none}
+  #prog-scroll::-webkit-scrollbar{display:none}
+  #type-row{flex-wrap:nowrap!important;overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:4px;scrollbar-width:none}
+  #type-row::-webkit-scrollbar{display:none}
+  #input-row{flex-wrap:wrap!important;gap:6px!important}
+  #input-row .ai-btn{width:100%!important;justify-content:center!important}
+  #ai-hint{font-size:10px!important}
+  .section-header{padding:7px 10px!important}
+  .section-title{font-size:9px!important}
+  #update-banner{top:8px!important;right:8px!important;left:8px!important;padding:11px 14px!important}
+}
+@media(max-width:400px){
+  .tab-btn{font-size:10px!important;padding:6px 2px!important}
+  .result-card{flex-direction:column!important;gap:8px!important}
+}
 </style>
 <body>
 <div id="app"></div>
@@ -1831,7 +1858,7 @@ function render(){
   header.innerHTML=`
     <div style="display:inline-flex;align-items:center;gap:6px;background:rgba(99,102,241,0.1);border:1px solid rgba(99,102,241,0.2);border-radius:20px;padding:3px 12px;margin-bottom:14px;font-size:10px;font-weight:800;letter-spacing:2px;color:#818cf8">RENDERGAMES</div>
     <h1 style="font-size:clamp(32px,7vw,52px);font-weight:900;letter-spacing:-2px;margin:0 0 6px;background:${h1grad};-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">SearchCopy</h1>
-    <p style="font-size:11px;color:var(--text3);letter-spacing:3px;text-transform:uppercase;margin:0">${t.subtitle}</p>`;
+    <p style="font-size:11px;color:var(--text3);letter-spacing:3px;text-transform:uppercase;margin:0">${t.tagline}</p>`;
   wrap.appendChild(header);
 
   // ── Tabs ──
@@ -1852,6 +1879,7 @@ function render(){
 
   // ── App filter pills ──
   const progRow=el('div',"display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;animation:fadeUp 0.3s 0.1s cubic-bezier(.4,0,.2,1) both");
+  progRow.id='prog-scroll';
 
   function updatePills(){
     progRow.querySelectorAll('.pill[data-prog]').forEach(b=>{
@@ -1896,6 +1924,7 @@ function render(){
 
   // ── Type filter chips ──
   const typeRow=el('div',"display:flex;align-items:center;gap:6px;margin-bottom:14px;flex-wrap:wrap");
+  typeRow.id='type-row';
   const typeLabel=el('span',"font-size:10px;color:var(--text3);font-weight:700;letter-spacing:1px;text-transform:uppercase");
   typeLabel.textContent=settings.lang==='ru'?'Тип:':'Type:';
   typeRow.appendChild(typeLabel);
@@ -1923,6 +1952,7 @@ function render(){
 
   // ── Search input ──
   const inputRow=el('div',"display:flex;gap:8px;margin-bottom:12px;align-items:center;animation:fadeUp 0.3s 0.18s cubic-bezier(.4,0,.2,1) both");
+  inputRow.id='input-row';
   const inputWrap=el('div',"flex:1;position:relative;display:flex;align-items:center");
 
   const prefixIcon=el('span',"position:absolute;left:14px;font-size:14px;color:var(--text3);pointer-events:none");
@@ -1976,6 +2006,7 @@ function render(){
 
   // ── AI hint ──
   const aiHint=el('div',"background:rgba(168,85,247,0.06);border:1px solid rgba(168,85,247,0.18);border-radius:10px;padding:8px 14px;margin-bottom:12px;font-size:11px;color:#c084fc;display:flex;align-items:center;gap:7px");
+  aiHint.id='ai-hint';
   aiHint.style.display=state.aiMode?'flex':'none';
   aiHint.innerHTML='<span>✦</span><span>'+(settings.lang==='ru'?'Нажми Enter для ИИ-поиска — результаты появятся вместе с базой':'Press Enter for AI search — shown alongside local results')+'</span>';
   sw.appendChild(aiHint);
@@ -2106,6 +2137,14 @@ async function runSilentInstall(url, fileName, version){
   }
 }
 
+// ── Dismiss update helpers ──
+function dismissUpdate(version){
+  try{localStorage.setItem('sc_dismissed_update',version);}catch{}
+}
+function isDismissedUpdate(version){
+  try{return localStorage.getItem('sc_dismissed_update')===version;}catch{return false;}
+}
+
 // ── Check for updates ──
 async function checkForUpdates(silent=false){
   const invoke=window.__TAURI__?.core?.invoke||window.__TAURI__?.tauri?.invoke;
@@ -2115,8 +2154,8 @@ async function checkForUpdates(silent=false){
     const res=await fetch('https://api.github.com/repos/MihailKashintsev/searchcopy/releases/latest');
     if(!res.ok)return;
     const data=await res.json();
-    const latest=data.tag_name?.replace('v','');
-    if(!latest||latest===currentVersion)return;
+    const latest=data.tag_name?.replace('v','').trim();
+    if(!latest||latest===currentVersion.trim()||isDismissedUpdate(latest))return;
     // Find asset URL
     const ua=navigator.userAgent+navigator.platform;
     const isMac=/Mac/.test(ua);const isWin=/Win/.test(ua);
@@ -2141,7 +2180,7 @@ function showUpdateBanner(version,url,fileName){
   banner.appendChild(installBtn);
   const close=document.createElement('button');
   close.style.cssText='background:transparent;border:none;color:#475569;cursor:pointer;padding:4px;font-size:14px;line-height:1';
-  close.textContent='×';close.onclick=()=>banner.remove();
+  close.textContent='×';close.onclick=()=>{dismissUpdate(version);banner.remove();};
   banner.appendChild(close);
   document.body.appendChild(banner);
 }
