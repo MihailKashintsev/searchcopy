@@ -42,6 +42,22 @@ input::placeholder,textarea::placeholder{color:var(--text3)}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.3}}
 @keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
 @keyframes spin{to{transform:rotate(360deg)}}
+@keyframes floatY{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+@keyframes glow{0%,100%{box-shadow:0 0 8px rgba(99,102,241,0.2)}50%{box-shadow:0 0 22px rgba(99,102,241,0.55),0 0 40px rgba(99,102,241,0.15)}}
+@keyframes glowPurple{0%,100%{box-shadow:0 0 8px rgba(168,85,247,0.2)}50%{box-shadow:0 0 22px rgba(168,85,247,0.6),0 0 40px rgba(168,85,247,0.15)}}
+@keyframes glowGreen{0%,100%{box-shadow:0 0 6px rgba(52,211,153,0.2)}50%{box-shadow:0 0 18px rgba(52,211,153,0.5)}}
+@keyframes pulseRing{0%{transform:scale(1);opacity:0.7}100%{transform:scale(1.6);opacity:0}}
+@keyframes typewriter{from{width:0}to{width:100%}}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+@keyframes gradientShift{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+@keyframes dimPulse{0%,100%{opacity:0.35}50%{opacity:0.6}}
+@keyframes bounce{0%,100%{transform:translateY(0)}40%{transform:translateY(-5px)}60%{transform:translateY(-2px)}}
+@keyframes ripple{0%{transform:scale(0);opacity:0.6}100%{transform:scale(2.5);opacity:0}}
+.anim-float{animation:floatY 3s ease-in-out infinite}
+.anim-glow{animation:glow 2.5s ease-in-out infinite}
+.anim-glow-purple{animation:glowPurple 2.5s ease-in-out infinite}
+.ai-btn.no-key{opacity:0.38;cursor:not-allowed;animation:dimPulse 2.8s ease-in-out infinite;pointer-events:none}
+.ai-btn.no-key:hover{background:var(--bg3)!important;border-color:var(--border)!important}
 @keyframes bounceIn{0%{transform:scale(0.8);opacity:0}60%{transform:scale(1.04)}100%{transform:scale(1);opacity:1}}
 @keyframes ripple{0%{transform:scale(0);opacity:0.4}100%{transform:scale(2.5);opacity:0}}
 
@@ -284,7 +300,7 @@ function adaptKeys(keys){
 const T={
   ru:{
     tagline:"Горячие клавиши · Формулы · AI-поиск",
-    tabSearch:"⌘ Поиск",tabAsk:"✦ Спросить AI",tabAbout:"◎ О приложении",tabSettings:"⚙ Настройки",
+    tabSearch:"⌘ Поиск",tabAsk:"✦ Спросить AI",tabGuide:"◈ Гайд",tabAbout:"◎ О приложении",tabSettings:"⚙ Настройки",
     tryLabel:"Попробуй:",
     suggestions:["сумма столбца G и B","найти значение в таблице","удалить строку","новая вкладка","открыть терминал","скопировать форматирование"],
     placeholder:'Что хочешь сделать?',
@@ -324,7 +340,7 @@ const T={
   },
   en:{
     tagline:"Hotkeys · Formulas · AI Search",
-    tabSearch:"⌘ Search",tabAsk:"✦ Ask AI",tabAbout:"◎ About",tabSettings:"⚙ Settings",
+    tabSearch:"⌘ Search",tabAsk:"✦ Ask AI",tabGuide:"◈ Guide",tabAbout:"◎ About",tabSettings:"⚙ Settings",
     tryLabel:"Try:",
     suggestions:["sum column G and B","find value in table","delete row","new tab","open terminal","copy formatting"],
     placeholder:'What do you want to do?',
@@ -1814,8 +1830,11 @@ function renderAskAI(){
 
   // ── Ask button ──
   const askBtn=document.createElement('button');
+  const hasKeyAsk=settings.aiProvider==='claude'?!!settings.aiKey:!!settings.gigaKey;
   askBtn.style.cssText='width:100%;background:linear-gradient(135deg,rgba(168,85,247,0.2),rgba(99,102,241,0.2));border:1px solid rgba(168,85,247,0.4);color:#c084fc;border-radius:12px;padding:12px;font-size:13px;font-weight:800;cursor:pointer;transition:all 0.2s;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:20px';
-  askBtn.innerHTML=`<span>✦</span>${settings.lang==='ru'?'Спросить AI':'Ask AI'}`;
+  if(!hasKeyAsk){askBtn.style.opacity='0.38';askBtn.style.cursor='not-allowed';askBtn.style.animation='dimPulse 2.8s ease-in-out infinite';askBtn.title=settings.lang==='ru'?'Нет API ключа — проверь ⚙ Настройки':'No API key — check ⚙ Settings';}
+  else{askBtn.classList.add('anim-glow-purple');}
+  askBtn.innerHTML=`<span>✦</span>${hasKeyAsk?(settings.lang==='ru'?'Спросить AI':'Ask AI'):(settings.lang==='ru'?'🔑 Нет ключа — Настройки':'🔑 No key — Settings')}`;
   askBtn.onmouseover=()=>askBtn.style.background='linear-gradient(135deg,rgba(168,85,247,0.3),rgba(99,102,241,0.3))';
   askBtn.onmouseout=()=>askBtn.style.background='linear-gradient(135deg,rgba(168,85,247,0.2),rgba(99,102,241,0.2))';
 
@@ -1846,8 +1865,8 @@ function renderAskAI(){
       :'Use Ctrl, Alt, Shift, Win. Example: "Ctrl+C".';
 
     const sysPrompt=settings.lang==='ru'
-      ?`Ты эксперт по приложению ${askApp} на ${osName}. Отвечай полезно, конкретно, на русском. ${osKeyInstr} Если перечисляешь клавиши — оформи в JSON массив: [{"keys":"...","desc":"...","example":""}]. Иначе отвечай обычным текстом.`
-      :`You are an expert on ${askApp} for ${osName}. Be helpful and specific. ${osKeyInstr} If listing shortcuts — return a JSON array: [{"keys":"...","desc":"...","example":""}]. Otherwise answer in plain text.`;
+      ?`Ты эксперт по ${askApp} на ${osName}. Отвечай только обычным текстом на русском — коротко и понятно, максимум 4-5 предложений. ${osKeyInstr} Горячие клавиши пиши прямо в тексте в скобках, например: (Command+C). ЗАПРЕЩЕНО: JSON, скобки [], {}, код, markdown, обратные кавычки.`
+      :`You are an expert on ${askApp} for ${osName}. Reply in plain text only — brief and clear, max 4-5 sentences. ${osKeyInstr} Write hotkeys inline in parentheses e.g. (Command+C). FORBIDDEN: JSON, brackets [] {}, code blocks, markdown, backticks.`;
 
     try{
       let rawText='';
@@ -1867,45 +1886,22 @@ function renderAskAI(){
         rawText=await invoke('giga_search',{authKey,systemPrompt:sysPrompt,query:question});
       }
 
-      // Try parse as JSON array, otherwise show as markdown-ish text
-      let items=null;
-      const fb=rawText.indexOf('['),lb=rawText.lastIndexOf(']');
-      if(fb!==-1&&lb>fb){
-        try{items=JSON.parse(rawText.slice(fb,lb+1));}catch{}
-      }
+      // Always render as plain text — no JSON parsing
+      // Strip any JSON/code artifacts AI might still produce
+      let cleanText = rawText
+        .replace(/```[\s\S]*?```/g, '')   // remove code blocks
+        .replace(/`[^`]+`/g, m => m.slice(1,-1)) // strip backticks
+        .replace(/^\s*[\[\{][\s\S]*?[\]\}]\s*$/gm, '') // remove standalone JSON lines
+        .trim();
 
       resultArea.innerHTML='';
-      if(items&&items.length>0){
-        const list=el('div',"display:flex;flex-direction:column;gap:8px;animation:fadeUp 0.3s ease");
-        items.forEach(item=>{
-          const card=el('div',"background:var(--card-bg);border:1px solid rgba(168,85,247,0.2);border-left:3px solid #a855f7;border-radius:12px;padding:14px 16px");
-          const kb=el('div',"background:rgba(168,85,247,0.15);border:1px solid rgba(168,85,247,0.3);border-radius:6px;padding:3px 10px;font-size:13px;color:#c084fc;font-weight:700;display:inline-block;margin-bottom:6px");
-          // Apply OS formatting
-          let keys=item.keys||'';
-          if(askOS==='mac') keys=keys.replace(/\bCommand\b/g,'⌘').replace(/\bOption\b/g,'⌥').replace(/\bShift\b/g,'⇧').replace(/\bCtrl\b/g,'⌘');
-          kb.textContent=keys;
-          card.appendChild(kb);
-          const desc=el('p',"margin:0 0 6px;color:var(--text2);font-size:12px");
-          desc.textContent=item.desc||'';
-          card.appendChild(desc);
-          if(item.example){
-            const ex=el('div',"background:var(--code-bg);border:1px solid var(--code-border);border-radius:7px;padding:6px 12px;font-size:12px;color:var(--code-color);font-weight:600");
-            ex.textContent=item.example;
-            card.appendChild(ex);
-          }
-          list.appendChild(card);
-        });
-        resultArea.appendChild(list);
-      } else {
-        // Plain text answer
-        const box=el('div',"background:var(--card-bg);border:1px solid rgba(168,85,247,0.2);border-radius:14px;padding:18px;animation:fadeUp 0.3s ease");
-        const badge=el('div',"display:inline-flex;align-items:center;gap:6px;background:rgba(168,85,247,0.1);border:1px solid rgba(168,85,247,0.25);border-radius:20px;padding:3px 10px;font-size:10px;color:#c084fc;font-weight:800;margin-bottom:12px");
-        badge.innerHTML=`✦ ${provider==='giga'?'GigaChat':'Claude'} · ${askApp} · ${osName}`;
-        const text=el('div',"font-size:13px;color:var(--text);line-height:1.7;white-space:pre-wrap");
-        text.textContent=rawText;
-        box.appendChild(badge);box.appendChild(text);
-        resultArea.appendChild(box);
-      }
+      const box=el('div',"background:var(--card-bg);border:1px solid rgba(168,85,247,0.2);border-radius:14px;padding:18px;animation:fadeUp 0.3s ease");
+      const badge=el('div',"display:inline-flex;align-items:center;gap:6px;background:rgba(168,85,247,0.1);border:1px solid rgba(168,85,247,0.25);border-radius:20px;padding:3px 10px;font-size:10px;color:#c084fc;font-weight:800;margin-bottom:12px");
+      badge.innerHTML=`✦ ${provider==='giga'?'GigaChat':'Claude'} · ${askApp} · ${osName}`;
+      const text=el('div',"font-size:13px;color:var(--text);line-height:1.75;white-space:pre-wrap");
+      text.textContent=cleanText;
+      box.appendChild(badge);box.appendChild(text);
+      resultArea.appendChild(box);
     }catch(e){
       const msg=typeof e==='string'?e:(e?.message||String(e));
       resultArea.innerHTML=`<div style="background:rgba(239,68,68,0.06);border:1px solid rgba(239,68,68,0.2);border-radius:12px;padding:14px;color:#fca5a5;font-size:12px">❌ ${msg.slice(0,200)}</div>`;
@@ -1918,6 +1914,247 @@ function renderAskAI(){
   textarea.onkeydown=e=>{
     if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();askBtn.click();}
   };
+
+  return wrap;
+}
+
+
+// ══════════════════════════════════════════════
+// ── Render Guide Tab ──
+// ══════════════════════════════════════════════
+function renderGuide(){
+  const t=T[settings.lang];
+  const ru=settings.lang==='ru';
+  const wrap=el('div',"animation:fadeUp 0.35s ease both");
+
+  // ── Hero banner with gradient animation ──
+  const hero=document.createElement('div');
+  hero.style.cssText='background:linear-gradient(270deg,rgba(99,102,241,0.18),rgba(168,85,247,0.15),rgba(14,165,233,0.12),rgba(99,102,241,0.18));background-size:300% 300%;animation:gradientShift 6s ease infinite;border:1px solid rgba(99,102,241,0.25);border-radius:18px;padding:22px 20px;margin-bottom:22px;text-align:center';
+  const heroIcon=document.createElement('div');
+  heroIcon.style.cssText='font-size:36px;margin-bottom:8px;animation:floatY 3s ease-in-out infinite';
+  heroIcon.textContent='◈';
+  const heroTitle=document.createElement('div');
+  heroTitle.style.cssText='font-size:15px;font-weight:900;color:var(--text);margin-bottom:4px';
+  heroTitle.textContent=ru?'Как пользоваться SearchCopy':'How to use SearchCopy';
+  const heroSub=document.createElement('div');
+  heroSub.style.cssText='font-size:12px;color:var(--text2)';
+  heroSub.textContent=ru?'Пошаговая настройка за 2 минуты':'Step-by-step setup in 2 minutes';
+  hero.appendChild(heroIcon);hero.appendChild(heroTitle);hero.appendChild(heroSub);
+  wrap.appendChild(hero);
+
+  // ── Animated progress dots ──
+  const steps=[
+    {id:'s1',icon:'⌕',color:'#6366f1',title:ru?'Поиск горячих клавиш':'Search shortcuts',
+     lines:ru?['Введи название действия в строку поиска','Например: скопировать, открыть файл, новая вкладка','SearchCopy покажет точные горячие клавиши']:
+              ['Type the action name in the search bar','For example: copy, open file, new tab','SearchCopy shows exact keyboard shortcuts'],
+     anim:'search'},
+    {id:'s2',icon:'◎',color:'#818cf8',title:ru?'Выбери приложение':'Choose an app',
+     lines:ru?['Нажми на нужное приложение вверху','Excel, Word, VS Code, Figma и другие','Поиск автоматически переключится на него']:
+              ['Tap the app pill at the top','Excel, Word, VS Code, Figma and more','Search will automatically switch to it'],
+     anim:'pills'},
+    {id:'s3',icon:'✦',color:'#a855f7',title:ru?'Подключи AI (необязательно)':'Connect AI (optional)',
+     lines:ru?['Получи ключ на console.anthropic.com или от GigaChat','Вставь в ⚙ Настройки → API ключ','Теперь можно задавать вопросы на естественном языке']:
+              ['Get a key at console.anthropic.com or GigaChat','Paste in ⚙ Settings → API key','Now ask questions in natural language'],
+     anim:'key'},
+    {id:'s4',icon:'⊟',color:'#0ea5e9',title:ru?'Копируй одним кликом':'Copy with one click',
+     lines:ru?['Нажми кнопку копирования рядом с командой','Горячая клавиша сразу в буфере обмена','Используй на Windows, macOS или Linux']:
+              ['Click the copy button next to the command','The shortcut is instantly in your clipboard','Works on Windows, macOS and Linux'],
+     anim:'copy'},
+  ];
+
+  // Step cards
+  steps.forEach((step,i)=>{
+    const card=document.createElement('div');
+    card.style.cssText=`background:var(--card-bg);border:1px solid var(--border);border-left:3px solid ${step.color};border-radius:16px;padding:18px;margin-bottom:12px;animation:fadeUp 0.4s ease ${i*0.08}s both;position:relative;overflow:hidden`;
+
+    // Animated bg blob
+    const blob=document.createElement('div');
+    blob.style.cssText=`position:absolute;top:-20px;right:-20px;width:80px;height:80px;border-radius:50%;background:${step.color};opacity:0.06;animation:floatY ${2.5+i*0.3}s ease-in-out infinite;pointer-events:none`;
+    card.appendChild(blob);
+
+    const row=el('div',"display:flex;align-items:flex-start;gap:14px");
+    const numWrap=document.createElement('div');
+    numWrap.style.cssText=`min-width:40px;height:40px;border-radius:12px;background:${step.color}22;border:1.5px solid ${step.color}55;display:flex;align-items:center;justify-content:center;font-size:18px;animation:floatY ${3+i*0.2}s ease-in-out infinite;flex-shrink:0`;
+    numWrap.textContent=step.icon;
+    const content=el('div',"flex:1");
+    const stepNum=el('div',`font-size:10px;font-weight:800;letter-spacing:1.5px;color:${step.color};margin-bottom:3px`,`ШАГ ${i+1}`);
+    const title=el('div',"font-size:13px;font-weight:900;color:var(--text);margin-bottom:8px",step.title);
+    content.appendChild(stepNum);content.appendChild(title);
+
+    // Animated demo area
+    const demo=document.createElement('div');
+    demo.style.cssText=`background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:10px 14px;margin-bottom:10px;min-height:38px;position:relative;overflow:hidden`;
+
+    if(step.anim==='search'){
+      // Typewriter animation
+      const cursor=document.createElement('div');
+      cursor.style.cssText='font-size:12px;color:var(--text2);display:flex;align-items:center;gap:6px';
+      const iconS=el('span',"color:#6366f1;font-size:14px","⌕");
+      const typed=el('span',"color:var(--text);font-weight:700","");
+      const caret=el('span',"display:inline-block;width:2px;height:14px;background:#6366f1;margin-left:1px;animation:blink 1s step-end infinite;vertical-align:middle","");
+      cursor.appendChild(iconS);cursor.appendChild(typed);cursor.appendChild(caret);
+      demo.appendChild(cursor);
+      const words=ru?['скопировать','открыть файл','новая вкладка','поиск']:['copy','open file','new tab','find'];
+      let wi=0,ci=0,del=false;
+      const tw=setInterval(()=>{
+        if(!del){typed.textContent=words[wi].slice(0,++ci);if(ci>=words[wi].length){del=true;setTimeout(()=>{del=false;},900);}}
+        else{typed.textContent=words[wi].slice(0,--ci);if(ci===0){del=false;wi=(wi+1)%words.length;}}
+      },80);
+      demo._cleanup=()=>clearInterval(tw);
+    } else if(step.anim==='pills'){
+      // Animated pill highlight
+      const pills2=el('div',"display:flex;gap:6px;flex-wrap:wrap");
+      const apps=['Excel','Word','VS Code','Figma'];
+      const colors2=['#22c55e','#3b82f6','#6366f1','#f59e0b'];
+      let active2=0;
+      apps.forEach((a,j)=>{
+        const p=document.createElement('div');
+        p.style.cssText=`font-size:11px;font-weight:700;padding:4px 10px;border-radius:20px;border:1px solid ${colors2[j]}44;color:${colors2[j]};background:${colors2[j]}11;transition:all 0.3s`;
+        p.textContent=a;
+        p.dataset.idx=j;
+        pills2.appendChild(p);
+      });
+      const cyclePills=setInterval(()=>{
+        pills2.querySelectorAll('div').forEach((p,j)=>{
+          const c2=colors2[j];
+          if(j===active2){p.style.background=c2+'33';p.style.borderColor=c2+'aa';p.style.transform='scale(1.08)';p.style.boxShadow=`0 0 10px ${c2}44`;}
+          else{p.style.background=c2+'11';p.style.borderColor=c2+'44';p.style.transform='scale(1)';p.style.boxShadow='none';}
+        });
+        active2=(active2+1)%apps.length;
+      },900);
+      demo.appendChild(pills2);
+      demo._cleanup=()=>clearInterval(cyclePills);
+    } else if(step.anim==='key'){
+      // Animated key input
+      const keyRow=el('div',"display:flex;align-items:center;gap:8px");
+      const lockIcon=document.createElement('div');
+      lockIcon.style.cssText='font-size:16px;animation:floatY 2s ease-in-out infinite';
+      lockIcon.textContent='🔑';
+      const keyField=document.createElement('div');
+      keyField.style.cssText='flex:1;background:var(--input-bg);border:1px solid var(--border);border-radius:8px;padding:6px 10px;font-size:11px;color:var(--text3);font-family:monospace;overflow:hidden;white-space:nowrap';
+      const fakeKeys=['sk-ant-api03-••••••••••••••••','giga-•••••••••••••••••'];
+      let fki=0;
+      const cycleKey=setInterval(()=>{
+        fki=(fki+1)%fakeKeys.length;
+        keyField.style.opacity='0';
+        setTimeout(()=>{keyField.textContent=fakeKeys[fki];keyField.style.opacity='1';},300);
+      },2200);
+      keyField.textContent=fakeKeys[0];
+      keyField.style.transition='opacity 0.3s';
+      keyRow.appendChild(lockIcon);keyRow.appendChild(keyField);
+      demo.appendChild(keyRow);
+      demo._cleanup=()=>clearInterval(cycleKey);
+    } else if(step.anim==='copy'){
+      // Animated copy button
+      const copyRow=el('div',"display:flex;align-items:center;gap:8px");
+      const kbd=document.createElement('div');
+      const shortcuts=['⌘+C','Ctrl+C','Ctrl+Shift+T','⌘+Space'];
+      let si=0;
+      kbd.style.cssText='background:rgba(99,102,241,0.12);border:1px solid rgba(99,102,241,0.3);border-radius:8px;padding:5px 14px;font-size:13px;font-weight:900;color:#818cf8;font-family:monospace;flex:1;text-align:center;transition:all 0.3s';
+      kbd.textContent=shortcuts[0];
+      const copyBtn2=document.createElement('div');
+      copyBtn2.style.cssText='background:rgba(52,211,153,0.12);border:1px solid rgba(52,211,153,0.3);border-radius:8px;padding:5px 12px;font-size:11px;font-weight:800;color:#34d399;cursor:pointer;white-space:nowrap;transition:all 0.25s';
+      copyBtn2.textContent='⎘ '+(ru?'Копировать':'Copy');
+      let copied=false;
+      const cycleShortcut=setInterval(()=>{
+        si=(si+1)%shortcuts.length;
+        kbd.style.opacity='0';kbd.style.transform='translateY(4px)';
+        setTimeout(()=>{kbd.textContent=shortcuts[si];kbd.style.opacity='1';kbd.style.transform='translateY(0)';},250);
+      },1400);
+      const flashCopy=setInterval(()=>{
+        if(copied)return;
+        copyBtn2.style.background='rgba(52,211,153,0.3)';copyBtn2.style.transform='scale(0.96)';
+        setTimeout(()=>{copyBtn2.style.background='rgba(52,211,153,0.12)';copyBtn2.style.transform='scale(1)';},300);
+      },1800);
+      copyRow.appendChild(kbd);copyRow.appendChild(copyBtn2);
+      demo.appendChild(copyRow);
+      demo._cleanup=()=>{clearInterval(cycleShortcut);clearInterval(flashCopy);};
+    }
+
+    content.appendChild(demo);
+
+    // Bullet lines
+    step.lines.forEach(line=>{
+      const li=el('div',"display:flex;align-items:flex-start;gap:6px;margin-bottom:4px");
+      const dot=el('span',`color:${step.color};font-size:10px;margin-top:3px;flex-shrink:0`,'◆');
+      const txt=el('span',"font-size:12px;color:var(--text2);line-height:1.5",line);
+      li.appendChild(dot);li.appendChild(txt);
+      content.appendChild(li);
+    });
+
+    row.appendChild(numWrap);row.appendChild(content);
+    card.appendChild(row);
+    wrap.appendChild(card);
+
+    // Cleanup intervals when tab changes
+    wrap.addEventListener('remove',()=>{if(demo._cleanup)demo._cleanup();},{once:true});
+  });
+
+  // ── AI Help section ──
+  const aiDiv=document.createElement('div');
+  const hasKeyG=settings.aiProvider==='claude'?!!settings.aiKey:!!settings.gigaKey;
+  aiDiv.style.cssText=`background:linear-gradient(135deg,rgba(168,85,247,0.08),rgba(99,102,241,0.06));border:1px solid rgba(168,85,247,0.2);border-radius:16px;padding:18px;margin-top:8px;${hasKeyG?'animation:glowPurple 3s ease-in-out infinite':'opacity:0.5'}`;
+  const aiHead=el('div',"display:flex;align-items:center;gap:10px;margin-bottom:12px");
+  const aiIconG=el('div',"font-size:20px;animation:floatY 3s ease-in-out infinite","✦");
+  const aiTitleG=el('div',"");
+  aiTitleG.innerHTML=`<div style="font-size:13px;font-weight:900;color:var(--text)">${ru?'Спросить AI о настройке':'Ask AI about setup'}</div><div style="font-size:11px;color:var(--text2)">${hasKeyG?(ru?'AI подключён':'AI connected'):(ru?'Нет ключа — подключи в ⚙ Настройках':'No key — connect in ⚙ Settings')}</div>`;
+  aiHead.appendChild(aiIconG);aiHead.appendChild(aiTitleG);
+  aiDiv.appendChild(aiHead);
+
+  const guideInput=document.createElement('textarea');
+  guideInput.style.cssText=`width:100%;background:var(--input-bg);border:1px solid var(--border);border-radius:12px;padding:10px 14px;font-size:12px;color:var(--text);font-family:inherit;resize:none;height:72px;outline:none;transition:border-color 0.18s;box-sizing:border-box;${!hasKeyG?'opacity:0.5;pointer-events:none':''}`;
+  guideInput.placeholder=ru?'Например: где найти API ключ Anthropic? Как подключить GigaChat?':'E.g.: where to get Anthropic API key? How to connect GigaChat?';
+  guideInput.onfocus=()=>guideInput.style.borderColor='rgba(168,85,247,0.5)';
+  guideInput.onblur=()=>guideInput.style.borderColor='var(--border)';
+  aiDiv.appendChild(guideInput);
+
+  const guideBtn=document.createElement('button');
+  guideBtn.style.cssText=`width:100%;margin-top:8px;background:linear-gradient(135deg,rgba(168,85,247,0.2),rgba(99,102,241,0.2));border:1px solid rgba(168,85,247,0.4);color:#c084fc;border-radius:10px;padding:10px;font-size:12px;font-weight:800;cursor:${hasKeyG?'pointer':'not-allowed'};font-family:inherit;display:flex;align-items:center;justify-content:center;gap:6px;transition:all 0.2s;opacity:${hasKeyG?'1':'0.45'}`;
+  guideBtn.innerHTML=hasKeyG?`<span style="animation:floatY 2s ease-in-out infinite;display:inline-block">✦</span> ${ru?'Спросить AI':'Ask AI'}`:`🔑 ${ru?'Нет ключа — Настройки':'No key — Settings'}`;
+
+  const guideResult=el('div',"margin-top:10px");
+
+  guideBtn.onclick=async()=>{
+    if(!hasKeyG)return;
+    const q=guideInput.value.trim();
+    if(!q){guideInput.focus();return;}
+    guideBtn.innerHTML=`<div class="spinner"></div>${ru?'Думаю...':'Thinking...'}`;
+    guideBtn.disabled=true;
+    guideResult.innerHTML=`<div class="skeleton" style="height:60px;border-radius:10px"></div>`;
+    const sp=ru
+      ?`Ты помощник по настройке приложения SearchCopy. Отвечай кратко и по делу, обычным текстом на русском. Никакого JSON, markdown или кода. Максимум 4 предложения.`
+      :`You are a helper for setting up the SearchCopy app. Reply briefly in plain text, no JSON, markdown or code. Max 4 sentences.`;
+    try{
+      let ans='';
+      if(settings.aiProvider==='claude'){
+        const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',
+          headers:{'Content-Type':'application/json','x-api-key':settings.aiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+          body:JSON.stringify({model:'claude-haiku-4-5',max_tokens:400,system:sp,messages:[{role:'user',content:q}]})});
+        const d=await r.json();ans=d.content?.[0]?.text||'';
+      } else {
+        const invoke=window.__TAURI__?.core?.invoke||window.__TAURI__?.tauri?.invoke;
+        if(!invoke)throw new Error(ru?'GigaChat только в приложении':'GigaChat is desktop-only');
+        const ak=settings.gigaKey.startsWith('Basic ')?settings.gigaKey.slice(6).trim():settings.gigaKey;
+        ans=await invoke('giga_search',{authKey:ak,systemPrompt:sp,query:q});
+      }
+      ans=ans.replace(/```[\s\S]*?```/g,'').replace(/`([^`]+)`/g,'$1').trim();
+      guideResult.innerHTML='';
+      const box=el('div',"background:var(--card-bg);border:1px solid rgba(168,85,247,0.2);border-radius:12px;padding:14px;animation:fadeUp 0.3s ease");
+      const bBadge=el('div',"font-size:10px;font-weight:800;color:#c084fc;margin-bottom:8px",`✦ ${settings.aiProvider==='giga'?'GigaChat':'Claude'}`);
+      const bText=el('div',"font-size:12px;color:var(--text);line-height:1.7;white-space:pre-wrap",ans);
+      box.appendChild(bBadge);box.appendChild(bText);
+      guideResult.appendChild(box);
+    }catch(e){
+      guideResult.innerHTML=`<div style="color:#fca5a5;font-size:12px;padding:8px">❌ ${String(e.message||e).slice(0,150)}</div>`;
+    }
+    guideBtn.innerHTML=`<span style="animation:floatY 2s ease-in-out infinite;display:inline-block">✦</span> ${ru?'Спросить AI':'Ask AI'}`;
+    guideBtn.disabled=false;
+  };
+  guideInput.onkeydown=e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();guideBtn.click();}};
+
+  aiDiv.appendChild(guideBtn);
+  aiDiv.appendChild(guideResult);
+  wrap.appendChild(aiDiv);
 
   return wrap;
 }
@@ -2143,7 +2380,7 @@ function render(){
 
   // ── Tabs ──
   const tabs=el('div',"display:flex;background:var(--bg3);border:1px solid var(--border);border-radius:14px;padding:4px;gap:4px;margin-bottom:20px;animation:fadeUp 0.35s 0.05s cubic-bezier(.4,0,.2,1) both");
-  [{key:'search',label:t.tabSearch},{key:'ask',label:t.tabAsk},{key:'about',label:t.tabAbout},{key:'settings',label:t.tabSettings}].forEach(({key,label})=>{
+  [{key:'search',label:t.tabSearch},{key:'ask',label:t.tabAsk},{key:'guide',label:t.tabGuide},{key:'about',label:t.tabAbout},{key:'settings',label:t.tabSettings}].forEach(({key,label})=>{
     const btn=document.createElement('button');
     btn.className='tab-btn'+(state.tab===key?' active':'');
     btn.textContent=label;
@@ -2153,6 +2390,7 @@ function render(){
   wrap.appendChild(tabs);
 
   if(state.tab==='settings'){const s=renderSettings();s.style.animation='slideDown 0.25s cubic-bezier(.4,0,.2,1) both';wrap.appendChild(s);app.appendChild(wrap);return;}
+  if(state.tab==='guide'){const g=renderGuide();g.style.animation='slideDown 0.25s cubic-bezier(.4,0,.2,1) both';wrap.appendChild(g);app.appendChild(wrap);return;}
   if(state.tab==='ask'){const a=renderAskAI();a.style.animation='slideDown 0.25s cubic-bezier(.4,0,.2,1) both';wrap.appendChild(a);app.appendChild(wrap);return;}
   if(state.tab==='about'){const a=renderAbout();a.style.animation='slideDown 0.25s cubic-bezier(.4,0,.2,1) both';wrap.appendChild(a);app.appendChild(wrap);return;}
 
@@ -2267,10 +2505,13 @@ function render(){
 
   // ── AI button ──
   const providerLabel=settings.aiProvider==='giga'?'GigaChat':'Claude';
+  const hasKeySearch=settings.aiProvider==='claude'?!!settings.aiKey:!!settings.gigaKey;
   const aiBtn=document.createElement('button');
-  aiBtn.className='ai-btn'+(state.aiMode?' active':'');
-  aiBtn.innerHTML=state.aiMode?('✦ '+providerLabel):t.aiSearch;
+  aiBtn.className='ai-btn'+(state.aiMode?' active':'')+(hasKeySearch?'':' no-key');
+  if(!hasKeySearch){aiBtn.title=settings.lang==='ru'?'Нет API ключа — проверь ⚙ Настройки':'No API key — check ⚙ Settings';}
+  aiBtn.innerHTML=state.aiMode?('✦ '+providerLabel):(hasKeySearch?t.aiSearch:'🔑 '+t.aiSearch);
   aiBtn.onclick=()=>{
+  if(!hasKeySearch)return;
     state.aiMode=!state.aiMode;
     state.aiResult=null;state.aiLoading=false;
     aiBtn.classList.toggle('active',state.aiMode);
