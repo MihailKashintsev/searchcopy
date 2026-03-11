@@ -1,11 +1,9 @@
-### v1.1.1
-- Реакции на карточки: зажми 1.5с → пикер эмодзи (8 категорий, ~150 emoji)
-- Twemoji — iOS-стиль эмодзи на всех платформах
-- Кнопка 🔥 рядом с копированием для быстрой реакции
-- Избранное: все карточки с реакциями, фильтры по emoji / приложению / типу
-- Экспорт: теги реакций на шпаргалке + toggle включения
-- Избранное синхронизировано с экспортом
-- Онбординг при первом запуске (5 карточек с анимациями)
-- Гайд: 8 актуальных шагов с новыми фичами
-- Иконки в боковой панели → цветные emoji
-- Фикс: пикер не закрывается при отпускании после зажатия
+- Reactions: hold card 1.5s to open emoji picker (8 categories, 150+ emoji)
+- Twemoji: iOS-style emoji on all platforms
+- Quick reaction button next to copy button
+- Favorites: filter by emoji, app, type
+- Export: reaction tags toggle for favorites cheat sheet
+- Onboarding modal on first launch with animations
+- Guide: 8 updated steps covering all new features
+- Sidebar icons updated to color emoji
+- Fix: picker stays open when releasing after hold
