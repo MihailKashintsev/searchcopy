@@ -56,8 +56,11 @@ jobs:
         id: changelog
         shell: bash
         run: |
-          NOTE=$(cat .changelog 2>/dev/null || echo "Обновление ${{ github.ref_name }}")
-          echo "text=$NOTE" >> $GITHUB_OUTPUT
+          {
+            echo 'text<<__EOF__'
+            cat .changelog 2>/dev/null || echo "Release ${{ github.ref_name }}"
+            echo '__EOF__'
+          } >> "$GITHUB_OUTPUT"
 
       - name: Create Release (only once)
         if: matrix.platform == 'macos-latest'
