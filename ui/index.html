@@ -157,6 +157,21 @@ input::placeholder,textarea::placeholder{color:var(--text3)}
 .chip.active{background:var(--chip-bg,rgba(99,102,241,0.15));border-color:var(--chip-border,rgba(99,102,241,0.4));color:var(--chip-color,#c7d2fe)}
 
 /* ── Tab buttons ── */
+/* ── Sidebar ── */
+.sidebar-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:199;animation:fadeIn 0.2s ease}
+.sidebar{position:fixed;top:0;left:0;height:100%;width:260px;background:var(--bg2);border-right:1px solid var(--border);z-index:200;display:flex;flex-direction:column;gap:0;box-shadow:4px 0 32px rgba(0,0,0,0.25);animation:slideFromLeft 0.25s cubic-bezier(.4,0,.2,1) both;overflow-y:auto;padding:0 0 24px}
+@keyframes slideFromLeft{from{transform:translateX(-100%);opacity:0}to{transform:translateX(0);opacity:1}}
+.sidebar-header{display:flex;align-items:center;justify-content:space-between;padding:20px 16px 14px;border-bottom:1px solid var(--border);flex-shrink:0}
+.sidebar-logo{font-size:15px;font-weight:900;color:var(--text);letter-spacing:0.5px}
+.sidebar-close{background:none;border:none;color:var(--text3);cursor:pointer;font-size:18px;padding:4px 8px;border-radius:8px;transition:background 0.15s;font-family:inherit}
+.sidebar-close:hover{background:var(--bg3);color:var(--text)}
+.sidebar-section{padding:10px 10px 4px;font-size:9px;font-weight:900;color:var(--text3);text-transform:uppercase;letter-spacing:1.8px}
+.sidebar-btn{display:flex;align-items:center;gap:10px;width:100%;background:transparent;border:1px solid transparent;border-radius:10px;padding:10px 12px;font-size:13px;font-weight:700;color:var(--text2);cursor:pointer;transition:all 0.15s;font-family:inherit;text-align:left;margin:1px 8px;width:calc(100% - 16px)}
+.sidebar-btn:hover{background:var(--bg3);color:var(--text)}
+.sidebar-btn.active{background:rgba(99,102,241,0.12);border-color:rgba(99,102,241,0.25);color:#818cf8;font-weight:800}
+.sidebar-btn .sb-icon{font-size:15px;width:22px;text-align:center;flex-shrink:0}
+.menu-toggle-btn{display:flex;align-items:center;gap:8px;background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:8px 14px;font-size:12px;font-weight:800;color:var(--text2);cursor:pointer;font-family:inherit;transition:all 0.18s;margin-bottom:16px}
+.menu-toggle-btn:hover{background:rgba(99,102,241,0.08);border-color:rgba(99,102,241,0.2);color:var(--text)}
 .tab-btn{
   flex:1;background:transparent;border:1px solid transparent;
   border-radius:10px;padding:9px;font-size:12px;font-weight:800;
@@ -300,7 +315,7 @@ function adaptKeys(keys){
 const T={
   ru:{
     tagline:"Горячие клавиши · Формулы · AI-поиск",
-    tabSearch:"⌘ Поиск",tabAsk:"✦ Спросить AI",tabGuide:"◈ Гайд",tabAbout:"◎ О приложении",tabSettings:"⚙ Настройки",
+    tabSearch:"⌘ Поиск",tabFav:"★ Избранное",tabTrainer:"⌨ Тренажёр",tabExport:"🃏 Экспорт",tabReverse:"⌥ По клавише",tabAsk:"✦ Спросить AI",tabGuide:"◈ Гайд",tabAbout:"◎ О приложении",tabSettings:"⚙ Настройки",
     tryLabel:"Попробуй:",
     suggestions:["сумма столбца G и B","найти значение в таблице","удалить строку","новая вкладка","открыть терминал","скопировать форматирование"],
     placeholder:'Что хочешь сделать?',
@@ -326,7 +341,7 @@ const T={
       ["Ничего не найдено","Переформулируй или используй AI-поиск."],
       ["AI не отвечает","Проверь API ключ в Настройках → Anthropic API Key."],
     ],
-    footer:"RENDERGAMES © 2025",
+    footer:"RENDERGAMES © 2026",
     sTitle:"Настройки",sLang:"Язык",sTheme:"Тема",sOS:"Платформа",sUpdate:"Автообновление",sAI:"AI провайдер",
     sAIProvider:"Провайдер",sAIProviderDesc:"Выбери сервис для AI-поиска",
     sClaudeKey:"Anthropic API Key",sClaudeKeyDesc:"Claude Haiku — быстрый, работает везде",
@@ -340,7 +355,7 @@ const T={
   },
   en:{
     tagline:"Hotkeys · Formulas · AI Search",
-    tabSearch:"⌘ Search",tabAsk:"✦ Ask AI",tabGuide:"◈ Guide",tabAbout:"◎ About",tabSettings:"⚙ Settings",
+    tabSearch:"⌘ Search",tabFav:"★ Favorites",tabTrainer:"⌨ Trainer",tabExport:"🃏 Export",tabReverse:"⌥ By Key",tabAsk:"✦ Ask AI",tabGuide:"◈ Guide",tabAbout:"◎ About",tabSettings:"⚙ Settings",
     tryLabel:"Try:",
     suggestions:["sum column G and B","find value in table","delete row","new tab","open terminal","copy formatting"],
     placeholder:'What do you want to do?',
@@ -366,7 +381,7 @@ const T={
       ["Nothing found","Rephrase or use AI search."],
       ["AI not responding","Check your API key in Settings → Anthropic API Key."],
     ],
-    footer:"RENDERGAMES © 2025",
+    footer:"RENDERGAMES © 2026",
     sTitle:"Settings",sLang:"Language",sTheme:"Theme",sOS:"Platform",sUpdate:"Auto-update",sAI:"AI Provider",
     sAIProvider:"Provider",sAIProviderDesc:"Choose AI service for search",
     sClaudeKey:"Anthropic API Key",sClaudeKeyDesc:"Claude Haiku — fast, works everywhere",
@@ -934,6 +949,26 @@ let state={
   aiLoading:false
 };
 
+// ── Favorites helpers ──
+function getFavorites(){try{return JSON.parse(localStorage.getItem('sc_favorites')||'[]');}catch{return [];}}
+function saveFavorites(arr){localStorage.setItem('sc_favorites',JSON.stringify(arr));}
+function isFavorite(id){return getFavorites().includes(String(id));}
+function toggleFavorite(id){
+  const favs=getFavorites();const sid=String(id);
+  const idx=favs.indexOf(sid);
+  if(idx>=0)favs.splice(idx,1);else favs.unshift(sid);
+  saveFavorites(favs);return idx<0;
+}
+
+// ── Search history helpers ──
+function getHistory(){try{return JSON.parse(localStorage.getItem('sc_history')||'[]');}catch{return [];}}
+function addHistory(q){
+  if(!q||q.trim().length<2)return;
+  const h=getHistory().filter(x=>x!==q.trim());
+  h.unshift(q.trim());
+  localStorage.setItem('sc_history',JSON.stringify(h.slice(0,12)));
+}
+
 // ── Утилиты ──
 function extractColumns(q){
   const parts=q.toUpperCase().split(/[\s,+иand&]+/);
@@ -1214,7 +1249,27 @@ function renderResultCard(item,idx,detectedCols){
   const desc=el('div',"font-size:12px;color:var(--text2);line-height:1.4");
   desc.textContent=getDesc(item);
   info.appendChild(keysBadge);info.appendChild(desc);
-  top.appendChild(info);top.appendChild(makeCopyBtn(keysText));
+  top.appendChild(info);
+  // Fav + copy buttons
+  const cardActions=el('div',"display:flex;align-items:center;gap:6px;flex-shrink:0");
+  const favBtn=document.createElement('button');
+  const isFav=isFavorite(item.id);
+  favBtn.style.cssText='font-size:16px;padding:4px 8px;background:transparent;border:1px solid transparent;border-radius:7px;cursor:pointer;font-family:inherit;flex-shrink:0;transition:color 0.15s,transform 0.15s;color:'+(isFav?'#fbbf24':'var(--text3)');
+  favBtn.title=isFav?(settings.lang==='ru'?'Убрать из избранного':'Remove from favorites'):(settings.lang==='ru'?'В избранное':'Add to favorites');
+  favBtn.textContent=isFav?'★':'☆';
+  favBtn.onmouseover=()=>{if(!isFavorite(item.id))favBtn.style.color='var(--text)';};
+  favBtn.onmouseout=()=>{if(!isFavorite(item.id))favBtn.style.color='var(--text3)';};
+  favBtn.onclick=(e)=>{
+    e.stopPropagation();
+    const added=toggleFavorite(item.id);
+    favBtn.textContent=added?'★':'☆';
+    favBtn.style.color=added?'#fbbf24':'var(--text3)';
+    favBtn.title=added?(settings.lang==='ru'?'Убрать из избранного':'Remove from favorites'):(settings.lang==='ru'?'В избранное':'Add to favorites');
+    favBtn.style.transform='scale(1.4)';setTimeout(()=>favBtn.style.transform='scale(1)',200);
+  };
+  cardActions.appendChild(favBtn);
+  cardActions.appendChild(makeCopyBtn(keysText));
+  top.appendChild(info);top.appendChild(cardActions);
   card.appendChild(top);
   if(item.template){
     const cols=detectedCols&&detectedCols.length?detectedCols:['A'];
@@ -1660,6 +1715,42 @@ function renderSettings(){
   wrap.appendChild(settingRow("🔔",t.sUpdate,t.sUpdateDesc,
     toggle(settings.autoUpdate,val=>{settings.autoUpdate=val;saveSettings(settings);render()})));
 
+  // ── Check updates button ──
+  const updBtn=document.createElement('button');
+  updBtn.style.cssText='width:100%;margin-top:12px;background:var(--bg3);border:1px solid var(--border);color:var(--text2);border-radius:12px;padding:11px;font-size:12px;font-weight:800;cursor:pointer;font-family:inherit;transition:all 0.2s;display:flex;align-items:center;justify-content:center;gap:8px';
+  updBtn.innerHTML=`<span style="animation:floatY 2s ease-in-out infinite;display:inline-block">🔄</span> ${settings.lang==='ru'?'Проверить обновления':'Check for updates'}`;
+  updBtn.onmouseover=()=>{updBtn.style.background='rgba(99,102,241,0.1)';updBtn.style.borderColor='rgba(99,102,241,0.3)';updBtn.style.color='#818cf8';};
+  updBtn.onmouseout=()=>{updBtn.style.background='var(--bg3)';updBtn.style.borderColor='var(--border)';updBtn.style.color='var(--text2)';};
+  updBtn.onclick=async()=>{
+    updBtn.innerHTML=`<div class="spinner"></div>${settings.lang==='ru'?'Проверяю...':'Checking...'}`;
+    updBtn.disabled=true;
+    try{
+      const invoke=window.__TAURI__?.core?.invoke||window.__TAURI__?.tauri?.invoke;
+      if(!invoke)throw new Error(settings.lang==='ru'?'Только в десктоп-приложении':'Desktop app only');
+      const cur=await invoke('get_version');
+      const res=await fetch('https://api.github.com/repos/MihailKashintsev/searchcopy/releases/latest');
+      const data=await res.json();
+      const latest=data.tag_name?.replace('v','').trim();
+      if(latest&&latest!==cur.trim()){
+        updBtn.innerHTML=`✨ ${settings.lang==='ru'?'Доступна v'+latest+'! Обновляю...':'v'+latest+' available! Updating...'}`;
+        updBtn.style.color='#4ade80';updBtn.style.borderColor='rgba(52,211,153,0.4)';
+        await checkForUpdates(false);
+      } else {
+        updBtn.innerHTML=`✅ ${settings.lang==='ru'?'У вас последняя версия v'+cur:'You have the latest v'+cur}`;
+        updBtn.style.color='#4ade80';updBtn.style.borderColor='rgba(52,211,153,0.4)';
+        setTimeout(()=>{updBtn.innerHTML=`🔄 ${settings.lang==='ru'?'Проверить обновления':'Check for updates'}`;updBtn.style.color='var(--text2)';updBtn.style.borderColor='var(--border)';updBtn.disabled=false;},3000);
+        return;
+      }
+    }catch(e){
+      updBtn.innerHTML=`❌ ${String(e.message||e).slice(0,60)}`;
+      updBtn.style.color='#fca5a5';
+      setTimeout(()=>{updBtn.innerHTML=`🔄 ${settings.lang==='ru'?'Проверить обновления':'Check for updates'}`;updBtn.style.color='var(--text2)';updBtn.disabled=false;},3000);
+      return;
+    }
+    updBtn.disabled=false;
+  };
+  wrap.appendChild(updBtn);
+
   wrap.appendChild(el('div',"text-align:center;color:var(--text3);font-size:10px;margin-top:28px;padding-bottom:8px",t.footer));
   return wrap;
 }
@@ -1922,6 +2013,616 @@ function renderAskAI(){
 // ══════════════════════════════════════════════
 // ── Render Guide Tab ──
 // ══════════════════════════════════════════════
+
+// ══════════════════════════════════════════════
+// ── Render Favorites Tab ──
+// ══════════════════════════════════════════════
+function renderFavorites(){
+  const ru=settings.lang==='ru';
+  const wrap=document.createElement('div');
+  wrap.style.animation='fadeUp 0.35s ease both';
+
+  const favIds=getFavorites();
+  const allItems=Object.values(DB).flat();
+
+  const hero=document.createElement('div');
+  hero.style.cssText='background:linear-gradient(135deg,rgba(251,191,36,0.1),rgba(245,158,11,0.07));border:1px solid rgba(251,191,36,0.2);border-radius:16px;padding:18px 20px;margin-bottom:20px;display:flex;align-items:center;gap:14px';
+  hero.innerHTML=`<span style="font-size:28px;animation:floatY 3s ease-in-out infinite;display:inline-block">★</span><div><div style="font-size:14px;font-weight:900;color:var(--text)">${ru?'Избранные шорткаты':'Favorite Shortcuts'}</div><div style="font-size:11px;color:var(--text2);margin-top:3px">${ru?`Сохранено: ${favIds.length} шорткатов`:`Saved: ${favIds.length} shortcuts`}</div></div>`;
+  wrap.appendChild(hero);
+
+  if(favIds.length===0){
+    const empty=document.createElement('div');
+    empty.style.cssText='text-align:center;padding:40px 20px;color:var(--text3)';
+    empty.innerHTML=`<div style="font-size:40px;margin-bottom:12px;animation:floatY 3s ease-in-out infinite">☆</div><div style="font-size:14px;font-weight:700;margin-bottom:6px">${ru?'Пока пусто':'Nothing here yet'}</div><div style="font-size:12px">${ru?'Нажми ☆ на карточке в поиске чтобы добавить':'Tap ☆ on a search result card to add'}</div>`;
+    wrap.appendChild(empty);
+    return wrap;
+  }
+
+  favIds.forEach(fid=>{
+    const item=allItems.find(x=>String(x.id)===fid);
+    if(!item)return;
+    const keysText=getKeys(item);
+    const card=document.createElement('div');
+    card.style.cssText='background:var(--card-bg);border:1px solid rgba(251,191,36,0.2);border-left:3px solid #fbbf24;border-radius:14px;padding:14px 16px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;gap:12px;animation:fadeUp 0.3s ease both';
+
+    const info=document.createElement('div');
+    info.style.flex='1';
+    const kbadge=document.createElement('div');
+    kbadge.style.cssText='background:rgba(251,191,36,0.12);border:1px solid rgba(251,191,36,0.3);border-radius:8px;padding:4px 12px;font-size:13px;font-weight:900;color:#fbbf24;display:inline-block;margin-bottom:5px;font-family:monospace';
+    kbadge.textContent=keysText;
+    const desc=document.createElement('div');
+    desc.style.cssText='font-size:12px;color:var(--text2);line-height:1.5';
+    desc.textContent=item.desc?.[settings.lang]||item.desc?.ru||'';
+    info.appendChild(kbadge);info.appendChild(desc);
+
+    const btns=document.createElement('div');
+    btns.style.cssText='display:flex;gap:6px;flex-shrink:0';
+    const copyB=document.createElement('button');copyB.className='copy-btn';copyB.textContent='⎘';copyB.onclick=()=>copyText(keysText,copyB);
+    const remB=document.createElement('button');remB.className='copy-btn';remB.style.color='#fbbf24';remB.textContent='★';
+    remB.onclick=()=>{toggleFavorite(item.id);card.style.animation='fadeUp 0.2s ease reverse both';setTimeout(()=>{card.remove();const cnt=wrap.querySelector('div[data-fcount]');if(cnt)cnt.textContent=ru?`Сохранено: ${getFavorites().length} шорткатов`:`Saved: ${getFavorites().length} shortcuts`;},200);};
+    btns.appendChild(copyB);btns.appendChild(remB);
+    card.appendChild(info);card.appendChild(btns);
+    wrap.appendChild(card);
+  });
+
+  // Clear all button
+  const clearBtn=document.createElement('button');
+  clearBtn.style.cssText='width:100%;margin-top:12px;background:rgba(239,68,68,0.06);border:1px solid rgba(239,68,68,0.2);color:#fca5a5;border-radius:10px;padding:10px;font-size:12px;font-weight:800;cursor:pointer;font-family:inherit;transition:all 0.2s';
+  clearBtn.textContent=ru?'🗑 Очистить все избранные':'🗑 Clear all favorites';
+  clearBtn.onclick=()=>{saveFavorites([]);state.tab='search';render();};
+  wrap.appendChild(clearBtn);
+  return wrap;
+}
+
+// ══════════════════════════════════════════════
+// ── Render Trainer Tab ──
+// ══════════════════════════════════════════════
+function renderTrainer(){
+  const ru=settings.lang==='ru';
+  const wrap=document.createElement('div');
+  wrap.style.animation='fadeUp 0.35s ease both';
+
+  // State
+  let score=0,streak=0,total=0,currentQ=null,answered=false;
+
+  const hero=document.createElement('div');
+  hero.style.cssText='background:linear-gradient(135deg,rgba(99,102,241,0.1),rgba(168,85,247,0.08));border:1px solid rgba(99,102,241,0.2);border-radius:16px;padding:18px 20px;margin-bottom:20px;text-align:center';
+  const scoreDiv=document.createElement('div');
+  scoreDiv.style.cssText='display:flex;align-items:center;justify-content:center;gap:20px';
+  scoreDiv.innerHTML=`<div><div style="font-size:22px;font-weight:900;color:var(--text)" id="tr-score">0</div><div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:1px">${ru?'Очки':'Score'}</div></div><div style="font-size:28px;animation:floatY 2s ease-in-out infinite">⌨</div><div><div style="font-size:22px;font-weight:900;color:#fbbf24" id="tr-streak">0🔥</div><div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:1px">${ru?'Серия':'Streak'}</div></div>`;
+  hero.appendChild(scoreDiv);
+  wrap.appendChild(hero);
+
+  const qCard=document.createElement('div');
+  qCard.style.cssText='background:var(--card-bg);border:1px solid var(--border);border-radius:16px;padding:20px;margin-bottom:16px;text-align:center;min-height:120px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:10px';
+  const qLabel=document.createElement('div');
+  qLabel.style.cssText='font-size:11px;font-weight:800;color:var(--text3);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:4px';
+  qLabel.textContent=ru?'Какая клавиша выполняет это действие?':'What shortcut performs this action?';
+  const qText=document.createElement('div');
+  qText.style.cssText='font-size:16px;font-weight:900;color:var(--text);line-height:1.5;text-align:center';
+  const qApp=document.createElement('div');
+  qApp.style.cssText='font-size:11px;color:var(--text3);margin-top:4px';
+  qCard.appendChild(qLabel);qCard.appendChild(qText);qCard.appendChild(qApp);
+  wrap.appendChild(qCard);
+
+  const optGrid=document.createElement('div');
+  optGrid.style.cssText='display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px';
+  wrap.appendChild(optGrid);
+
+  const nextBtn=document.createElement('button');
+  nextBtn.style.cssText='width:100%;background:linear-gradient(135deg,rgba(99,102,241,0.2),rgba(168,85,247,0.15));border:1px solid rgba(99,102,241,0.35);color:#818cf8;border-radius:12px;padding:12px;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;display:none;animation:fadeUp 0.25s ease';
+  nextBtn.textContent=ru?'➜ Следующий вопрос':'➜ Next question';
+  wrap.appendChild(nextBtn);
+
+  const allHotkeys=Object.entries(DB).flatMap(([app,items])=>items.filter(x=>x.type==='hotkey').map(x=>({...x,app})));
+
+  function getOsKey(item){
+    const os=settings.os||'win';
+    if(typeof item.keys==='object')return item.keys[os]||item.keys.win||item.keys.mac||'?';
+    return item.keys||'?';
+  }
+
+  function loadQuestion(){
+    if(allHotkeys.length<4){qText.textContent=ru?'Недостаточно данных':'Not enough data';return;}
+    answered=false;nextBtn.style.display='none';
+    currentQ=allHotkeys[Math.floor(Math.random()*allHotkeys.length)];
+    qText.textContent=currentQ.desc?.[settings.lang]||currentQ.desc?.ru||'';
+    qApp.textContent=currentQ.app+' · '+(settings.os==='mac'?'macOS':settings.os==='linux'?'Linux':'Windows');
+    qCard.style.animation='scaleIn 0.22s ease both';
+    // 4 options
+    const correct=getOsKey(currentQ);
+    const others=[...allHotkeys].filter(x=>getOsKey(x)!==correct).sort(()=>Math.random()-0.5).slice(0,3).map(x=>getOsKey(x));
+    const opts=[correct,...others].sort(()=>Math.random()-0.5);
+    optGrid.innerHTML='';
+    opts.forEach(opt=>{
+      const btn=document.createElement('button');
+      btn.style.cssText='background:var(--bg3);border:1.5px solid var(--border);border-radius:12px;padding:12px 8px;font-size:13px;font-weight:800;color:var(--text);cursor:pointer;font-family:monospace;transition:all 0.18s;text-align:center';
+      btn.textContent=opt;
+      btn.onmouseover=()=>{if(!answered)btn.style.background='rgba(99,102,241,0.1)';};
+      btn.onmouseout=()=>{if(!answered&&btn.style.borderColor!=='rgb(52, 211, 153)')btn.style.background='var(--bg3)';};
+      btn.onclick=()=>{
+        if(answered)return;
+        answered=true;total++;
+        const isRight=opt===correct;
+        if(isRight){
+          score+=10+(streak*2);streak++;
+          btn.style.background='rgba(52,211,153,0.15)';btn.style.borderColor='#34d399';btn.style.color='#34d399';
+          document.getElementById('tr-score').textContent=score;
+          document.getElementById('tr-streak').textContent=streak+'🔥';
+        } else {
+          streak=0;
+          btn.style.background='rgba(239,68,68,0.1)';btn.style.borderColor='#f87171';btn.style.color='#f87171';
+          document.getElementById('tr-streak').textContent='0🔥';
+          // Show correct
+          optGrid.querySelectorAll('button').forEach(b=>{if(b.textContent===correct){b.style.background='rgba(52,211,153,0.15)';b.style.borderColor='#34d399';b.style.color='#34d399';}});
+        }
+        nextBtn.style.display='block';
+      };
+      optGrid.appendChild(btn);
+    });
+  }
+
+  nextBtn.onclick=loadQuestion;
+  loadQuestion();
+  return wrap;
+}
+
+// ══════════════════════════════════════════════
+// ── Render Export Tab ──
+// ══════════════════════════════════════════════
+function renderExport(){
+  const ru=settings.lang==='ru';
+  const wrap=document.createElement('div');
+  wrap.style.animation='fadeUp 0.35s ease both';
+
+  const hero=document.createElement('div');
+  hero.style.cssText='background:linear-gradient(135deg,rgba(52,211,153,0.1),rgba(14,165,233,0.07));border:1px solid rgba(52,211,153,0.2);border-radius:16px;padding:18px 20px;margin-bottom:20px;display:flex;align-items:center;gap:14px';
+  hero.innerHTML=`<span style="font-size:28px;animation:floatY 3s ease-in-out infinite;display:inline-block">🃏</span><div><div style="font-size:14px;font-weight:900;color:var(--text)">${ru?'Экспорт шпаргалки':'Cheat Sheet Export'}</div><div style="font-size:11px;color:var(--text2);margin-top:3px">${ru?'Красивая карточка для соцсетей или печати':'Beautiful card for social media or print'}</div></div>`;
+  wrap.appendChild(hero);
+
+  // App selector
+  const appLabel=document.createElement('p');
+  appLabel.style.cssText='color:var(--text3);font-size:10px;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:8px;font-weight:800';
+  appLabel.textContent=ru?'Приложение':'Application';
+  wrap.appendChild(appLabel);
+  const appRow=document.createElement('div');
+  appRow.style.cssText='display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px';
+  let exportApp=state.progs[0]||'Excel';
+  PROGRAMS.forEach(p=>{
+    const color=COLORS[p]||'#818cf8';
+    const btn=document.createElement('button');
+    btn.className='pill'+(exportApp===p?' active':'');
+    btn.dataset.ep=p;
+    if(exportApp===p){btn.style.setProperty('--pill-c',color+'88');btn.style.setProperty('--pill-bg',color+'1a');btn.style.setProperty('--pill-color',color);}
+    btn.innerHTML=`<span>${ICONS[p]||'◉'}</span>${p}`;
+    btn.onclick=()=>{
+      exportApp=p;
+      appRow.querySelectorAll('[data-ep]').forEach(b=>{
+        const bc=COLORS[b.dataset.ep]||'#818cf8';
+        b.classList.toggle('active',b.dataset.ep===p);
+        if(b.dataset.ep===p){b.style.setProperty('--pill-c',bc+'88');b.style.setProperty('--pill-bg',bc+'1a');b.style.setProperty('--pill-color',bc);}
+        else{b.style.removeProperty('--pill-c');b.style.removeProperty('--pill-bg');b.style.removeProperty('--pill-color');}
+      });
+      updatePreview();
+    };
+    appRow.appendChild(btn);
+  });
+  wrap.appendChild(appRow);
+
+  // Preset selector
+  const presetLabel=document.createElement('p');
+  presetLabel.style.cssText='color:var(--text3);font-size:10px;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:8px;font-weight:800';
+  presetLabel.textContent=ru?'Пресет':'Preset';
+  wrap.appendChild(presetLabel);
+  const presetRow=document.createElement('div');
+  presetRow.style.cssText='display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap';
+  let exportPreset='app'; // 'app' | 'favorites'
+  [['app',ru?'📱 По приложению':'📱 By App','#818cf8'],['favorites',ru?'★ Избранное':'★ Favorites','#fbbf24']].forEach(([val,label,col])=>{
+    const btn=document.createElement('button');
+    btn.style.cssText=`flex:1;background:${exportPreset===val?col+'22':'var(--bg3)'};border:${exportPreset===val?'1.5px solid '+col+'66':'1px solid var(--border)'};border-radius:12px;padding:9px 12px;font-size:12px;font-weight:800;color:${exportPreset===val?col:'var(--text2)'};cursor:pointer;font-family:inherit;transition:all 0.2s`;
+    btn.dataset.preset=val;
+    btn.textContent=label;
+    btn.onclick=()=>{
+      exportPreset=val;
+      presetRow.querySelectorAll('[data-preset]').forEach(b=>{
+        const bc=b.dataset.preset==='favorites'?'#fbbf24':'#818cf8';
+        const active=b.dataset.preset===val;
+        b.style.background=active?bc+'22':'var(--bg3)';
+        b.style.border=active?'1.5px solid '+bc+'66':'1px solid var(--border)';
+        b.style.color=active?bc:'var(--text2)';
+      });
+      appRow.style.opacity=val==='favorites'?'0.4':'1';
+      appRow.style.pointerEvents=val==='favorites'?'none':'auto';
+      updatePreview();
+    };
+    presetRow.appendChild(btn);
+  });
+  wrap.appendChild(presetRow);
+
+  // Type filter
+  const typeLabel=document.createElement('p');
+  typeLabel.style.cssText='color:var(--text3);font-size:10px;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:8px;font-weight:800';
+  typeLabel.textContent=ru?'Тип контента':'Content type';
+  wrap.appendChild(typeLabel);
+  const typeRow=document.createElement('div');
+  typeRow.style.cssText='display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px';
+  let exportType='hotkey';
+  [['hotkey',ru?'Клавиши':'Hotkeys','⌨'],['formula',ru?'Формулы':'Formulas','📊'],['all',ru?'Всё':'All','◎']].forEach(([val,label,icon])=>{
+    const btn=document.createElement('button');
+    btn.className='pill'+(exportType===val?' active':'');
+    btn.dataset.et=val;
+    btn.innerHTML=`${icon} ${label}`;
+    btn.onclick=()=>{exportType=val;typeRow.querySelectorAll('[data-et]').forEach(b=>b.classList.toggle('active',b.dataset.et===val));updatePreview();};
+    typeRow.appendChild(btn);
+  });
+  wrap.appendChild(typeRow);
+
+  // Format selector
+  const fmtLabel=document.createElement('p');
+  fmtLabel.style.cssText='color:var(--text3);font-size:10px;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:8px;font-weight:800';
+  fmtLabel.textContent=ru?'Формат экспорта':'Export format';
+  wrap.appendChild(fmtLabel);
+  const fmtRow=document.createElement('div');
+  fmtRow.style.cssText='display:flex;gap:8px;margin-bottom:20px';
+  let exportFmt='png';
+  [['png','🖼 PNG',ru?'Для TikTok / Instagram':'For TikTok / Instagram'],['pdf','📄 PDF',ru?'Для печати':'For print']].forEach(([val,label,hint])=>{
+    const btn=document.createElement('button');
+    btn.style.cssText=`flex:1;background:${exportFmt===val?'rgba(99,102,241,0.12)':'var(--bg3)'};border:${exportFmt===val?'1.5px solid rgba(99,102,241,0.4)':'1px solid var(--border)'};border-radius:12px;padding:10px 12px;text-align:left;cursor:pointer;transition:all 0.2s;font-family:inherit`;
+    btn.innerHTML=`<div style="font-size:13px;font-weight:800;color:${exportFmt===val?'#818cf8':'var(--text)'}">${label}</div><div style="font-size:10px;color:var(--text3);margin-top:2px">${hint}</div>`;
+    btn.dataset.fmt=val;
+    btn.onclick=()=>{
+      exportFmt=val;
+      fmtRow.querySelectorAll('[data-fmt]').forEach(b=>{
+        const active=b.dataset.fmt===val;
+        b.style.background=active?'rgba(99,102,241,0.12)':'var(--bg3)';
+        b.style.border=active?'1.5px solid rgba(99,102,241,0.4)':'1px solid var(--border)';
+        b.querySelector('div').style.color=active?'#818cf8':'var(--text)';
+      });
+    };
+    fmtRow.appendChild(btn);
+  });
+  wrap.appendChild(fmtRow);
+
+  // Preview canvas
+  const previewWrap=document.createElement('div');
+  previewWrap.style.cssText='border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:16px;background:var(--bg)';
+  const canvas=document.createElement('canvas');
+  canvas.style.cssText='width:100%;display:block';
+  previewWrap.appendChild(canvas);
+  wrap.appendChild(previewWrap);
+
+  // Export button
+  const exportBtn=document.createElement('button');
+  exportBtn.style.cssText='width:100%;background:linear-gradient(135deg,rgba(52,211,153,0.2),rgba(14,165,233,0.15));border:1px solid rgba(52,211,153,0.4);color:#34d399;border-radius:12px;padding:12px;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;transition:all 0.2s;animation:glowGreen 3s ease-in-out infinite';
+  exportBtn.textContent=ru?'⬇ Скачать шпаргалку':'⬇ Download cheat sheet';
+  wrap.appendChild(exportBtn);
+
+  function getExportItems(){
+    let items;
+    if(exportPreset==='favorites'){
+      const favIds=getFavorites();
+      const allItems=Object.values(DB).flat();
+      items=favIds.map(fid=>allItems.find(x=>String(x.id)===fid)).filter(Boolean);
+      if(exportType!=='all')items=items.filter(x=>x.type===exportType);
+    } else {
+      items=DB[exportApp]||[];
+      if(exportType!=='all')items=items.filter(x=>x.type===exportType);
+    }
+    return items;
+  }
+
+  function drawCard(ctx,W,H,items){
+    const DPR=2;// rendered at 2x then scaled down = crisp
+    const dark=!document.documentElement.classList.contains('light');
+    const appColor=(exportPreset==='favorites'?'#fbbf24':COLORS[exportApp])||'#6366f1';
+    const PAD=40;
+    // Background gradient
+    const bg=ctx.createLinearGradient(0,0,W,H);
+    if(dark){bg.addColorStop(0,'#0d0e1a');bg.addColorStop(0.5,'#111322');bg.addColorStop(1,'#0a0c18');}
+    else{bg.addColorStop(0,'#f4f6ff');bg.addColorStop(1,'#eaedff');}
+    ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
+    // Subtle grid pattern
+    ctx.strokeStyle=dark?'rgba(255,255,255,0.025)':'rgba(0,0,0,0.025)';
+    ctx.lineWidth=1;
+    for(let gx=0;gx<W;gx+=40){ctx.beginPath();ctx.moveTo(gx,0);ctx.lineTo(gx,H);ctx.stroke();}
+    for(let gy=0;gy<H;gy+=40){ctx.beginPath();ctx.moveTo(0,gy);ctx.lineTo(W,gy);ctx.stroke();}
+    // Accent glow top-left
+    const grd=ctx.createRadialGradient(80,80,0,80,80,200);
+    grd.addColorStop(0,appColor+'30');grd.addColorStop(1,'transparent');
+    ctx.fillStyle=grd;ctx.fillRect(0,0,W,Math.min(H,300));
+    // Top border accent
+    const topGrad=ctx.createLinearGradient(0,0,W,0);
+    topGrad.addColorStop(0,'transparent');topGrad.addColorStop(0.3,appColor+'cc');topGrad.addColorStop(0.7,appColor+'cc');topGrad.addColorStop(1,'transparent');
+    ctx.fillStyle=topGrad;ctx.fillRect(0,0,W,3);
+    // Header section
+    ctx.fillStyle=dark?'rgba(255,255,255,0.06)':'rgba(0,0,0,0.04)';
+    roundRect(ctx,PAD-10,PAD-10,W-PAD*2+20,68,14);ctx.fill();
+    // App icon pill
+    ctx.fillStyle=appColor+'22';
+    roundRect(ctx,PAD,PAD,36,36,10);ctx.fill();
+    ctx.strokeStyle=appColor+'55';ctx.lineWidth=1.5;roundRect(ctx,PAD,PAD,36,36,10);ctx.stroke();
+    ctx.font='bold 18px system-ui,-apple-system,sans-serif';
+    ctx.fillStyle=appColor;ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillText(ICONS[exportApp]||'◉',PAD+18,PAD+18);
+    ctx.textAlign='left';ctx.textBaseline='alphabetic';
+    // Title
+    ctx.font='bold 22px system-ui,-apple-system,sans-serif';
+    ctx.fillStyle=dark?'#f1f5f9':'#0f172a';
+    const title=exportPreset==='favorites'?(ru?'★ Избранное':'★ Favorites'):exportApp;
+    ctx.fillText(title,PAD+46,PAD+20);
+    ctx.font='13px system-ui,-apple-system,sans-serif';
+    ctx.fillStyle=dark?'#64748b':'#94a3b8';
+    const osName=settings.os==='mac'?'macOS':settings.os==='linux'?'Linux':'Windows';
+    const typeLabel=exportType==='formula'?(ru?'Формулы':'Formulas'):(exportType==='all'?(ru?'Все':'All'):(ru?'Горячие клавиши':'Shortcuts'));
+    ctx.fillText(typeLabel+' · '+osName,PAD+46,PAD+40);
+    // Divider
+    ctx.strokeStyle=dark?'rgba(255,255,255,0.07)':'rgba(0,0,0,0.07)';ctx.lineWidth=1;
+    ctx.beginPath();ctx.moveTo(PAD,PAD+60);ctx.lineTo(W-PAD,PAD+60);ctx.stroke();
+    // Items grid
+    const maxItems=Math.min(items.length,18);
+    const COLS=2;const ITEM_H=50;const ITEM_W=(W-PAD*2-10)/COLS;
+    const startY=PAD+74;
+    for(let i=0;i<maxItems;i++){
+      const item=items[i];const col=i%COLS;const row=Math.floor(i/COLS);
+      const x=PAD+col*(ITEM_W+10);const y=startY+row*ITEM_H;
+      // Card background
+      ctx.fillStyle=dark?'rgba(255,255,255,0.04)':'rgba(255,255,255,0.8)';
+      roundRect(ctx,x,y,ITEM_W,ITEM_H-6,10);ctx.fill();
+      ctx.strokeStyle=dark?'rgba(255,255,255,0.07)':'rgba(0,0,0,0.08)';ctx.lineWidth=1;
+      roundRect(ctx,x,y,ITEM_W,ITEM_H-6,10);ctx.stroke();
+      // Left accent bar
+      ctx.fillStyle=appColor+'99';roundRect(ctx,x,y,3,ITEM_H-6,2);ctx.fill();
+      // Key badge background
+      const keysText=getKeys(item);
+      ctx.font='bold 11px ui-monospace,monospace';
+      const kw=ctx.measureText(keysText.slice(0,20)).width;
+      ctx.fillStyle=appColor+'25';roundRect(ctx,x+10,y+7,kw+16,20,6);ctx.fill();
+      ctx.strokeStyle=appColor+'44';ctx.lineWidth=1;roundRect(ctx,x+10,y+7,kw+16,20,6);ctx.stroke();
+      // Key text
+      ctx.font='bold 11px ui-monospace,monospace';
+      ctx.fillStyle=appColor;ctx.fillText(keysText.slice(0,20),x+18,y+21);
+      // Description
+      ctx.font='11px system-ui,-apple-system,sans-serif';
+      ctx.fillStyle=dark?'#94a3b8':'#475569';
+      const desc=(item.desc?.[settings.lang]||item.desc?.ru||'').slice(0,32);
+      ctx.fillText(desc,x+10,y+38);
+    }
+    // Footer
+    const footY=startY+Math.ceil(maxItems/COLS)*ITEM_H+12;
+    ctx.strokeStyle=dark?'rgba(255,255,255,0.07)':'rgba(0,0,0,0.07)';ctx.lineWidth=1;
+    ctx.beginPath();ctx.moveTo(PAD,footY);ctx.lineTo(W-PAD,footY);ctx.stroke();
+    // Logo text
+    ctx.font='bold 12px system-ui,-apple-system,sans-serif';
+    ctx.fillStyle=dark?'rgba(255,255,255,0.35)':'rgba(0,0,0,0.3)';
+    ctx.fillText('SearchCopy',PAD,footY+18);
+    ctx.font='12px system-ui,-apple-system,sans-serif';
+    ctx.fillStyle=dark?'rgba(255,255,255,0.18)':'rgba(0,0,0,0.18)';
+    ctx.fillText(' by RENDERGAMES · 2026',PAD+ctx.measureText('SearchCopy').width+1,footY+18);
+    ctx.font='10px system-ui,-apple-system,sans-serif';
+    ctx.fillStyle=dark?'rgba(255,255,255,0.12)':'rgba(0,0,0,0.12)';
+    ctx.textAlign='right';
+    ctx.fillText('rendergames.tilda.ws · @rendergm',W-PAD,footY+18);
+    ctx.textAlign='left';
+  }
+
+  function roundRect(ctx,x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);ctx.quadraticCurveTo(x+w,y,x+w,y+r);ctx.lineTo(x+w,y+h-r);ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);ctx.lineTo(x+r,y+h);ctx.quadraticCurveTo(x,y+h,x,y+h-r);ctx.lineTo(x,y+r);ctx.quadraticCurveTo(x,y,x+r,y);ctx.closePath();}
+
+  function updatePreview(){
+    const items=getExportItems();
+    const rows=Math.ceil(Math.min(items.length,18)/2);
+    const W=600;const H=40+74+rows*50+50;
+    const DPR=window.devicePixelRatio||2;
+    canvas.width=W*DPR;canvas.height=H*DPR;
+    canvas.style.width=W+'px';canvas.style.height=H+'px';
+    const ctx=canvas.getContext('2d');
+    ctx.scale(DPR,DPR);
+    drawCard(ctx,W,H,items);
+  }
+
+  exportBtn.onclick=async()=>{
+    const items=getExportItems();
+    const rows=Math.ceil(Math.min(items.length,16)/2);
+    const W=600;const H=40+74+rows*50+50;
+    const DPR=3;// 3x for ultra-crisp export
+    const offscreen=document.createElement('canvas');
+    offscreen.width=W*DPR;offscreen.height=H*DPR;
+    const ctx=offscreen.getContext('2d');
+    ctx.scale(DPR,DPR);
+    drawCard(ctx,W,H,items);
+    const fname=`SearchCopy_${exportApp.replace(/\s/g,'_')}_${settings.os||'win'}`;
+    if(exportFmt==='png'){
+      const a=document.createElement('a');a.download=fname+'.png';a.href=offscreen.toDataURL('image/png');a.click();
+    } else {
+      // PDF via print-ready HTML in new window
+      const dataURL=offscreen.toDataURL('image/png');
+      const win2=window.open('','_blank');
+      if(win2){
+        win2.document.write(`<html><head><title>${fname}</title><style>body{margin:0;background:#fff}img{width:100%;max-width:600px;display:block;margin:0 auto}@media print{body{margin:0}}</style></head><body><img src="${dataURL}"><script>window.onload=()=>{window.print();}<\/script></body></html>`);
+        win2.document.close();
+      }
+    }
+    // Flash button
+    exportBtn.style.background='linear-gradient(135deg,rgba(52,211,153,0.35),rgba(14,165,233,0.3))';
+    setTimeout(()=>exportBtn.style.background='linear-gradient(135deg,rgba(52,211,153,0.2),rgba(14,165,233,0.15))',600);
+  };
+
+  updatePreview();
+  return wrap;
+}
+
+// ══════════════════════════════════════════════
+// ── Render Reverse Search Tab ──
+// ══════════════════════════════════════════════
+function renderReverse(){
+  const ru=settings.lang==='ru';
+  const wrap=document.createElement('div');
+  wrap.style.animation='fadeUp 0.35s ease both';
+
+  const hero=document.createElement('div');
+  hero.style.cssText='background:linear-gradient(135deg,rgba(14,165,233,0.1),rgba(99,102,241,0.07));border:1px solid rgba(14,165,233,0.2);border-radius:16px;padding:18px 20px;margin-bottom:20px;display:flex;align-items:center;gap:14px';
+  hero.innerHTML=`<span style="font-size:28px;animation:floatY 3s ease-in-out infinite;display:inline-block">⌥</span><div><div style="font-size:14px;font-weight:900;color:var(--text)">${ru?'Поиск по клавише':'Search by Key'}</div><div style="font-size:11px;color:var(--text2);margin-top:3px">${ru?'Введи комбинацию — узнай что она делает':'Type a shortcut — find out what it does'}</div></div>`;
+  wrap.appendChild(hero);
+
+  // App filter
+  const appLabel=document.createElement('p');
+  appLabel.style.cssText='color:var(--text3);font-size:10px;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:8px;font-weight:800';
+  appLabel.textContent=ru?'Приложение':'Application';
+  wrap.appendChild(appLabel);
+  const appRow2=document.createElement('div');
+  appRow2.style.cssText='display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px';
+  let revApp='all';
+  [['all',ru?'Все':'All','◎'],...PROGRAMS.map(p=>[p,p,ICONS[p]||'◉'])].forEach(([val,label,icon])=>{
+    const color=COLORS[val]||'#818cf8';
+    const btn=document.createElement('button');
+    btn.className='pill'+(revApp===val?' active':'');
+    btn.dataset.rp=val;
+    if(revApp===val){btn.style.setProperty('--pill-c','#818cf888');btn.style.setProperty('--pill-bg','#818cf81a');btn.style.setProperty('--pill-color','#818cf8');}
+    btn.innerHTML=`<span>${icon}</span>${label}`;
+    btn.onclick=()=>{
+      revApp=val;
+      appRow2.querySelectorAll('[data-rp]').forEach(b=>{
+        const bc=COLORS[b.dataset.rp]||'#818cf8';
+        b.classList.toggle('active',b.dataset.rp===val);
+        if(b.dataset.rp===val){b.style.setProperty('--pill-c',bc+'88');b.style.setProperty('--pill-bg',bc+'1a');b.style.setProperty('--pill-color',bc);}
+        else{b.style.removeProperty('--pill-c');b.style.removeProperty('--pill-bg');b.style.removeProperty('--pill-color');}
+      });
+    };
+    appRow2.appendChild(btn);
+  });
+  wrap.appendChild(appRow2);
+
+  // Key input
+  const qLabel2=document.createElement('p');
+  qLabel2.style.cssText='color:var(--text3);font-size:10px;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:8px;font-weight:800';
+  qLabel2.textContent=ru?'Введи клавишу или комбинацию':'Enter a key or combination';
+  wrap.appendChild(qLabel2);
+
+  const keyInput=document.createElement('input');
+  keyInput.style.cssText='width:100%;background:var(--input-bg);border:1.5px solid var(--border);border-radius:14px;padding:12px 16px;font-size:16px;color:var(--text);outline:none;font-family:monospace;font-weight:700;letter-spacing:1px;box-sizing:border-box;transition:border-color 0.2s,box-shadow 0.2s;margin-bottom:8px';
+  keyInput.placeholder=ru?'Например: Ctrl+K, ⌘+Shift+P, F5':'E.g.: Ctrl+K, ⌘+Shift+P, F5';
+  keyInput.onfocus=()=>{keyInput.style.borderColor='rgba(14,165,233,0.5)';keyInput.style.boxShadow='0 0 0 3px rgba(14,165,233,0.08)';};
+  keyInput.onblur=()=>{keyInput.style.borderColor='var(--border)';keyInput.style.boxShadow='none';};
+  wrap.appendChild(keyInput);
+
+  // Quick key buttons
+  const quickKeys=['Ctrl','Alt','Shift','Win/⌘','F1-F12','Enter','Esc','Tab'];
+  const qkRow=document.createElement('div');
+  qkRow.style.cssText='display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px';
+  quickKeys.forEach(k=>{
+    const btn=document.createElement('button');
+    btn.style.cssText='background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:4px 10px;font-size:11px;font-weight:700;color:var(--text2);cursor:pointer;font-family:monospace;transition:all 0.15s';
+    btn.textContent=k;
+    btn.onclick=()=>{
+      if(keyInput.value&&!keyInput.value.endsWith('+'))keyInput.value+='+';
+      else if(keyInput.value.endsWith('+')){}
+      keyInput.value+=k.includes('/')?k.split('/')[0]:k;
+      doRevSearch();
+    };
+    qkRow.appendChild(btn);
+  });
+  wrap.appendChild(qkRow);
+
+  const revResults=document.createElement('div');
+  revResults.id='rev-results';
+  wrap.appendChild(revResults);
+
+  function doRevSearch(){
+    const q=keyInput.value.trim().toLowerCase().replace(/\s/g,'');
+    if(q.length<1){revResults.innerHTML='';return;}
+    const os=settings.os||'win';
+    const found=[];
+    Object.entries(DB).forEach(([app,items])=>{
+      if(revApp!=='all'&&app!==revApp)return;
+      items.forEach(item=>{
+        const keysRaw=item.keys;
+        let keyStr='';
+        if(typeof keysRaw==='object')keyStr=(keysRaw[os]||keysRaw.win||keysRaw.mac||'').toLowerCase().replace(/\s/g,'');
+        else keyStr=(keysRaw||'').toLowerCase().replace(/\s/g,'');
+        if(keyStr.includes(q)||q.includes(keyStr.slice(0,Math.min(q.length,keyStr.length))))found.push({...item,app});
+      });
+    });
+    revResults.innerHTML='';
+    if(found.length===0){
+      revResults.innerHTML=`<div style="text-align:center;padding:20px;color:var(--text3);font-size:12px">🔍 ${ru?'Ничего не найдено — попробуй другую комбинацию':'Nothing found — try a different combination'}</div>`;
+      return;
+    }
+    found.slice(0,20).forEach(item=>{
+      const keysText=getKeys(item);
+      const card=document.createElement('div');
+      card.style.cssText='background:var(--card-bg);border:1px solid rgba(14,165,233,0.2);border-left:3px solid #0ea5e9;border-radius:12px;padding:12px 14px;margin-bottom:8px;display:flex;align-items:center;gap:12px;animation:fadeUp 0.25s ease both';
+      const appC=COLORS[item.app]||'#818cf8';
+      const kbdEl=document.createElement('div');
+      kbdEl.style.cssText=`background:rgba(14,165,233,0.1);border:1px solid rgba(14,165,233,0.25);border-radius:8px;padding:4px 12px;font-size:12px;font-weight:900;color:#38bdf8;font-family:monospace;white-space:nowrap;flex-shrink:0`;
+      kbdEl.textContent=keysText;
+      const infoEl=document.createElement('div');infoEl.style.flex='1';
+      const descEl=document.createElement('div');descEl.style.cssText='font-size:12px;font-weight:700;color:var(--text)';descEl.textContent=item.desc?.[settings.lang]||item.desc?.ru||'';
+      const appBadge=document.createElement('div');appBadge.style.cssText=`font-size:10px;color:${appC};font-weight:700;margin-top:2px`;appBadge.textContent=item.app;
+      infoEl.appendChild(descEl);infoEl.appendChild(appBadge);
+      const copyB=document.createElement('button');copyB.className='copy-btn';copyB.textContent='⎘';copyB.onclick=()=>copyText(keysText,copyB);
+      card.appendChild(kbdEl);card.appendChild(infoEl);card.appendChild(copyB);
+      revResults.appendChild(card);
+    });
+  }
+
+  keyInput.oninput=doRevSearch;
+  keyInput.onkeydown=e=>{if(e.key==='Enter')doRevSearch();};
+
+  // ── AI block ──
+  const hasKeyR=settings.aiProvider==='claude'?!!settings.aiKey:!!settings.gigaKey;
+  const aiRevDiv=document.createElement('div');
+  aiRevDiv.style.cssText=`margin-top:20px;background:linear-gradient(135deg,rgba(99,102,241,0.07),rgba(14,165,233,0.05));border:1px solid rgba(99,102,241,0.18);border-radius:14px;padding:16px;${hasKeyR?'':'opacity:0.5'}`;
+  const aiRevHead=el('div',"display:flex;align-items:center;gap:8px;margin-bottom:10px");
+  aiRevHead.innerHTML=`<span style="font-size:16px;animation:floatY 2s ease-in-out infinite;display:inline-block">✦</span><div><div style="font-size:12px;font-weight:900;color:var(--text)">${ru?'Не нашёл? Спроси AI':"Can't find it? Ask AI"}</div><div style="font-size:10px;color:var(--text2)">${hasKeyR?(ru?'AI объяснит что делает эта комбинация':'AI will explain what this shortcut does'):(ru?'Нет ключа — подключи в ⚙ Настройках':'No key — connect in ⚙ Settings')}</div></div>`;
+  aiRevDiv.appendChild(aiRevHead);
+  const aiRevBtn=document.createElement('button');
+  aiRevBtn.style.cssText=`width:100%;background:linear-gradient(135deg,rgba(99,102,241,0.15),rgba(14,165,233,0.1));border:1px solid rgba(99,102,241,0.3);color:#818cf8;border-radius:10px;padding:10px;font-size:12px;font-weight:800;cursor:${hasKeyR?'pointer':'not-allowed'};font-family:inherit;display:flex;align-items:center;justify-content:center;gap:6px;transition:all 0.2s;opacity:${hasKeyR?'1':'0.5'}`;
+  aiRevBtn.innerHTML=`✦ ${ru?'Спросить AI о клавише':'Ask AI about this key'}`;
+  const aiRevResult=el('div',"margin-top:10px");
+  aiRevDiv.appendChild(aiRevBtn);
+  aiRevDiv.appendChild(aiRevResult);
+  wrap.appendChild(aiRevDiv);
+
+  aiRevBtn.onclick=async()=>{
+    if(!hasKeyR)return;
+    const q=keyInput.value.trim();
+    if(!q){keyInput.focus();return;}
+    const appCtx=revApp==='all'?(ru?'любом приложении':'any application'):revApp;
+    const osName=settings.os==='mac'?'macOS':settings.os==='linux'?'Linux':'Windows';
+    aiRevBtn.innerHTML=`<div class="spinner"></div>${ru?'Думаю...':'Thinking...'}`;
+    aiRevBtn.disabled=true;
+    const sp=ru
+      ?`Ты эксперт по горячим клавишам. Объясни что делает комбинация "${q}" в ${appCtx} на ${osName}. Если не знаешь — честно скажи. Обычный текст, без JSON, максимум 4 предложения.`
+      :`You are a keyboard shortcut expert. Explain what the shortcut "${q}" does in ${appCtx} on ${osName}. If you don't know — say so. Plain text, no JSON, max 4 sentences.`;
+    try{
+      let ans='';
+      if(settings.aiProvider==='claude'){
+        const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',
+          headers:{'Content-Type':'application/json','x-api-key':settings.aiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+          body:JSON.stringify({model:'claude-haiku-4-5',max_tokens:300,system:sp,messages:[{role:'user',content:`Что делает ${q}?`}]})});
+        const d=await r.json();ans=d.content?.[0]?.text||'';
+      } else {
+        const invoke=window.__TAURI__?.core?.invoke||window.__TAURI__?.tauri?.invoke;
+        if(!invoke)throw new Error(ru?'GigaChat только в приложении':'GigaChat is desktop-only');
+        const ak=settings.gigaKey.startsWith('Basic ')?settings.gigaKey.slice(6).trim():settings.gigaKey;
+        ans=await invoke('giga_search',{authKey:ak,systemPrompt:sp,query:`Что делает ${q}?`});
+      }
+      ans=ans.replace(/\`\`\`[\s\S]*?\`\`\`/g,'').replace(/\`([^\`]+)\`/g,'$1').trim();
+      aiRevResult.innerHTML='';
+      const box=el('div',"background:var(--card-bg);border:1px solid rgba(99,102,241,0.2);border-radius:10px;padding:12px;animation:fadeUp 0.25s ease");
+      const badge=el('div',"font-size:10px;font-weight:800;color:#818cf8;margin-bottom:6px",`✦ ${settings.aiProvider==='giga'?'GigaChat':'Claude'} · ${q}`);
+      const text=el('div',"font-size:12px;color:var(--text);line-height:1.7",ans);
+      box.appendChild(badge);box.appendChild(text);
+      aiRevResult.appendChild(box);
+    }catch(e){
+      aiRevResult.innerHTML=`<div style="color:#fca5a5;font-size:12px">❌ ${String(e.message||e).slice(0,100)}</div>`;
+    }
+    aiRevBtn.innerHTML=`✦ ${ru?'Спросить AI о клавише':'Ask AI about this key'}`;
+    aiRevBtn.disabled=false;
+  };
+
+  return wrap;
+}
+
 function renderGuide(){
   const t=T[settings.lang];
   const ru=settings.lang==='ru';
@@ -1994,11 +2695,16 @@ function renderGuide(){
       const caret=el('span',"display:inline-block;width:2px;height:14px;background:#6366f1;margin-left:1px;animation:blink 1s step-end infinite;vertical-align:middle","");
       cursor.appendChild(iconS);cursor.appendChild(typed);cursor.appendChild(caret);
       demo.appendChild(cursor);
-      const words=ru?['скопировать','открыть файл','новая вкладка','поиск']:['copy','open file','new tab','find'];
-      let wi=0,ci=0,del=false;
+      const words=ru?['скопировать','открыть файл','новая вкладка','горячие клавиши Excel','поиск в таблице','открыть терминал','скопировать формат','переключить окно']:['copy text','open file','new tab','undo action','find in page','switch window','paste clipboard','close app'];
+      let wi=0,ci=0,del=false,pauseTimer=null;
       const tw=setInterval(()=>{
-        if(!del){typed.textContent=words[wi].slice(0,++ci);if(ci>=words[wi].length){del=true;setTimeout(()=>{del=false;},900);}}
-        else{typed.textContent=words[wi].slice(0,--ci);if(ci===0){del=false;wi=(wi+1)%words.length;}}
+        if(pauseTimer)return;
+        if(!del){
+          ci++;typed.textContent=words[wi].slice(0,ci);
+          if(ci>=words[wi].length){del=true;pauseTimer=setTimeout(()=>{pauseTimer=null;},1400);}
+        } else {
+          ci--;typed.textContent=words[wi].slice(0,ci);
+          if(ci===0){del=false;wi=(wi+1)%words.length;}}
       },80);
       demo._cleanup=()=>clearInterval(tw);
     } else if(step.anim==='pills'){
@@ -2174,7 +2880,12 @@ function renderAbout(){
   }
   function heading(txt){const d=el('p',"color:var(--text3);font-size:10px;text-transform:uppercase;letter-spacing:2px;font-weight:800;margin:24px 0 10px");d.textContent=txt;return d;}
   const hero=el('div',"background:linear-gradient(135deg,rgba(79,70,229,0.1),rgba(14,165,233,0.07));border:1px solid rgba(99,102,241,0.2);border-radius:16px;padding:24px;text-align:center;margin-bottom:6px");
-  hero.innerHTML=`<div style="font-size:32px;margin-bottom:10px">⌘</div><h2 style="margin:0 0 5px;font-size:20px;font-weight:900;color:var(--text)">SearchCopy</h2><p style="margin:0 0 10px;color:#818cf8;font-size:10px;letter-spacing:2.5px;text-transform:uppercase">by RENDERGAMES</p><p style="margin:0;color:var(--text2);font-size:12px;line-height:1.6">${t.aboutHero}</p>`;
+  hero.innerHTML=`<div style="font-size:32px;margin-bottom:10px;animation:floatY 3s ease-in-out infinite">⌘</div><h2 style="margin:0 0 5px;font-size:20px;font-weight:900;color:var(--text)">SearchCopy</h2><p style="margin:0 0 10px;color:#818cf8;font-size:10px;letter-spacing:2.5px;text-transform:uppercase">by RENDERGAMES</p><p style="margin:0 0 16px;color:var(--text2);font-size:12px;line-height:1.6">${t.aboutHero}</p><div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
+  <a href="https://github.com/MihailKashintsev/searchcopy" target="_blank" style="display:inline-flex;align-items:center;gap:5px;background:rgba(99,102,241,0.1);border:1px solid rgba(99,102,241,0.25);border-radius:20px;padding:5px 13px;font-size:11px;font-weight:800;color:#818cf8;text-decoration:none;transition:all 0.2s" onmouseover="this.style.background='rgba(99,102,241,0.2)'" onmouseout="this.style.background='rgba(99,102,241,0.1)'">⊟ GitHub</a>
+  <a href="https://t.me/rendergm" target="_blank" style="display:inline-flex;align-items:center;gap:5px;background:rgba(6,182,212,0.1);border:1px solid rgba(6,182,212,0.25);border-radius:20px;padding:5px 13px;font-size:11px;font-weight:800;color:#22d3ee;text-decoration:none;transition:all 0.2s" onmouseover="this.style.background='rgba(6,182,212,0.2)'" onmouseout="this.style.background='rgba(6,182,212,0.1)'">✈ Telegram</a>
+  <a href="https://boosty.to/rendergamesru" target="_blank" style="display:inline-flex;align-items:center;gap:5px;background:rgba(249,115,22,0.1);border:1px solid rgba(249,115,22,0.25);border-radius:20px;padding:5px 13px;font-size:11px;font-weight:800;color:#fb923c;text-decoration:none;transition:all 0.2s" onmouseover="this.style.background='rgba(249,115,22,0.2)'" onmouseout="this.style.background='rgba(249,115,22,0.1)'">★ Boosty</a>
+  <a href="https://rendergames.tilda.ws/" target="_blank" style="display:inline-flex;align-items:center;gap:5px;background:rgba(168,85,247,0.1);border:1px solid rgba(168,85,247,0.25);border-radius:20px;padding:5px 13px;font-size:11px;font-weight:800;color:#c084fc;text-decoration:none;transition:all 0.2s" onmouseover="this.style.background='rgba(168,85,247,0.2)'" onmouseout="this.style.background='rgba(168,85,247,0.1)'">◈ Сайт</a>
+</div>`;
   wrap.appendChild(hero);
   wrap.appendChild(heading(t.h_howto));t.rows.slice(0,3).forEach(r=>wrap.appendChild(infoRow(r[0],r[1],r[2])));
   wrap.appendChild(heading(t.h_filters));wrap.appendChild(infoRow(t.rows[3][0],t.rows[3][1],t.rows[3][2]));
@@ -2356,6 +3067,68 @@ function renderResults(){
   }
 }
 
+
+// ── Sidebar navigation ──
+function openSidebar(tabDefs, t){
+  const overlay=document.createElement('div');
+  overlay.className='sidebar-overlay';
+  const sidebar=document.createElement('div');
+  sidebar.className='sidebar';
+
+  const hdr=document.createElement('div');
+  hdr.className='sidebar-header';
+  hdr.innerHTML=`<div class="sidebar-logo">⌘ SearchCopy</div>`;
+  const closeBtn=document.createElement('button');
+  closeBtn.className='sidebar-close';
+  closeBtn.textContent='✕';
+  hdr.appendChild(closeBtn);
+  sidebar.appendChild(hdr);
+
+  function close(){overlay.remove();sidebar.remove();}
+  overlay.onclick=close;
+  closeBtn.onclick=close;
+
+  const groups={
+    main: t.lang==='ru'?'Поиск':'Search',
+    tools: t.lang==='ru'?'Инструменты':'Tools',
+    ai: 'AI',
+    info: t.lang==='ru'?'Информация':'Info',
+  };
+  const ru=t===T['ru']||settings.lang==='ru';
+  const groupLabels={main:ru?'Поиск':'Search',tools:ru?'Инструменты':'Tools',ai:'AI',info:ru?'Информация':'Info'};
+  let lastGroup='';
+  tabDefs.forEach(({key,label,icon,group})=>{
+    if(group!==lastGroup){
+      const sec=document.createElement('div');
+      sec.className='sidebar-section';
+      sec.textContent=groupLabels[group]||group;
+      sidebar.appendChild(sec);
+      lastGroup=group;
+    }
+    const btn=document.createElement('button');
+    btn.className='sidebar-btn'+(state.tab===key?' active':'');
+    btn.innerHTML=`<span class="sb-icon">${icon}</span><span>${label}</span>`;
+    if(state.tab===key){
+      const dot=document.createElement('span');
+      dot.style.cssText='margin-left:auto;width:6px;height:6px;border-radius:50%;background:#818cf8;flex-shrink:0';
+      btn.appendChild(dot);
+    }
+    btn.onclick=()=>{state.tab=key;close();render();};
+    sidebar.appendChild(btn);
+  });
+
+  // Version info at bottom
+  const ver=document.createElement('div');
+  ver.style.cssText='margin-top:auto;padding:16px;font-size:10px;color:var(--text3);text-align:center;border-top:1px solid var(--border);margin-top:12px';
+  const invoke=window.__TAURI__?.core?.invoke||window.__TAURI__?.tauri?.invoke;
+  if(invoke){invoke('get_version').then(v=>{ver.textContent=`SearchCopy v${v} · RENDERGAMES`;}).catch(()=>{ver.textContent='SearchCopy · RENDERGAMES';});}
+  else{ver.textContent='SearchCopy · RENDERGAMES';}
+  sidebar.appendChild(ver);
+
+  document.body.appendChild(overlay);
+  document.body.appendChild(sidebar);
+}
+
 function render(){
   const t=T[settings.lang];
   const app=document.getElementById('app');
@@ -2378,18 +3151,32 @@ function render(){
     <p style="font-size:11px;color:var(--text3);letter-spacing:3px;text-transform:uppercase;margin:0">${t.tagline}</p>`;
   wrap.appendChild(header);
 
-  // ── Tabs ──
-  const tabs=el('div',"display:flex;background:var(--bg3);border:1px solid var(--border);border-radius:14px;padding:4px;gap:4px;margin-bottom:20px;animation:fadeUp 0.35s 0.05s cubic-bezier(.4,0,.2,1) both");
-  [{key:'search',label:t.tabSearch},{key:'ask',label:t.tabAsk},{key:'guide',label:t.tabGuide},{key:'about',label:t.tabAbout},{key:'settings',label:t.tabSettings}].forEach(({key,label})=>{
-    const btn=document.createElement('button');
-    btn.className='tab-btn'+(state.tab===key?' active':'');
-    btn.textContent=label;
-    btn.onclick=()=>{state.tab=key;render();};
-    tabs.appendChild(btn);
-  });
-  wrap.appendChild(tabs);
+  // ── Sidebar toggle button ──
+  const tabDefs=[
+    {key:'search',label:t.tabSearch,icon:'⌕',group:'main'},
+    {key:'fav',label:t.tabFav,icon:'★',group:'main'},
+    {key:'reverse',label:t.tabReverse,icon:'⌥',group:'main'},
+    {key:'trainer',label:t.tabTrainer,icon:'⌨',group:'tools'},
+    {key:'export',label:t.tabExport,icon:'🃏',group:'tools'},
+    {key:'ask',label:t.tabAsk,icon:'✦',group:'ai'},
+    {key:'guide',label:t.tabGuide,icon:'◈',group:'info'},
+    {key:'about',label:t.tabAbout,icon:'◎',group:'info'},
+    {key:'settings',label:t.tabSettings,icon:'⚙',group:'info'},
+  ];
+  const curTab=tabDefs.find(x=>x.key===state.tab)||tabDefs[0];
+  const topBar=el('div',"display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;animation:fadeUp 0.3s ease both");
+  const menuBtn=document.createElement('button');
+  menuBtn.className='menu-toggle-btn';
+  menuBtn.innerHTML=`<span style="font-size:15px">☰</span><span style="font-size:15px">${curTab.icon}</span><span>${curTab.label}</span>`;
+  menuBtn.onclick=()=>openSidebar(tabDefs,t);
+  topBar.appendChild(menuBtn);
+  wrap.appendChild(topBar);
 
   if(state.tab==='settings'){const s=renderSettings();s.style.animation='slideDown 0.25s cubic-bezier(.4,0,.2,1) both';wrap.appendChild(s);app.appendChild(wrap);return;}
+  if(state.tab==='fav'){const f=renderFavorites();f.style.animation='slideDown 0.25s cubic-bezier(.4,0,.2,1) both';wrap.appendChild(f);app.appendChild(wrap);return;}
+  if(state.tab==='trainer'){const tr=renderTrainer();tr.style.animation='slideDown 0.25s cubic-bezier(.4,0,.2,1) both';wrap.appendChild(tr);app.appendChild(wrap);return;}
+  if(state.tab==='export'){const ex=renderExport();ex.style.animation='slideDown 0.25s cubic-bezier(.4,0,.2,1) both';wrap.appendChild(ex);app.appendChild(wrap);return;}
+  if(state.tab==='reverse'){const rv=renderReverse();rv.style.animation='slideDown 0.25s cubic-bezier(.4,0,.2,1) both';wrap.appendChild(rv);app.appendChild(wrap);return;}
   if(state.tab==='guide'){const g=renderGuide();g.style.animation='slideDown 0.25s cubic-bezier(.4,0,.2,1) both';wrap.appendChild(g);app.appendChild(wrap);return;}
   if(state.tab==='ask'){const a=renderAskAI();a.style.animation='slideDown 0.25s cubic-bezier(.4,0,.2,1) both';wrap.appendChild(a);app.appendChild(wrap);return;}
   if(state.tab==='about'){const a=renderAbout();a.style.animation='slideDown 0.25s cubic-bezier(.4,0,.2,1) both';wrap.appendChild(a);app.appendChild(wrap);return;}
@@ -2492,6 +3279,7 @@ function render(){
   input.onkeydown=e=>{
     if(e.key==='Enter'&&state.query.trim()){
       e.preventDefault();
+      addHistory(state.query.trim());
       if(state.aiMode){state.aiLoading=true;state.aiResult=null;renderResults();doAiSearch(state.query.trim());}
     }
   };
@@ -2535,16 +3323,45 @@ function render(){
 
   // ── Suggestions ──
   if(!state.query&&!state.aiMode){
+    const history=getHistory();
     const sugWrap=el('div',"margin-bottom:20px");
-    sugWrap.appendChild(el('p',"color:var(--text3);font-size:10px;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:8px",t.tryLabel));
-    const sugRow=el('div',"display:flex;flex-wrap:wrap;gap:6px");
-    t.suggestions.forEach(s=>{
-      const btn=document.createElement('button');
-      btn.className='sug';btn.textContent=s;
-      btn.onclick=()=>{state.query=s;input.value=s;renderResults();input.focus();};
-      sugRow.appendChild(btn);
-    });
-    sugWrap.appendChild(sugRow);sw.appendChild(sugWrap);
+    if(history.length>0){
+      const hRow=el('div',"display:flex;align-items:center;justify-content:space-between;margin-bottom:8px");
+      hRow.appendChild(el('p',"color:var(--text3);font-size:10px;text-transform:uppercase;letter-spacing:1.5px;margin:0",settings.lang==='ru'?'🕐 Недавние запросы':'🕐 Recent searches'));
+      const clrAll=document.createElement('button');
+      clrAll.style.cssText='background:none;border:none;color:var(--text3);font-size:10px;cursor:pointer;padding:0;font-family:inherit';
+      clrAll.textContent=settings.lang==='ru'?'Очистить':'Clear';
+      clrAll.onclick=()=>{localStorage.removeItem('sc_history');sugWrap.remove();};
+      hRow.appendChild(clrAll);
+      sugWrap.appendChild(hRow);
+      const sugRow=el('div',"display:flex;flex-wrap:wrap;gap:6px");
+      history.forEach(s=>{
+        const wrap2=el('div',"position:relative;display:inline-flex;align-items:center");
+        const btn=document.createElement('button');
+        btn.className='sug';
+        btn.style.paddingRight='24px';
+        btn.innerHTML=`<span style="color:var(--text3);margin-right:4px;font-size:10px">🕐</span>${s}`;
+        btn.onclick=()=>{state.query=s;input.value=s;renderResults();input.focus();};
+        const del=document.createElement('button');
+        del.style.cssText='position:absolute;right:6px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--text3);font-size:10px;cursor:pointer;padding:0;line-height:1';
+        del.textContent='×';
+        del.onclick=(e)=>{e.stopPropagation();const h=getHistory().filter(x=>x!==s);localStorage.setItem('sc_history',JSON.stringify(h));wrap2.remove();};
+        wrap2.appendChild(btn);wrap2.appendChild(del);
+        sugRow.appendChild(wrap2);
+      });
+      sugWrap.appendChild(sugRow);
+    } else {
+      sugWrap.appendChild(el('p',"color:var(--text3);font-size:10px;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:8px",t.tryLabel));
+      const sugRow=el('div',"display:flex;flex-wrap:wrap;gap:6px");
+      t.suggestions.forEach(s=>{
+        const btn=document.createElement('button');
+        btn.className='sug';btn.textContent=s;
+        btn.onclick=()=>{state.query=s;input.value=s;renderResults();input.focus();};
+        sugRow.appendChild(btn);
+      });
+      sugWrap.appendChild(sugRow);
+    }
+    sw.appendChild(sugWrap);
   }
 
   const rw=el('div',"");rw.id='results-wrap';sw.appendChild(rw);
