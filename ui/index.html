@@ -524,31 +524,7 @@ const T={
 // ── Global emoji rendering (Twemoji iOS style) ──
 function parseEmoji(el){
   if(!window.twemoji||!el) return;
-  twemoji.parse(el,{folder:'svg',ext:'.svg',
-    callback:(icon,opts)=>`${opts.base}${opts.size}/${icon}${opts.ext}`
-  });
-}
-// Auto-parse new DOM nodes
-let _twObserver;
-function startEmojiObserver(){
-  if(!window.twemoji||_twObserver) return;
-  _twObserver = new MutationObserver(muts=>{
-    for(const m of muts){
-      for(const n of m.addedNodes){
-        if(n.nodeType===1) parseEmoji(n);
-      }
-    }
-  });
-  _twObserver.observe(document.body,{childList:true,subtree:true});
-}
-// Start observer once twemoji is loaded
-if(window.twemoji){
-  startEmojiObserver();
-} else {
-  document.querySelector('script[src*="twemoji"]')?.addEventListener('load',()=>{
-    startEmojiObserver();
-    parseEmoji(document.body);
-  });
+  twemoji.parse(el,{folder:'svg',ext:'.svg'});
 }
 
 const DB={
@@ -3389,7 +3365,7 @@ function renderExport(){
     tagsSwitch.innerHTML=`<span style="position:absolute;top:3px;left:${exportShowTags?'23px':'3px'};width:18px;height:18px;border-radius:50%;background:#fff;transition:left 0.2s;box-shadow:0 1px 4px rgba(0,0,0,0.3)"></span>`;
   }
   updateTagsSwitch();
-  tagsSwitch.onclick=()=>{ exportShowTags=!exportShowTags; updateTagsSwitch(); schedulePreview(); };
+  tagsSwitch.onclick=()=>{ exportShowTags=!exportShowTags; updateTagsSwitch(); updatePreview(); };
   tagsToggleRow.appendChild(tagsLabel);
   tagsToggleRow.appendChild(tagsSwitch);
   wrap.appendChild(tagsToggleRow);
@@ -3940,6 +3916,118 @@ function renderGuide(){
       copyRow.appendChild(kbd);copyRow.appendChild(copyBtn2);
       demo.appendChild(copyRow);
       demo._cleanup=()=>{clearInterval(cycleShortcut);clearInterval(flashCopy);};
+
+    } else if(step.anim==='hold'){
+      // Long press ring demo
+      const mockCard=el('div',"background:var(--bg2);border:1.5px solid var(--border);border-radius:10px;padding:10px 12px;display:flex;align-items:center;justify-content:space-between;gap:10px;position:relative;overflow:hidden;transition:border-color 0.3s");
+      mockCard.innerHTML=`<div style="font-family:monospace;font-size:13px;font-weight:900;color:#818cf8;background:rgba(99,102,241,0.12);border:1px solid rgba(99,102,241,0.25);border-radius:6px;padding:3px 10px">Ctrl+C</div><div style="font-size:10px;color:var(--text3);font-weight:700">${ru?'⏱ Зажми':'⏱ Hold'}</div>`;
+      const ring=document.createElement('div');
+      ring.style.cssText='position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);pointer-events:none;z-index:2;opacity:0;transition:opacity 0.2s';
+      const R=20,SIZE=56,circ=+(2*Math.PI*R).toFixed(2);
+      ring.innerHTML=`<svg width="${SIZE}" height="${SIZE}" viewBox="0 0 ${SIZE} ${SIZE}" style="display:block"><circle cx="${SIZE/2}" cy="${SIZE/2}" r="${R}" fill="rgba(10,10,20,0.5)" stroke="rgba(99,102,241,0.2)" stroke-width="3"/><text x="${SIZE/2}" y="${SIZE/2}" text-anchor="middle" dominant-baseline="central" font-size="14">🔥</text><circle class="ring-arc" cx="${SIZE/2}" cy="${SIZE/2}" r="${R}" fill="none" stroke="url(#rg1)" stroke-width="3" stroke-linecap="round" stroke-dasharray="${circ}" stroke-dashoffset="${circ}" transform="rotate(-90 ${SIZE/2} ${SIZE/2})" style="transition:stroke-dashoffset 1.4s linear"/><defs><linearGradient id="rg1" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#818cf8"/><stop offset="100%" stop-color="#c084fc"/></linearGradient></defs></svg>`;
+      mockCard.appendChild(ring);
+      demo.appendChild(mockCard);
+      function runHoldAnim(){
+        ring.style.opacity='1';
+        mockCard.style.borderColor='rgba(99,102,241,0.4)';
+        const arc=ring.querySelector('.ring-arc');
+        requestAnimationFrame(()=>requestAnimationFrame(()=>{if(arc)arc.style.strokeDashoffset='0';}));
+        setTimeout(()=>{
+          ring.style.opacity='0';
+          mockCard.style.borderColor='var(--border)';
+          if(arc){arc.style.transition='none';arc.style.strokeDashoffset=String(circ);requestAnimationFrame(()=>{arc.style.transition='stroke-dashoffset 1.4s linear';});}
+          const emojis=['⭐','❤️','🔥','💡'];
+          emojis.forEach((e,i)=>{
+            const dot=el('div','position:absolute;font-size:16px;top:50%;left:50%;transform:translate(-50%,-50%);opacity:0;transition:all 0.4s ease;pointer-events:none;z-index:3');
+            dot.textContent=e; parseEmoji(dot); mockCard.appendChild(dot);
+            setTimeout(()=>{const ang=(i/emojis.length)*Math.PI*2-Math.PI/2;dot.style.transform=`translate(calc(-50% + ${Math.cos(ang)*34}px),calc(-50% + ${Math.sin(ang)*20}px))`;dot.style.opacity='1';},100+i*60);
+            setTimeout(()=>{dot.style.opacity='0';},900);
+            setTimeout(()=>dot.remove(),1300);
+          });
+          setTimeout(runHoldAnim,2500);
+        },1600);
+      }
+      let _holdT=setTimeout(runHoldAnim,600);
+      demo._cleanup=()=>clearTimeout(_holdT);
+
+    } else if(step.anim==='fav'){
+      const pillsWrap=el('div',"display:flex;flex-direction:column;gap:6px");
+      const reacRow=el('div',"display:flex;gap:4px;flex-wrap:wrap");
+      const react=['⭐','❤️','🔥','💡','🤯','👍'];
+      let ar=0;
+      const rEls=react.map(e=>{
+        const b=document.createElement('div');
+        b.style.cssText='font-size:16px;background:var(--bg2);border:1.5px solid var(--border);border-radius:8px;padding:3px 7px;transition:all 0.25s;cursor:default';
+        b.textContent=e; parseEmoji(b); return b;
+      });
+      rEls.forEach(b=>reacRow.appendChild(b));
+      const appRow2=el('div',"display:flex;gap:4px;margin-top:2px");
+      ['Excel','Word','VS Code'].forEach((a,i)=>{
+        const cols=['#22c55e','#3b82f6','#6366f1'];
+        const b=el('div',`font-size:10px;font-weight:800;padding:3px 8px;border-radius:12px;border:1px solid ${cols[i]}44;color:${cols[i]};background:${cols[i]}11;transition:all 0.25s`);
+        b.textContent=a; appRow2.appendChild(b);
+      });
+      pillsWrap.appendChild(reacRow); pillsWrap.appendChild(appRow2);
+      demo.appendChild(pillsWrap);
+      let ar2=0;
+      const favAnim=setInterval(()=>{
+        rEls.forEach((b,i)=>{const on=i===ar2;b.style.background=on?'rgba(99,102,241,0.18)':'var(--bg2)';b.style.borderColor=on?'rgba(99,102,241,0.45)':'var(--border)';b.style.transform=on?'scale(1.15)':'scale(1)';});
+        ar2=(ar2+1)%react.length;
+      },600);
+      demo._cleanup=()=>clearInterval(favAnim);
+
+    } else if(step.anim==='quiz'){
+      const scoreRow=el('div',"display:flex;gap:8px;justify-content:center");
+      const sData=[[ru?'Счёт':'Score','0/10','#818cf8'],[ru?'Серия':'Streak','0','#f59e0b'],[ru?'Точность':'Accuracy','0%','#34d399']];
+      const sEls=sData.map(([label,val,col])=>{
+        const d=el('div',`flex:1;text-align:center;background:${col}12;border:1px solid ${col}30;border-radius:10px;padding:8px 6px;transition:all 0.3s`);
+        d.innerHTML=`<div style="font-size:15px;font-weight:900;color:${col}">${val}</div><div style="font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-top:2px">${label}</div>`;
+        return d;
+      });
+      sEls.forEach(e=>scoreRow.appendChild(e));
+      demo.appendChild(scoreRow);
+      let sq=0;
+      const quizAnim=setInterval(()=>{
+        sq=Math.min(sq+1,10);
+        sEls[0].querySelector('div').textContent=sq+'/10';
+        sEls[1].querySelector('div').textContent=sq+'🔥';
+        sEls[2].querySelector('div').textContent=(sq*11)+'%';
+        sEls.forEach(e=>{e.style.transform='scale(1.05)';setTimeout(()=>e.style.transform='scale(1)',200);});
+        if(sq>=10) setTimeout(()=>{sq=0;sEls.forEach(e=>{e.querySelector('div').textContent=e.querySelector('div').textContent.includes('/')? '0/10':e.querySelector('div').textContent.includes('%')?'0%':'0';});},800);
+      },500);
+      demo._cleanup=()=>clearInterval(quizAnim);
+
+    } else if(step.anim==='export'){
+      const fmtWrap=el('div',"display:flex;gap:8px");
+      let activeF=0;
+      const formats=[['🖼️ PNG','#34d399','TikTok'],['📄 PDF','#818cf8',ru?'Печать':'Print']];
+      const fEls=formats.map(([label,col,hint],i)=>{
+        const b=el('div',`flex:1;background:${i===0?col+'18':'var(--bg2)'};border:1.5px solid ${i===0?col+'55':'var(--border)'};border-radius:10px;padding:8px;text-align:center;transition:all 0.3s;cursor:default`);
+        b.innerHTML=`<div style="font-size:12px;font-weight:800;color:${i===0?col:'var(--text3)'}">${label}</div><div style="font-size:9px;color:var(--text3);margin-top:2px">${hint}</div>`;
+        parseEmoji(b); return b;
+      });
+      fEls.forEach(b=>fmtWrap.appendChild(b));
+      demo.appendChild(fmtWrap);
+      const expAnim=setInterval(()=>{
+        activeF=(activeF+1)%2;
+        fEls.forEach((b,i)=>{const [,col,hint]=formats[i];const on=i===activeF;b.style.background=on?col+'18':'var(--bg2)';b.style.borderColor=on?col+'55':'var(--border)';b.querySelector('div').style.color=on?col:'var(--text3)';b.style.transform=on?'scale(1.04)':'scale(1)';});
+      },1200);
+      demo._cleanup=()=>clearInterval(expAnim);
+
+    } else if(step.anim==='ai'){
+      const aiWrap=el('div',"display:flex;flex-direction:column;gap:6px");
+      const inp2=el('div',"background:var(--input-bg);border:1.5px solid rgba(192,132,252,0.35);border-radius:8px;padding:7px 10px;font-size:12px;font-weight:700;color:#c084fc;font-family:monospace;min-height:28px");
+      const aiResp=el('div',"background:rgba(192,132,252,0.07);border:1px solid rgba(192,132,252,0.2);border-radius:8px;padding:7px 10px;font-size:11px;color:var(--text2);line-height:1.5;min-height:28px;transition:opacity 0.3s");
+      const queries=ru?['как открыть новый файл?','горячие клавиши Excel','как отменить действие?']:['how to open new file?','Excel shortcuts','how to undo in VS Code?'];
+      const answers=ru?['Ctrl+N — новый файл','Ctrl+Z — отмена, Ctrl+Y — повтор','Alt+Z — перенос строк']:['Ctrl+N — new file','Ctrl+Z — undo, Ctrl+Y — redo','Alt+Z — toggle word wrap'];
+      let qi=0,ci2=0,aiPhase='type';
+      aiWrap.appendChild(inp2); aiWrap.appendChild(aiResp);
+      demo.appendChild(aiWrap);
+      const aiAnim=setInterval(()=>{
+        if(aiPhase==='type'){ci2++;inp2.textContent=queries[qi].slice(0,ci2)+'▌';if(ci2>=queries[qi].length)aiPhase='show';}
+        else if(aiPhase==='show'){aiResp.style.opacity='0';setTimeout(()=>{aiResp.textContent=answers[qi];aiResp.style.opacity='1';},200);aiPhase='pause';setTimeout(()=>{aiResp.textContent='';inp2.textContent='';ci2=0;qi=(qi+1)%queries.length;aiPhase='type';},1800);}
+      },65);
+      demo._cleanup=()=>clearInterval(aiAnim);
     }
 
     content.appendChild(demo);
@@ -4046,9 +4134,9 @@ function renderAbout(){
   function heading(txt){const d=el('p',"color:var(--text3);font-size:10px;text-transform:uppercase;letter-spacing:2px;font-weight:800;margin:24px 0 10px");d.textContent=txt;return d;}
   const hero=el('div',"background:linear-gradient(135deg,rgba(79,70,229,0.1),rgba(14,165,233,0.07));border:1px solid rgba(99,102,241,0.2);border-radius:16px;padding:24px;text-align:center;margin-bottom:6px");
   hero.innerHTML=`<div style="font-size:32px;margin-bottom:10px;animation:floatY 3s ease-in-out infinite">⌘</div><h2 style="margin:0 0 5px;font-size:20px;font-weight:900;color:var(--text)">SearchCopy</h2><p style="margin:0 0 10px;color:#818cf8;font-size:10px;letter-spacing:2.5px;text-transform:uppercase">by RENDERGAMES</p><p style="margin:0 0 16px;color:var(--text2);font-size:12px;line-height:1.6">${t.aboutHero}</p><div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
-  <a href="https://github.com/MihailKashintsev/searchcopy" target="_blank" style="display:inline-flex;align-items:center;gap:5px;background:rgba(99,102,241,0.1);border:1px solid rgba(99,102,241,0.25);border-radius:20px;padding:5px 13px;font-size:11px;font-weight:800;color:#818cf8;text-decoration:none;transition:all 0.2s" onmouseover="this.style.background='rgba(99,102,241,0.2)'" onmouseout="this.style.background='rgba(99,102,241,0.1)'">⊟ GitHub</a>
-  <a href="https://t.me/rendergm" target="_blank" style="display:inline-flex;align-items:center;gap:5px;background:rgba(6,182,212,0.1);border:1px solid rgba(6,182,212,0.25);border-radius:20px;padding:5px 13px;font-size:11px;font-weight:800;color:#22d3ee;text-decoration:none;transition:all 0.2s" onmouseover="this.style.background='rgba(6,182,212,0.2)'" onmouseout="this.style.background='rgba(6,182,212,0.1)'">✈ Telegram</a>
-  <a href="https://boosty.to/rendergamesru" target="_blank" style="display:inline-flex;align-items:center;gap:5px;background:rgba(249,115,22,0.1);border:1px solid rgba(249,115,22,0.25);border-radius:20px;padding:5px 13px;font-size:11px;font-weight:800;color:#fb923c;text-decoration:none;transition:all 0.2s" onmouseover="this.style.background='rgba(249,115,22,0.2)'" onmouseout="this.style.background='rgba(249,115,22,0.1)'">★ Boosty</a>
+  <a href="https://github.com/MihailKashintsev/searchcopy" target="_blank" style="display:inline-flex;align-items:center;gap:5px;background:rgba(99,102,241,0.1);border:1px solid rgba(99,102,241,0.25);border-radius:20px;padding:5px 13px;font-size:11px;font-weight:800;color:#818cf8;text-decoration:none;transition:all 0.2s" onmouseover="this.style.background='rgba(99,102,241,0.2)'" onmouseout="this.style.background='rgba(99,102,241,0.1)'">🐙 GitHub</a>
+  <a href="https://t.me/rendergm" target="_blank" style="display:inline-flex;align-items:center;gap:5px;background:rgba(6,182,212,0.1);border:1px solid rgba(6,182,212,0.25);border-radius:20px;padding:5px 13px;font-size:11px;font-weight:800;color:#22d3ee;text-decoration:none;transition:all 0.2s" onmouseover="this.style.background='rgba(6,182,212,0.2)'" onmouseout="this.style.background='rgba(6,182,212,0.1)'">✈️ Telegram</a>
+  <a href="https://boosty.to/rendergamesru" target="_blank" style="display:inline-flex;align-items:center;gap:5px;background:rgba(249,115,22,0.1);border:1px solid rgba(249,115,22,0.25);border-radius:20px;padding:5px 13px;font-size:11px;font-weight:800;color:#fb923c;text-decoration:none;transition:all 0.2s" onmouseover="this.style.background='rgba(249,115,22,0.2)'" onmouseout="this.style.background='rgba(249,115,22,0.1)'">💛 Boosty</a>
   <a href="https://rendergames.tilda.ws/" target="_blank" style="display:inline-flex;align-items:center;gap:5px;background:rgba(168,85,247,0.1);border:1px solid rgba(168,85,247,0.25);border-radius:20px;padding:5px 13px;font-size:11px;font-weight:800;color:#c084fc;text-decoration:none;transition:all 0.2s" onmouseover="this.style.background='rgba(168,85,247,0.2)'" onmouseout="this.style.background='rgba(168,85,247,0.1)'">◈ Сайт</a>
 </div>`;
   wrap.appendChild(hero);
