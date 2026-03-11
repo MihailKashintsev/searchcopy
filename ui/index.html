@@ -1865,8 +1865,8 @@ function renderAskAI(){
       :'Use Ctrl, Alt, Shift, Win. Example: "Ctrl+C".';
 
     const sysPrompt=settings.lang==='ru'
-      ?`Ты эксперт по ${askApp} на ${osName}. Отвечай только обычным текстом на русском — коротко и понятно, максимум 4-5 предложений. ${osKeyInstr} Горячие клавиши пиши прямо в тексте в скобках, например: (Command+C). ЗАПРЕЩЕНО: JSON, скобки [], {}, код, markdown, обратные кавычки.`
-      :`You are an expert on ${askApp} for ${osName}. Reply in plain text only — brief and clear, max 4-5 sentences. ${osKeyInstr} Write hotkeys inline in parentheses e.g. (Command+C). FORBIDDEN: JSON, brackets [] {}, code blocks, markdown, backticks.`;
+      ?`Ты эксперт по приложению ${askApp} на ${osName}. Отвечай ТОЛЬКО на вопросы про ${askApp} — горячие клавиши, функции, настройки, работу с интерфейсом. Если вопрос не про ${askApp} — скажи: «Я отвечаю только на вопросы про ${askApp}». ${osKeyInstr} Горячие клавиши пиши прямо в тексте в скобках: (Command+C). Обычный текст на русском, максимум 4-5 предложений. ЗАПРЕЩЕНО: JSON, [], {}, код, markdown, обратные кавычки.`
+      :`You are an expert on ${askApp} for ${osName}. Answer ONLY questions about ${askApp} — shortcuts, features, settings, interface. If the question is unrelated to ${askApp} — say: "I only answer questions about ${askApp}." ${osKeyInstr} Write hotkeys inline: (Command+C). Plain text only, max 4-5 sentences. FORBIDDEN: JSON, [], {}, code, markdown, backticks.`;
 
     try{
       let rawText='';
@@ -2122,8 +2122,8 @@ function renderGuide(){
     guideBtn.disabled=true;
     guideResult.innerHTML=`<div class="skeleton" style="height:60px;border-radius:10px"></div>`;
     const sp=ru
-      ?`Ты помощник по настройке приложения SearchCopy. Отвечай кратко и по делу, обычным текстом на русском. Никакого JSON, markdown или кода. Максимум 4 предложения.`
-      :`You are a helper for setting up the SearchCopy app. Reply briefly in plain text, no JSON, markdown or code. Max 4 sentences.`;
+      ?`Ты помощник ТОЛЬКО по приложению SearchCopy. SearchCopy — десктопное приложение для быстрого поиска горячих клавиш для Excel, Word, VS Code, Figma, Chrome и других программ. Возможности: поиск шорткатов, вкладка «Спросить AI», вкладка «Гайд», настройки API ключей (Claude и GigaChat), поддержка Windows/macOS/Linux. Отвечай ТОЛЬКО на вопросы про SearchCopy и его настройку. Если вопрос не про SearchCopy — скажи: «Я помогаю только с настройкой и использованием SearchCopy». Обычный текст на русском, максимум 4 предложения, никакого JSON или markdown.`
+      :`You are a helper ONLY for the SearchCopy app. SearchCopy is a desktop app for quickly finding keyboard shortcuts for Excel, Word, VS Code, Figma, Chrome and other programs. Features: shortcut search, Ask AI tab, Guide tab, API key settings (Claude and GigaChat), Windows/macOS/Linux support. Answer ONLY questions about SearchCopy and its setup. If the question is unrelated — say: "I can only help with SearchCopy setup and usage." Plain text only, max 4 sentences, no JSON or markdown.`;
     try{
       let ans='';
       if(settings.aiProvider==='claude'){
