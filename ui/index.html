@@ -414,10 +414,18 @@ const detectedOS=(()=>{
 
 // ── Settings state ──
 let settings = Object.assign(
-  {lang:'ru', theme:'dark', os:detectedOS, autoUpdate:true, aiKey:'', gigaKey:'', aiProvider:'claude'},
+  {lang:'ru', theme:'dark', os:detectedOS, autoUpdate:true, aiKey:'', gigaKey:'', aiProvider:'claude',openaiKey:'',geminiKey:'',groqKey:'',deepseekKey:'',mistralKey:'',yandexKey:'',yandexFolder:'',customUrl:'',customKey:''},
   loadSettings()
 );
 
+
+// ── Universal AI key helper ──
+function getActiveKey(){
+  const m={claude:settings.aiKey,giga:settings.gigaKey,openai:settings.openaiKey,
+    gemini:settings.geminiKey,groq:settings.groqKey,deepseek:settings.deepseekKey,
+    mistral:settings.mistralKey,yandex:settings.yandexKey,custom:settings.customKey};
+  return m[settings.aiProvider||'claude']||'';
+}
 // ── Theme ──
 function applyTheme(){
   const dark = settings.theme !== 'light';
@@ -522,6 +530,209 @@ const T={
 
 
 // ── Global emoji rendering (Twemoji iOS style) ──
+
+// ── Universal AI caller ──
+async function callAI(sp, userMsg, maxTok){
+  const provider = settings.aiProvider||'claude';
+  const km={claude:settings.aiKey,giga:settings.gigaKey,openai:settings.openaiKey,
+    gemini:settings.geminiKey,groq:settings.groqKey,deepseek:settings.deepseekKey,
+    mistral:settings.mistralKey,yandex:settings.yandexKey,custom:settings.customKey};
+  const key = km[provider]||'';
+  if(!key && provider!=='giga') throw new Error('❌ Нет API ключа для '+provider);
+  maxTok = maxTok||400;
+
+  if(provider==='claude'){
+    const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',
+      headers:{'Content-Type':'application/json','x-api-key':key,
+        'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+      body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:maxTok,system:sp,
+        messages:[{role:'user',content:userMsg}]})});
+    const d=await r.json();
+    if(d.error) throw new Error(d.error.message||'Claude error');
+    return d.content?.[0]?.text||'';
+  }
+
+  if(provider==='giga'){
+    const invoke=window.__TAURI__?.core?.invoke||window.__TAURI__?.tauri?.invoke;
+    if(!invoke) throw new Error('GigaChat доступен только в десктоп-приложении');
+    const ak=key.startsWith('Basic ')?key.slice(6).trim():key;
+    return await invoke('giga_search',{authKey:ak,systemPrompt:sp,query:userMsg});
+  }
+
+  if(provider==='openai'){
+    const r=await fetch('https://api.openai.com/v1/chat/completions',{method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},
+      body:JSON.stringify({model:'gpt-4o-mini',max_tokens:maxTok,
+        messages:[{role:'system',content:sp},{role:'user',content:userMsg}]})});
+    const d=await r.json();
+    if(d.error) throw new Error(d.error.message||'OpenAI error');
+    return d.choices?.[0]?.message?.content||'';
+  }
+
+  if(provider==='gemini'){
+    const model='gemini-2.0-flash-lite';
+    const r=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`,
+      {method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({contents:[{role:'user',parts:[{text:sp+'\n\n'+userMsg}]}],
+        generationConfig:{maxOutputTokens:maxTok}})});
+    const d=await r.json();
+    if(d.error) throw new Error(d.error.message||'Gemini error');
+    return d.candidates?.[0]?.content?.parts?.[0]?.text||'';
+  }
+
+  if(provider==='groq'){
+    const r=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},
+      body:JSON.stringify({model:'llama-3.1-8b-instant',max_tokens:maxTok,
+        messages:[{role:'system',content:sp},{role:'user',content:userMsg}]})});
+    const d=await r.json();
+    if(d.error) throw new Error(d.error.message||'Groq error');
+    return d.choices?.[0]?.message?.content||'';
+  }
+
+  if(provider==='deepseek'){
+    const r=await fetch('https://api.deepseek.com/chat/completions',{method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},
+      body:JSON.stringify({model:'deepseek-chat',max_tokens:maxTok,
+        messages:[{role:'system',content:sp},{role:'user',content:userMsg}]})});
+    const d=await r.json();
+    if(d.error) throw new Error(d.error.message||'DeepSeek error');
+    return d.choices?.[0]?.message?.content||'';
+  }
+
+  if(provider==='mistral'){
+    const r=await fetch('https://api.mistral.ai/v1/chat/completions',{method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},
+      body:JSON.stringify({model:'mistral-small-latest',max_tokens:maxTok,
+        messages:[{role:'system',content:sp},{role:'user',content:userMsg}]})});
+    const d=await r.json();
+    if(d.error) throw new Error(d.error.message||'Mistral error');
+    return d.choices?.[0]?.message?.content||'';
+  }
+
+  if(provider==='yandex'){
+    const folder=settings.yandexFolder||'';
+    const r=await fetch('https://llm.api.cloud.yandex.net/foundationModels/v1/completion',
+      {method:'POST',headers:{'Content-Type':'application/json','Authorization':'Api-Key '+key,
+        'x-folder-id':folder},
+      body:JSON.stringify({modelUri:`gpt://${folder}/yandexgpt-lite`,
+        completionOptions:{maxTokens:maxTok,temperature:0.6},
+        messages:[{role:'system',text:sp},{role:'user',text:userMsg}]})});
+    const d=await r.json();
+    if(d.error) throw new Error(d.error.message||'YandexGPT error');
+    return d.result?.alternatives?.[0]?.message?.text||'';
+  }
+
+  // custom (OpenAI-compatible)
+  const url=(settings.customUrl||'').trim()||'https://api.openai.com/v1';
+  const base=url.endsWith('/')?url.slice(0,-1):url;
+  const r=await fetch(base+'/chat/completions',{method:'POST',
+    headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},
+    body:JSON.stringify({model:'gpt-4o-mini',max_tokens:maxTok,
+      messages:[{role:'system',content:sp},{role:'user',content:userMsg}]})});
+  const d=await r.json();
+  if(d.error) throw new Error(d.error.message||'Custom API error');
+  return d.choices?.[0]?.message?.content||'';
+}
+// ── Universal download helper ──
+async function downloadPNG(canvas, fname){
+  return new Promise(resolve=>{
+    canvas.toBlob(async blob=>{
+      if(!blob){ resolve(false); return; }
+      // 1. Try Tauri v2 FS (desktop)
+      try{
+        const tauri = window.__TAURI__;
+        if(tauri){
+          const arr = await blob.arrayBuffer();
+          const bytes = Array.from(new Uint8Array(arr));
+          // Tauri v2
+          if(tauri.fs?.writeBinaryFile){
+            await tauri.fs.writeBinaryFile(fname+'.png', new Uint8Array(arr));
+            resolve({path: fname+'.png', method:'tauri'}); return;
+          }
+          // Tauri v2 core path
+          if(tauri.core?.invoke){
+            const dlDir = await tauri.core.invoke('get_download_dir').catch(()=>null);
+            if(dlDir){
+              await tauri.path && (async()=>{})();
+            }
+          }
+        }
+      } catch(e){ /* fall through */ }
+      // 2. Android share (Web Share API with files)
+      try{
+        if(navigator.canShare && navigator.canShare({files:[new File([blob],fname+'.png',{type:'image/png'})]})){
+          await navigator.share({files:[new File([blob],fname+'.png',{type:'image/png'})], title:fname});
+          resolve({path: fname+'.png', method:'share'}); return;
+        }
+      } catch(e){ /* user cancelled or not supported */ }
+      // 3. Standard anchor download (works on Desktop + Android Chrome)
+      try{
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = fname+'.png';
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(()=>{ URL.revokeObjectURL(url); document.body.removeChild(a); }, 1500);
+        resolve({path: fname+'.png', method:'blob'}); return;
+      } catch(e){}
+      // 4. Fallback: data URL (old WebView)
+      const dataUrl = canvas.toDataURL('image/png');
+      const a2 = document.createElement('a');
+      a2.href = dataUrl; a2.download = fname+'.png';
+      document.body.appendChild(a2); a2.click();
+      setTimeout(()=>document.body.removeChild(a2), 500);
+      resolve({path: fname+'.png', method:'dataurl'});
+    }, 'image/png');
+  });
+}
+
+function showDownloadToast(fname, method){
+  // Remove existing toast
+  document.querySelectorAll('.dl-toast').forEach(e=>e.remove());
+  const toast = document.createElement('div');
+  toast.className = 'dl-toast';
+  const isShare = method==='share';
+  toast.style.cssText = `
+    position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(60px);
+    background:linear-gradient(135deg,rgba(52,211,153,0.15),rgba(99,102,241,0.1));
+    border:1px solid rgba(52,211,153,0.4);
+    border-radius:16px;padding:12px 20px;
+    display:flex;align-items:center;gap:10px;
+    font-size:13px;font-weight:700;color:#34d399;
+    backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+    box-shadow:0 8px 32px rgba(0,0,0,0.3);
+    z-index:9999;transition:transform 0.4s cubic-bezier(0.34,1.56,0.64,1),opacity 0.4s;
+    max-width:90vw;white-space:nowrap;
+  `;
+  const icon = document.createElement('span');
+  icon.style.cssText = 'font-size:20px;animation:floatY 2s ease-in-out infinite';
+  icon.textContent = isShare ? '📤' : '✅';
+  const txt = document.createElement('div');
+  const label = isShare
+    ? (settings.lang==='ru'?'Отправлено через Share!':'Shared successfully!')
+    : (settings.lang==='ru'?'Сохранено!':'Saved!');
+  txt.innerHTML = `<div style="font-size:13px">${label}</div>
+    <div style="font-size:10px;color:#94a3b8;margin-top:2px;font-weight:500">${fname+'.png'}</div>`;
+  toast.appendChild(icon); toast.appendChild(txt);
+  // Close btn
+  const x = document.createElement('div');
+  x.style.cssText='margin-left:8px;color:#64748b;cursor:pointer;font-size:16px;line-height:1';
+  x.textContent='×'; x.onclick=()=>dismissToast();
+  toast.appendChild(x);
+  document.body.appendChild(toast);
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{
+    toast.style.transform='translateX(-50%) translateY(0)';
+  }));
+  function dismissToast(){
+    toast.style.transform='translateX(-50%) translateY(80px)';
+    toast.style.opacity='0';
+    setTimeout(()=>toast.remove(), 400);
+  }
+  setTimeout(dismissToast, 4000);
+}
+
 function parseEmoji(el){
   if(!window.twemoji||!el) return;
   twemoji.parse(el,{folder:'svg',ext:'.svg'});
@@ -642,8 +853,63 @@ const DB={
     {id:284,keys:"Alt + F11",type:"hotkey",
       desc:{ru:"Открыть редактор VBA",en:"Open VBA editor"},
       tags:{ru:["vba","макрос","редактор"],en:["vba","macro","editor"]}},
-  ],
 
+  // ── Extra Excel formulas ──
+    {id:1300,keys:"COUNTIF",type:"formula",template:"=COUNTIF({range},{criteria})",example:'=COUNTIF(A:A,">0")',
+      desc:{ru:"Количество ячеек по условию",en:"Count cells matching condition"},
+      tags:{ru:["счётесли","посчитать","количество","сколько","count","if condition","условие"],en:["countif","count if","count cells","condition"]}},
+    {id:1301,keys:"SUMIF",type:"formula",template:"=SUMIF({range},{criteria},{sum_range})",example:'=SUMIF(A:A,">0",B:B)',
+      desc:{ru:"Сумма по условию",en:"Sum cells matching condition"},
+      tags:{ru:["суммесли","сумма условие","sumif","условная сумма","сложить если"],en:["sumif","sum if","conditional sum"]}},
+    {id:1302,keys:"AVERAGEIF",type:"formula",template:"=AVERAGEIF({range},{criteria},{avg_range})",example:'=AVERAGEIF(A:A,">0",B:B)',
+      desc:{ru:"Среднее по условию",en:"Average cells matching condition"},
+      tags:{ru:["среднее условие","средняя если","averageif"],en:["averageif","conditional average"]}},
+    {id:1303,keys:"CONCATENATE",type:"formula",template:"=CONCATENATE({text1},{text2})",example:'=CONCATENATE(A1," ",B1)',
+      desc:{ru:"Объединить текст из ячеек",en:"Combine text from cells"},
+      tags:{ru:["сцепить","объединить","concatenate","склеить текст","соединить строки"],en:["concatenate","combine","join text","merge cells"]}},
+    {id:1304,keys:"LEFT",type:"formula",template:"=LEFT({text},{num_chars})",example:"=LEFT(A1,3)",
+      desc:{ru:"Первые N символов строки",en:"First N characters of text"},
+      tags:{ru:["первые символы","left","начало строки","подстрока"],en:["left","first characters","substring"]}},
+    {id:1305,keys:"RIGHT",type:"formula",template:"=RIGHT({text},{num_chars})",example:"=RIGHT(A1,3)",
+      desc:{ru:"Последние N символов строки",en:"Last N characters of text"},
+      tags:{ru:["последние символы","right","конец строки","подстрока"],en:["right","last characters","substring"]}},
+    {id:1306,keys:"MID",type:"formula",template:"=MID({text},{start},{num_chars})",example:"=MID(A1,2,5)",
+      desc:{ru:"Подстрока из середины текста",en:"Extract characters from middle of text"},
+      tags:{ru:["середина","подстрока","mid","часть строки"],en:["mid","middle","substring","extract"]}},
+    {id:1307,keys:"LEN",type:"formula",template:"=LEN({text})",example:"=LEN(A1)",
+      desc:{ru:"Длина строки (количество символов)",en:"Length of text string"},
+      tags:{ru:["длина","количество символов","len","размер строки"],en:["len","length","characters","string length"]}},
+    {id:1308,keys:"TRIM",type:"formula",template:"=TRIM({text})",example:"=TRIM(A1)",
+      desc:{ru:"Убрать лишние пробелы",en:"Remove extra spaces from text"},
+      tags:{ru:["пробелы","убрать пробелы","trim","пробел","очистить текст"],en:["trim","spaces","remove spaces","clean"]}},
+    {id:1309,keys:"UPPER",type:"formula",template:"=UPPER({text})",example:"=UPPER(A1)",
+      desc:{ru:"Перевести текст в верхний регистр",en:"Convert text to uppercase"},
+      tags:{ru:["верхний регистр","заглавные","upper","caps","большие буквы"],en:["uppercase","upper","caps","all caps"]}},
+    {id:1310,keys:"LOWER",type:"formula",template:"=LOWER({text})",example:"=LOWER(A1)",
+      desc:{ru:"Перевести текст в нижний регистр",en:"Convert text to lowercase"},
+      tags:{ru:["нижний регистр","строчные","lower","маленькие буквы"],en:["lowercase","lower","small caps"]}},
+    {id:1311,keys:"TEXT",type:"formula",template:"=TEXT({value},{format})",example:'=TEXT(A1,"DD.MM.YYYY")',
+      desc:{ru:"Форматировать число как текст",en:"Format number or date as text"},
+      tags:{ru:["форматировать число","text","дата текстом","формат даты"],en:["text","format number","date format","number to text"]}},
+    {id:1312,keys:"DATEVALUE",type:"formula",template:"=DATEVALUE({date_text})",example:'=DATEVALUE("01.01.2025")',
+      desc:{ru:"Преобразовать дату-текст в число",en:"Convert date text to serial number"},
+      tags:{ru:["дата из текста","datevalue","преобразовать дату"],en:["datevalue","date text","convert date"]}},
+    {id:1313,keys:"SUMPRODUCT",type:"formula",template:"=SUMPRODUCT({array1},{array2})",example:"=SUMPRODUCT(A1:A10,B1:B10)",
+      desc:{ru:"Сумма произведений диапазонов",en:"Sum of products of ranges"},
+      tags:{ru:["суммпроизв","произведение сумма","сумма массивов"],en:["sumproduct","dot product","weighted sum"]}},
+    {id:1314,keys:"MAX",type:"formula",template:"=MAX({range})",example:"=MAX(A:A)",
+      desc:{ru:"Максимальное значение в диапазоне",en:"Maximum value in range"},
+      tags:{ru:["максимум","наибольший","max","самый большой"],en:["max","maximum","largest","biggest"]}},
+    {id:1315,keys:"MIN",type:"formula",template:"=MIN({range})",example:"=MIN(A:A)",
+      desc:{ru:"Минимальное значение в диапазоне",en:"Minimum value in range"},
+      tags:{ru:["минимум","наименьший","min","самый маленький"],en:["min","minimum","smallest","lowest"]}},
+    {id:1316,keys:"COUNTA",type:"formula",template:"=COUNTA({range})",example:"=COUNTA(A:A)",
+      desc:{ru:"Количество непустых ячеек",en:"Count non-empty cells"},
+      tags:{ru:["счёта","непустые","непустых","counta"],en:["counta","non-empty","count filled"]}},
+    {id:1317,keys:"ROUND",type:"formula",template:"=ROUND({number},{digits})",example:"=ROUND(A1,2)",
+      desc:{ru:"Округлить до N знаков",en:"Round to N decimal places"},
+      tags:{ru:["округл","округлить","round","знаки","десятичные"],en:["round","decimal","round off"]}},
+  ],
   Word:[
     {id:40,keys:"Ctrl + B / I / U",type:"hotkey",
       desc:{ru:"Жирный / Курсив / Подчёркивание",en:"Bold / Italic / Underline"},
@@ -1053,6 +1319,70 @@ const DB={
     {id:195,keys:{win:"Alt + H",mac:"⌘ + Shift + H"},type:"hotkey",desc:{ru:"Показать/скрыть участников",en:"Show/hide participants"},
       tags:{ru:["участники","список","participants"],en:["participants","list","attendees"]}},
   ],
+  VSCode:[
+    {id:1100,keys:{win:"Ctrl + P",mac:"⌘ + P"},type:"hotkey",desc:{ru:"Быстрый открыть файл",en:"Quick open file"},
+      tags:{ru:["открыть файл","быстрый файл","перейти к файлу"],en:["open file","quick open","go to file"]}},
+    {id:1101,keys:{win:"Ctrl + Shift + P",mac:"⌘ + Shift + P"},type:"hotkey",desc:{ru:"Палитра команд",en:"Command palette"},
+      tags:{ru:["команды","палитра","все команды"],en:["command","palette","all commands"]}},
+    {id:1102,keys:{win:"Ctrl + `",mac:"⌃ + `"},type:"hotkey",desc:{ru:"Открыть терминал",en:"Open terminal"},
+      tags:{ru:["терминал","консоль","открыть терминал"],en:["terminal","console"]}},
+    {id:1103,keys:{win:"Ctrl + /",mac:"⌘ + /"},type:"hotkey",desc:{ru:"Закомментировать строку",en:"Toggle comment"},
+      tags:{ru:["комментарий","закомментировать","//"],en:["comment","toggle comment","uncomment"]}},
+    {id:1104,keys:{win:"Alt + ↑ / ↓",mac:"⌥ + ↑ / ↓"},type:"hotkey",desc:{ru:"Переместить строку вверх/вниз",en:"Move line up/down"},
+      tags:{ru:["переместить строку","двигать строку","swap lines"],en:["move line","swap line"]}},
+    {id:1105,keys:{win:"Ctrl + D",mac:"⌘ + D"},type:"hotkey",desc:{ru:"Выделить следующее совпадение",en:"Select next occurrence"},
+      tags:{ru:["выделить","совпадение","multi cursor","мультикурсор"],en:["select next","occurrence","multi cursor"]}},
+    {id:1106,keys:{win:"Ctrl + Shift + K",mac:"⌘ + Shift + K"},type:"hotkey",desc:{ru:"Удалить строку",en:"Delete line"},
+      tags:{ru:["удалить строку","del line"],en:["delete line","remove line"]}},
+    {id:1107,keys:{win:"Ctrl + B",mac:"⌘ + B"},type:"hotkey",desc:{ru:"Скрыть/показать sidebar",en:"Toggle sidebar"},
+      tags:{ru:["sidebar","боковая панель","скрыть панель"],en:["sidebar","toggle sidebar"]}},
+    {id:1108,keys:{win:"F12",mac:"F12"},type:"hotkey",desc:{ru:"Перейти к определению",en:"Go to definition"},
+      tags:{ru:["определение","декларация","go to def"],en:["definition","declaration","go to def"]}},
+    {id:1109,keys:{win:"Ctrl + Shift + F",mac:"⌘ + Shift + F"},type:"hotkey",desc:{ru:"Поиск по всем файлам",en:"Search across files"},
+      tags:{ru:["поиск везде","глобальный поиск","grep"],en:["global search","find in files","grep"]}},
+    {id:1110,keys:{win:"Alt + Shift + F",mac:"⌥ + Shift + F"},type:"hotkey",desc:{ru:"Форматировать файл",en:"Format document"},
+      tags:{ru:["форматировать","prettier","форматирование"],en:["format","prettier","beautify"]}},
+    {id:1111,keys:{win:"Ctrl + Z / Ctrl + Y",mac:"⌘ + Z / ⌘ + Shift + Z"},type:"hotkey",desc:{ru:"Отменить / Вернуть",en:"Undo / Redo"},
+      tags:{ru:["отмена","вернуть","undo","redo"],en:["undo","redo"]}},
+  ],
+  AfterEffects:[
+    {id:1200,keys:{win:"Space",mac:"Space"},type:"hotkey",desc:{ru:"Воспроизвести превью",en:"Preview playback"},
+      tags:{ru:["воспроизвести","запустить","preview","плей"],en:["play","preview","space"]}},
+    {id:1201,keys:{win:"Ctrl + Shift + D",mac:"⌘ + Shift + D"},type:"hotkey",desc:{ru:"Разрезать слой",en:"Split layer"},
+      tags:{ru:["разрезать","разделить слой","split"],en:["split","cut layer","divide"]}},
+    {id:1202,keys:{win:"U",mac:"U"},type:"hotkey",desc:{ru:"Показать все изменённые свойства",en:"Show modified properties"},
+      tags:{ru:["показать свойства","keyframe","кейфреймы","изменения"],en:["properties","keyframes","modified"]}},
+    {id:1203,keys:{win:"Ctrl + D",mac:"⌘ + D"},type:"hotkey",desc:{ru:"Дублировать слой",en:"Duplicate layer"},
+      tags:{ru:["дублировать","копировать слой","duplicate"],en:["duplicate","copy layer"]}},
+    {id:1204,keys:{win:"Ctrl + Shift + C",mac:"⌘ + Shift + C"},type:"hotkey",desc:{ru:"Pre-compose слои",en:"Pre-compose layers"},
+      tags:{ru:["прекомп","precomp","сгруппировать слои"],en:["precompose","precomp","group layers"]}},
+    {id:1205,keys:{win:"T",mac:"T"},type:"hotkey",desc:{ru:"Показать прозрачность слоя",en:"Show layer opacity"},
+      tags:{ru:["прозрачность","opacity","непрозрачность"],en:["opacity","transparency"]}},
+    {id:1206,keys:{win:"Ctrl + Alt + Y",mac:"⌘ + ⌥ + Y"},type:"hotkey",desc:{ru:"Новый adjustment layer",en:"New adjustment layer"},
+      tags:{ru:["adjustment","корректирующий слой","adjustments"],en:["adjustment layer","correction"]}},
+  ],
+  Notion:[
+    {id:1250,keys:{win:"Ctrl + \\",mac:"⌘ + \\"},type:"hotkey",desc:{ru:"Закрыть/открыть боковую панель",en:"Toggle sidebar"},
+      tags:{ru:["sidebar","боковая","скрыть панель"],en:["sidebar","toggle"]}},
+    {id:1251,keys:{win:"/",mac:"/"},type:"hotkey",desc:{ru:"Вставить блок (слэш-меню)",en:"Insert block (slash menu)"},
+      tags:{ru:["блок","вставить блок","слэш","команда","/ меню"],en:["block","insert","slash","command"]}},
+    {id:1252,keys:{win:"Ctrl + Shift + H",mac:"⌘ + Shift + H"},type:"hotkey",desc:{ru:"Выделить текст цветом",en:"Highlight text"},
+      tags:{ru:["выделить","подсветить","цвет","highlight"],en:["highlight","color","mark"]}},
+    {id:1253,keys:{win:"Ctrl + Shift + 1",mac:"⌘ + Shift + 1"},type:"hotkey",desc:{ru:"Заголовок H1",en:"Heading 1"},
+      tags:{ru:["заголовок","h1","большой заголовок"],en:["heading","h1","title"]}},
+    {id:1254,keys:{win:"Ctrl + Shift + 2",mac:"⌘ + Shift + 2"},type:"hotkey",desc:{ru:"Заголовок H2",en:"Heading 2"},
+      tags:{ru:["заголовок","h2","подзаголовок"],en:["heading","h2","subheading"]}},
+    {id:1255,keys:{win:"Ctrl + Shift + 7",mac:"⌘ + Shift + 7"},type:"hotkey",desc:{ru:"Нумерованный список",en:"Numbered list"},
+      tags:{ru:["нумерованный список","1 2 3","список"],en:["numbered list","ordered","ol"]}},
+    {id:1256,keys:{win:"Ctrl + Shift + 8",mac:"⌘ + Shift + 8"},type:"hotkey",desc:{ru:"Список с точками",en:"Bullet list"},
+      tags:{ru:["список точки","bullet","маркированный список"],en:["bullet","list","unordered"]}},
+    {id:1257,keys:{win:"Ctrl + Shift + 9",mac:"⌘ + Shift + 9"},type:"hotkey",desc:{ru:"Задача / чекбокс",en:"Todo / checkbox"},
+      tags:{ru:["задача","чекбокс","todo","checkbox","done"],en:["todo","checkbox","task","check"]}},
+    {id:1258,keys:{win:"Ctrl + [",mac:"⌘ + ["},type:"hotkey",desc:{ru:"Уменьшить отступ блока",en:"Decrease block indent"},
+      tags:{ru:["отступ","убрать вложение","dedent"],en:["dedent","indent","outdent"]}},
+    {id:1259,keys:{win:"Ctrl + ]",mac:"⌘ + ]"},type:"hotkey",desc:{ru:"Увеличить отступ блока",en:"Increase block indent"},
+      tags:{ru:["отступ","вложение","indent"],en:["indent","nest","block"]}},
+  ],
 };
 
 const PROGRAMS=Object.keys(DB);
@@ -1065,7 +1395,8 @@ const COLORS={
 const ICONS={
   Excel:"⊞",Word:"W",PowerPoint:"P","VS Code":"</>",Photoshop:"Ps",
   Figma:"◈",Chrome:"◉",Windows:"⊟",Terminal:">_",Telegram:"✈",
-  Notion:"N",Slack:"#",  "After Effects":"Ae",Premiere:"Pr",Blender:"⬡",Zoom:"Z"
+  Notion:"N",Slack:"#","After Effects":"Ae",Premiere:"Pr",Blender:"⬡",Zoom:"Z",
+  VSCode:"</>",AfterEffects:"Ae"
 };
 
 let state={
@@ -1129,36 +1460,6 @@ function extractColumns(q){
 function getDesc(item){return typeof item.desc==='object'?item.desc[settings.lang]:item.desc||''}
 function getTags(item){return typeof item.tags==='object'?(item.tags[settings.lang]||[]):(item.tags||[])}
 function getKeys(item){return adaptKeys(item.keys)}
-function adaptKeys(keys){
-  if(!keys) return '';
-  const os=settings.os||'win';
-  if(typeof keys==='object'){
-    return keys[os]||keys.win||keys.mac||Object.values(keys)[0]||'';
-  }
-  // String shortcut — adapt for macOS/Linux
-  if(os==='mac'){
-    return keys
-      .replace(/\bCommand\b/g,'⌘')
-      .replace(/\bCmd\b/g,'⌘')
-      .replace(/\bCtrl\b/g,'⌘')
-      .replace(/\bOption\b/g,'⌥')
-      .replace(/\bOpt\b/g,'⌥')
-      .replace(/\bAlt\b/g,'⌥')
-      .replace(/\bShift\b/g,'⇧')
-      .replace(/\bWin\b/g,'⌘')
-      .replace(/\bEnter\b/g,'↩')
-      .replace(/\bDelete\b/g,'⌫')
-      .replace(/\bUp\b/g,'↑')
-      .replace(/\bDown\b/g,'↓')
-      .replace(/\bLeft\b/g,'←')
-      .replace(/\bRight\b/g,'→');
-  }
-  if(os==='linux'){
-    return keys.replace(/\bWin\b/g,'Super');
-  }
-  return keys;
-}
-
 // ── Детектор цепочки действий ──
 // "посчитать, скопировать и вставить" → [{action:"посчитать"},{action:"скопировать"},{action:"вставить"}]
 const CHAIN_SPLITTERS=/[,;]|(?:\s+(?:и|и\s+ещ[её]|then|затем|после|потом|далее|and\s+then|after\s+that)\s+)/gi;
@@ -1320,6 +1621,31 @@ const FORMULA_MAP={
   'МАКС':'MAX','МИН':'MIN','ЛЕВСИМВ':'LEFT','ПРАВСИМВ':'RIGHT','ПСТР':'MID',
 };
 
+function parseComplexFormula(query){
+  // Detects queries like "Сумма столбца I и B", "сложить A и C", "средние столбцов D F"
+  const q=query.toLowerCase().trim();
+  const colMatch=q.match(/(?:столб(?:ца?|цов)?|column[s]?)\s+([a-zа-яёa-z,\s]+?)(?:\s+и\s+|\s*,\s*|\s+and\s+)([a-zа-яёa-z]+)/i);
+  const opWords={
+    'сумм':['сумм','сложить','total','сложи','итого','sum'],'среднее':['средн','average','avg','mean'],
+    'количество':['количеств','счёт','сколько','count'],'максимум':['макс','maximum','max','наибольш'],
+    'минимум':['миним','minimum','min','наименьш']
+  };
+  for(const [op,kws] of Object.entries(opWords)){
+    for(const kw of kws){
+      if(q.includes(kw)){
+        // Extract column letters
+        const cols=[...q.matchAll(/\b([a-zA-Z]{1,3})\b/g)]
+          .map(m=>m[1].toUpperCase())
+          .filter(l=>/^[A-Z]{1,3}$/.test(l)&&!/^(И|I|ИЛИ|ОТ|ДО|AND|OR|OF)$/i.test(l));
+        if(cols.length>=2) return {op,cols};
+        if(cols.length===1) return {op,cols};
+        return {op,cols:[]};
+      }
+    }
+  }
+  return null;
+}
+
 function scoreItem(query,item){
   if(!query||query.trim().length<2) return 0;
   // Bonus: if query looks like a formula (=ВПР(...) or =SUM), match by name
@@ -1355,6 +1681,35 @@ function scoreItem(query,item){
 
 function doSearch(query,progs,typeFilter){
   if(query.trim().length<2) return [];
+  // Handle complex formula queries first
+  const complex=parseComplexFormula(query);
+  if(complex&&(progs.includes('Excel')||typeFilter==='formula')){
+    const colStr=complex.cols.length?complex.cols.join(':'): 'A:A';
+    const opMap={
+      'сумм':'SUM','среднее':'AVERAGE','количество':'COUNT',
+      'максимум':'MAX','минимум':'MIN'
+    };
+    const fnName=opMap[complex.op]||'SUM';
+    // Find the matching formula item and boost it massively
+    const synth=complex.cols.length>=2
+      ? `=${fnName}(${complex.cols.join(':')})` // range like =SUM(A:B)  
+      : `=${fnName}(${colStr})`;
+    // Mark synthetic result on the item
+    const out=[];
+    for(const prog of progs){
+      for(const item of DB[prog]||[]){
+        if(typeFilter!=='all'&&item.type!==typeFilter) continue;
+        if(item.type==='formula'&&item.keys&&typeof item.keys==='string'&&item.keys.toUpperCase()===fnName){
+          out.push({...item,_synth:synth,_synthCols:complex.cols,program:prog,score:50});
+          continue;
+        }
+        const s=scoreItem(query,item);
+        if(s>0) out.push({...item,program:prog,score:s});
+      }
+    }
+    out.sort((a,b)=>b.score-a.score);
+    return out.slice(0,16);
+  }
   const out=[];
   for(const prog of progs){
     for(const item of DB[prog]||[]){
@@ -1829,15 +2184,38 @@ function renderAiCard(item,idx){
   top.appendChild(info);
   if(item.keys) top.appendChild(makeCopyBtn(item.keys));
   card.appendChild(top);
-  if(item.example){
+  const exampleText=item._synth||item.example;
+  if(exampleText){
     const ex=el('div',"font-size:11px;color:var(--text3);background:var(--bg3);border-radius:7px;padding:6px 10px");
-    ex.textContent=item.example;
+    ex.textContent=item._synth?`${exampleText}  ${item._synthCols&&item._synthCols.length>=2?'← '+item._synthCols.join(' и '):''}`:exampleText;
+    if(item._synth) ex.style.cssText+='color:#34d399;border:1px solid rgba(52,211,153,0.25)';
     card.appendChild(ex);
   }
   return card;
 }
 
 // ── GigaChat response parser (3 уровня fallback) ──
+function parseAIResponse(rawText, query, activeProgs){
+  try{
+    const clean=rawText.replace(/```json|```/g,'').trim();
+    const start=clean.indexOf('[');const end=clean.lastIndexOf(']');
+    if(start<0||end<0) return [];
+    const arr=JSON.parse(clean.slice(start,end+1));
+    if(!Array.isArray(arr)) return [];
+    return arr.filter(x=>x&&(x.keys||x.desc)).map(x=>({
+      id:Date.now()+Math.random(),
+      keys:x.keys||'',
+      desc:{ru:x.desc||'',en:x.desc||''},
+      example:x.example||'',
+      type:x.type||(x.keys&&x.keys.startsWith('=')?'formula':'hotkey'),
+      tags:{ru:[],en:[]},
+      program:x.program||activeProgs,
+      step:x.step,
+      _ai:true
+    }));
+  }catch(e){ return []; }
+}
+
 function parseGigaResponse(text, query, activeProgs){
   // Шаг 1: чистим markdown-обёртку
   let clean = text
@@ -1906,10 +2284,11 @@ function parseGigaResponse(text, query, activeProgs){
 // ── AI Search ──
 async function doAiSearch(query){
   const provider=settings.aiProvider||'claude';
-  const hasKey=provider==='claude'?!!settings.aiKey:!!settings.gigaKey;
+  const keyMap={claude:settings.aiKey,giga:settings.gigaKey,openai:settings.openaiKey,gemini:settings.geminiKey,groq:settings.groqKey,custom:settings.customKey};
+  const hasKey=!!(keyMap[provider]);
   console.log('[AI DEBUG] provider=',provider,'hasKey=',hasKey,'aiKey len=',settings.aiKey?.length,'gigaKey len=',settings.gigaKey?.length);
   if(!hasKey){
-    state.aiResult={error:true,msg:'❌ Нет ключа для '+provider+'. Проверь Настройки.'};
+    state.aiResult={error:true,msg:'❌ Нет API ключа для '+provider+'. Добавь его в ⚙️ Настройки.'};
     state.aiLoading=false;renderResults();return;
   }
   const lang=settings.lang;
@@ -2034,6 +2413,64 @@ ${osHint}
     if(tf==='chain' && items.some(i=>i.step!=null)){
       items.sort((a,b)=>(a.step||0)-(b.step||0));
       state.aiResult={items,query,provider,isChain:true};
+    } else if(provider==='giga'){
+      const invoke=window.__TAURI__?.core?.invoke||window.__TAURI__?.tauri?.invoke;
+      if(!invoke) throw new Error('GigaChat работает только в десктоп-приложении');
+      const rawKey=settings.gigaKey.trim();
+      const authKey=rawKey.startsWith('Basic ')?rawKey.slice(6).trim():rawKey;
+      const text=await invoke('giga_search',{authKey,systemPrompt:gigaSystemPrompt,query:gigaUserPrompt});
+      if(!text||text.trim()==='') throw new Error('GigaChat вернул пустой ответ');
+      items=parseGigaResponse(text,query,activeProgs);
+      if(items.length===0) throw new Error('GigaChat ответил, но данные не распознаны. Ответ: '+text.slice(0,200));
+
+    } else if(provider==='openai'){
+      const res=await fetch('https://api.openai.com/v1/chat/completions',{
+        method:'POST',
+        headers:{'Content-Type':'application/json','Authorization':'Bearer '+settings.openaiKey},
+        body:JSON.stringify({model:'gpt-4o-mini',max_tokens:1000,
+          messages:[{role:'system',content:systemPrompt},{role:'user',content:query}]})
+      });
+      if(!res.ok) throw new Error('OpenAI '+res.status+': '+(await res.text()).slice(0,200));
+      const d=await res.json();
+      items=parseAIResponse(d.choices?.[0]?.message?.content||'',query,activeProgs);
+
+    } else if(provider==='gemini'){
+      const res=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${settings.geminiKey}`,{
+        method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({contents:[{parts:[{text:systemPrompt+'\n\n'+query}]}],generationConfig:{maxOutputTokens:1000}})
+      });
+      if(!res.ok) throw new Error('Gemini '+res.status+': '+(await res.text()).slice(0,200));
+      const d=await res.json();
+      items=parseAIResponse(d.candidates?.[0]?.content?.parts?.[0]?.text||'',query,activeProgs);
+
+    } else if(provider==='groq'){
+      const res=await fetch('https://api.groq.com/openai/v1/chat/completions',{
+        method:'POST',
+        headers:{'Content-Type':'application/json','Authorization':'Bearer '+settings.groqKey},
+        body:JSON.stringify({model:'llama3-70b-8192',max_tokens:1000,
+          messages:[{role:'system',content:systemPrompt},{role:'user',content:query}]})
+      });
+      if(!res.ok) throw new Error('Groq '+res.status+': '+(await res.text()).slice(0,200));
+      const d=await res.json();
+      items=parseAIResponse(d.choices?.[0]?.message?.content||'',query,activeProgs);
+
+    } else if(provider==='custom'){
+      const baseUrl=(settings.customUrl||'https://api.openai.com/v1').replace(/\/$/,'');
+      const res=await fetch(baseUrl+'/chat/completions',{
+        method:'POST',
+        headers:{'Content-Type':'application/json','Authorization':'Bearer '+settings.customKey},
+        body:JSON.stringify({model:'gpt-4o-mini',max_tokens:1000,
+          messages:[{role:'system',content:systemPrompt},{role:'user',content:query}]})
+      });
+      if(!res.ok) throw new Error('Custom API '+res.status+': '+(await res.text()).slice(0,200));
+      const d=await res.json();
+      items=parseAIResponse(d.choices?.[0]?.message?.content||'',query,activeProgs);
+    }
+
+    // Handle chain format
+    if(tf==='chain' && items.some(i=>i.step!=null)){
+      items.sort((a,b)=>(a.step||0)-(b.step||0));
+      state.aiResult={items,query,provider,isChain:true};
     } else {
       state.aiResult={items,query,provider};
     }
@@ -2050,6 +2487,7 @@ ${osHint}
 // ── Settings ──
 function renderSettings(){
   const t=T[settings.lang];
+  const ru=settings.lang==='ru';
   const wrap=el('div',"animation:fadeUp 0.35s ease both");
   function section(title){const d=el('p',"color:var(--text3);font-size:10px;text-transform:uppercase;letter-spacing:2px;font-weight:800;margin:24px 0 10px");d.textContent=title;return d;}
   function settingRow(icon,title,desc,control){
@@ -2101,75 +2539,116 @@ function renderSettings(){
   const providerLeft=el('div',"display:flex;align-items:center;gap:12px");
   providerLeft.innerHTML=`<span style="font-size:18px">🤖</span><div><div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:2px">${t.sAIProvider}</div><div style="font-size:11px;color:var(--text2)">${t.sAIProviderDesc}</div></div>`;
   providerTop.appendChild(providerLeft);
-  providerTop.appendChild(segmented(
-    [{val:'claude',label:'Claude'},{val:'giga',label:'GigaChat'}],
-    settings.aiProvider||'claude',
-    val=>{settings.aiProvider=val;saveSettings(settings);render()}
-  ));
+  // Provider selector cards
+  const providerGrid=el('div',"display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-top:10px");
+  const PROVIDERS=[
+    {val:'claude', label:'Claude',     emoji:'🤖', color:'#818cf8', hint:'Anthropic'},
+    {val:'giga',   label:'GigaChat',   emoji:'🟢', color:'#4ade80', hint:'Сбер'},
+    {val:'openai', label:'OpenAI',     emoji:'⚡', color:'#10b981', hint:'GPT-4o'},
+    {val:'gemini', label:'Gemini',     emoji:'✨', color:'#f59e0b', hint:'Google'},
+    {val:'groq',   label:'Groq',       emoji:'🚀', color:'#06b6d4', hint:'Llama fast'},
+    {val:'deepseek',label:'DeepSeek',   emoji:'🐋', color:'#3b82f6', hint:'DeepSeek R1'},
+    {val:'mistral', label:'Mistral',    emoji:'🌪️', color:'#f97316', hint:'Mistral AI'},
+    {val:'yandex',  label:'YandexGPT', emoji:'🔴', color:'#ef4444', hint:'Яндекс'},
+    {val:'custom',  label:'Custom',    emoji:'🔧', color:'#a855f7', hint:'OpenAI API'},
+  ];
+  function buildProviderCards(){
+    providerGrid.innerHTML='';
+    PROVIDERS.forEach(p=>{
+      const active=settings.aiProvider===p.val;
+      const btn=el('div',`background:${active?p.color+'18':'var(--bg2)'};border:1.5px solid ${active?p.color+'55':'var(--border)'};border-radius:10px;padding:8px 6px;text-align:center;cursor:pointer;transition:all 0.2s`);
+      btn.innerHTML=`<div style="font-size:16px">${p.emoji}</div><div style="font-size:10px;font-weight:800;color:${active?p.color:'var(--text)'};margin-top:2px">${p.label}</div><div style="font-size:9px;color:var(--text3)">${p.hint}</div>`;
+      btn.onclick=()=>{settings.aiProvider=p.val;saveSettings(settings);buildProviderCards();updateKeyRows();};
+      providerGrid.appendChild(btn);
+    });
+  }
+  buildProviderCards();
+  providerRow.appendChild(providerGrid);
   providerRow.appendChild(providerTop);
   wrap.appendChild(providerRow);
 
-  // Claude key
-  const claudeRow=el('div',`background:var(--bg3);border:1px solid ${settings.aiProvider==='claude'?'rgba(99,102,241,0.35)':'var(--border)'};border-radius:12px;padding:16px;margin-bottom:8px;transition:border 0.2s`);
-  const claudeHead=el('div',"display:flex;align-items:center;gap:10px;margin-bottom:12px");
-  claudeHead.innerHTML=`<span style="font-size:16px">✦</span><div><div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:2px">${t.sClaudeKey}</div><div style="font-size:11px;color:var(--text2)">${t.sClaudeKeyDesc}</div></div>`;
-  claudeRow.appendChild(claudeHead);
-  const claudeInputRow=el('div',"display:flex;gap:8px");
-  const claudeInput=el('input',"flex:1;background:var(--input-bg);border:1px solid var(--border);border-radius:8px;padding:9px 12px;font-size:12px;color:var(--text);outline:none;transition:border 0.2s");
-  claudeInput.type='password';claudeInput.placeholder='sk-ant-...';claudeInput.value=settings.aiKey||'';
-  claudeInput.onfocus=()=>claudeInput.style.borderColor="rgba(99,102,241,0.5)";
-  claudeInput.onblur=()=>claudeInput.style.borderColor="var(--border)";
-  const claudeSaveBtn=el('button',"background:rgba(99,102,241,0.2);border:1px solid rgba(99,102,241,0.4);color:#c7d2fe;border-radius:8px;padding:9px 16px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;transition:all 0.18s");
-  claudeSaveBtn.textContent=t.sAISave;
-  claudeSaveBtn.onclick=()=>{settings.aiKey=claudeInput.value.trim();saveSettings(settings);claudeSaveBtn.textContent=t.sAISaved;setTimeout(()=>claudeSaveBtn.textContent=t.sAISave,1500)};
-  claudeInputRow.appendChild(claudeInput);claudeInputRow.appendChild(claudeSaveBtn);
-  claudeRow.appendChild(claudeInputRow);
-  const claudeHint=el('div',"margin-top:8px;font-size:10px;color:var(--text3)");
-  claudeHint.innerHTML=`Получить: <a href="https://console.anthropic.com" target="_blank" style="color:#818cf8;text-decoration:none">console.anthropic.com</a>`;
-  claudeRow.appendChild(claudeHint);
-  wrap.appendChild(claudeRow);
 
-  // GigaChat key
-  const gigaRow=el('div',`background:var(--bg3);border:1px solid ${settings.aiProvider==='giga'?'rgba(34,197,94,0.35)':'var(--border)'};border-radius:12px;padding:16px;margin-bottom:8px;transition:border 0.2s`);
-  const gigaHead=el('div',"display:flex;align-items:center;gap:10px;margin-bottom:12px");
-  gigaHead.innerHTML=`<span style="font-size:16px">🟢</span><div><div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:2px">${t.sGigaKey}</div><div style="font-size:11px;color:var(--text2)">${t.sGigaKeyDesc}</div></div>`;
-  gigaRow.appendChild(gigaHead);
-  const gigaInputRow=el('div',"display:flex;gap:8px");
-  const gigaInput=el('input',"flex:1;background:var(--input-bg);border:1px solid var(--border);border-radius:8px;padding:9px 12px;font-size:12px;color:var(--text);outline:none;transition:border 0.2s");
-  gigaInput.type='password';gigaInput.placeholder='Вставь Authorization из личного кабинета Сбера';gigaInput.value=settings.gigaKey||'';
-  gigaInput.onfocus=()=>gigaInput.style.borderColor="rgba(34,197,94,0.5)";
-  gigaInput.onblur=()=>gigaInput.style.borderColor="var(--border)";
-  const gigaSaveBtn=el('button',"background:rgba(34,197,94,0.15);border:1px solid rgba(34,197,94,0.4);color:#4ade80;border-radius:8px;padding:9px 16px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;transition:all 0.18s");
-  gigaSaveBtn.textContent=t.sAISave;
-  gigaSaveBtn.onclick=()=>{settings.gigaKey=gigaInput.value.trim();saveSettings(settings);gigaSaveBtn.textContent=t.sAISaved;setTimeout(()=>gigaSaveBtn.textContent=t.sAISave,1500)};
-  gigaInputRow.appendChild(gigaInput);gigaSaveBtn.textContent=t.sAISave;
-  gigaInputRow.appendChild(gigaSaveBtn);
-  gigaRow.appendChild(gigaInputRow);
-  const gigaHint=el('div',"margin-top:8px;font-size:10px;color:var(--text3)");
-  gigaHint.innerHTML=`<div style="margin-bottom:4px">Получить: <a href="https://developers.sber.ru/portal/products/gigachat" target="_blank" style="color:#4ade80;text-decoration:none">developers.sber.ru</a> → Studio → Проект → Credentials</div><div style="color:var(--text2)">Скопируй поле <span style="color:#4ade80;font-weight:700">Authorization</span> — вставляй как есть, со словом Basic или без</div>`;
-  // Test button for GigaChat
-  const gigaTestBtn=el('button',"margin-top:10px;width:100%;background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.25);color:#4ade80;border-radius:8px;padding:8px 14px;font-size:11px;font-weight:700;cursor:pointer;transition:all 0.18s;font-family:inherit");
-  gigaTestBtn.textContent='🔌 Проверить соединение';
-  gigaTestBtn.onclick=async()=>{
-    const key=gigaInput.value.trim();
-    if(!key){gigaTestBtn.textContent='⚠ Введи ключ';setTimeout(()=>gigaTestBtn.textContent='🔌 Проверить соединение',2000);return;}
-    gigaTestBtn.textContent='⏳ Проверяю...';gigaTestBtn.style.color='var(--text2)';
-    try{
-      const invoke=window.__TAURI__?.core?.invoke||window.__TAURI__?.tauri?.invoke;
-      if(!invoke) throw new Error('Только в десктоп-приложении');
-      const authKey=key.startsWith('Basic ')?key.slice(6).trim():key;
-      // Проверяем через тестовый запрос к giga_search
-      await invoke('giga_search',{authKey,systemPrompt:'test',query:'test'});
-      gigaTestBtn.textContent='✅ Работает!';gigaTestBtn.style.color='#4ade80';gigaTestBtn.style.borderColor='rgba(34,197,94,0.5)';
-    }catch(e){
-      const em=typeof e==='string'?e:(e?.message||String(e));
-      gigaTestBtn.textContent='❌ '+em.slice(0,50);gigaTestBtn.style.color='#fca5a5';gigaTestBtn.style.borderColor='rgba(239,68,68,0.4)';
+
+  // ── Dynamic key input rows for each provider ──
+  const KEY_PROVIDERS=[
+    {val:'claude', label:'Claude API Key', emoji:'🤖', color:'rgba(99,102,241,0.35)',
+      placeholder:'sk-ant-api03-...', field:'aiKey',
+      link:'https://console.anthropic.com/settings/keys', linkLabel:'console.anthropic.com',
+      hint:'Получить: console.anthropic.com → Settings → API Keys'},
+    {val:'giga', label:'GigaChat Authorization', emoji:'🟢', color:'rgba(34,197,94,0.35)',
+      placeholder:'Basic <base64 clientId:clientSecret>', field:'gigaKey',
+      link:'https://developers.sber.ru/portal/products/gigachat-api', linkLabel:'developers.sber.ru/portal',
+      hint:'Получить: developers.sber.ru/portal → GigaChat API → Подключить → Credentials'},
+    {val:'openai', label:'OpenAI API Key', emoji:'⚡', color:'rgba(16,185,129,0.35)',
+      placeholder:'sk-...', field:'openaiKey',
+      link:'https://platform.openai.com/api-keys', linkLabel:'platform.openai.com',
+      hint:'Получить: platform.openai.com → API keys → Create new'},
+    {val:'gemini', label:'Gemini API Key', emoji:'✨', color:'rgba(245,158,11,0.35)',
+      placeholder:'AIza...', field:'geminiKey',
+      link:'https://aistudio.google.com/app/apikey', linkLabel:'aistudio.google.com',
+      hint:'Получить: aistudio.google.com → Get API key → Create API key'},
+    {val:'groq', label:'Groq API Key', emoji:'🚀', color:'rgba(6,182,212,0.35)',
+      placeholder:'gsk_...', field:'groqKey',
+      link:'https://console.groq.com/keys', linkLabel:'console.groq.com',
+      hint:'Получить: console.groq.com → API Keys → Create API key (бесплатно)'},
+    {val:'deepseek', label:'DeepSeek API Key', emoji:'🐋', color:'rgba(59,130,246,0.35)',
+      placeholder:'sk-...', field:'deepseekKey',
+      link:'https://platform.deepseek.com/api_keys', linkLabel:'platform.deepseek.com',
+      hint:'Получить: platform.deepseek.com → API Keys → Create API key'},
+    {val:'mistral', label:'Mistral API Key', emoji:'🌪️', color:'rgba(249,115,22,0.35)',
+      placeholder:'...', field:'mistralKey',
+      link:'https://console.mistral.ai/api-keys', linkLabel:'console.mistral.ai',
+      hint:'Получить: console.mistral.ai → API Keys → Create new key'},
+    {val:'yandex', label:'YandexGPT API Key', emoji:'🔴', color:'rgba(239,68,68,0.35)',
+      placeholder:'AQVN...', field:'yandexKey',
+      link:'https://console.yandex.cloud/folders', linkLabel:'console.yandex.cloud',
+      hint:'Получить: console.yandex.cloud → IAM → Service accounts → Создать ключ'},
+    {val:'custom', label:'Custom OpenAI-compatible API', emoji:'🔧', color:'rgba(168,85,247,0.35)',
+      placeholder:'sk-...', field:'customKey',
+      link:null, linkLabel:null,
+      hint:'Любой OpenAI-совместимый API (LM Studio, Ollama, Together, etc.)'},
+  ];
+  const keyRowsContainer=el('div',"");
+  function buildKeyRow(p){
+    const active=settings.aiProvider===p.val;
+    const row=el('div',`background:var(--bg3);border:1px solid ${active?p.color:'var(--border)'};border-radius:12px;padding:14px 16px;margin-bottom:8px;transition:all 0.3s;${active?'':'display:none'}`);
+    row.dataset.providerRow=p.val;
+    const head=el('div',"display:flex;align-items:center;gap:10px;margin-bottom:10px");
+    head.innerHTML=`<span style="font-size:16px">${p.emoji}</span><div><div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:2px">${p.label}</div><div style="font-size:11px;color:var(--text2)">${p.hint}</div></div>`;
+    row.appendChild(head);
+    if(p.link){
+      const linkRow=el('div',"margin-bottom:8px;font-size:11px;color:var(--text3)");
+      linkRow.innerHTML=`Получить ключ: <a href="${p.link}" target="_blank" style="color:#60a5fa;text-decoration:none">${p.linkLabel}</a>`;
+      row.appendChild(linkRow);
     }
-    setTimeout(()=>{gigaTestBtn.textContent='🔌 Проверить соединение';gigaTestBtn.style.color='';gigaTestBtn.style.borderColor='';},4000);
-  };
-  gigaRow.appendChild(gigaTestBtn);
-  gigaRow.appendChild(gigaHint);
-  wrap.appendChild(gigaRow);
+    // Custom URL field
+    if(p.val==='custom'){
+      const urlRow=el('div',"display:flex;gap:8px;margin-bottom:8px");
+      const urlInput=el('input',"flex:1;background:var(--input-bg);border:1px solid var(--border);border-radius:8px;padding:9px 12px;font-size:12px;color:var(--text);outline:none");
+      urlInput.type='url';urlInput.placeholder='https://api.openai.com/v1 (или другой URL)';
+      urlInput.value=settings.customUrl||'';
+      urlInput.oninput=()=>{settings.customUrl=urlInput.value.trim();saveSettings(settings);};
+      urlRow.appendChild(urlInput);
+      row.appendChild(urlRow);
+    }
+    const inputRow=el('div',"display:flex;gap:8px");
+    const inp=el('input',"flex:1;background:var(--input-bg);border:1px solid var(--border);border-radius:8px;padding:9px 12px;font-size:12px;color:var(--text);outline:none;font-family:monospace");
+    inp.type='password';inp.placeholder=p.placeholder;inp.value=settings[p.field]||'';
+    inp.onfocus=()=>inp.style.borderColor=p.color.replace('0.35','0.6');
+    inp.onblur=()=>inp.style.borderColor='var(--border)';
+    const saveBtn=el('button',"background:rgba(52,211,153,0.15);border:1px solid rgba(52,211,153,0.3);color:#34d399;border-radius:8px;padding:9px 14px;font-size:12px;font-weight:800;cursor:pointer;font-family:inherit;white-space:nowrap;transition:all 0.2s");
+    saveBtn.textContent=ru?'Сохранить':'Save';
+    saveBtn.onclick=()=>{settings[p.field]=inp.value.trim();saveSettings(settings);saveBtn.textContent='✓';setTimeout(()=>saveBtn.textContent=ru?'Сохранить':'Save',2000);};
+    inputRow.appendChild(inp);inputRow.appendChild(saveBtn);
+    row.appendChild(inputRow);
+    return row;
+  }
+  function updateKeyRows(){
+    keyRowsContainer.innerHTML='';
+    KEY_PROVIDERS.forEach(p=>keyRowsContainer.appendChild(buildKeyRow(p)));
+  }
+  updateKeyRows();
+  wrap.appendChild(keyRowsContainer);
 
   wrap.appendChild(section(t.sUpdate));
   wrap.appendChild(settingRow("🔔",t.sUpdate,t.sUpdateDesc,
@@ -2244,24 +2723,6 @@ function renderChainCard(chain){
   footer.appendChild(el('span',"font-size:10px;color:var(--text3)",t.chainCopyAll));
   footer.appendChild(makeCopyBtn(chain.map(s=>s.formula).join('\n')));
   wrap.appendChild(footer);return wrap;
-}
-
-function renderAiCard(item,idx){
-  const color="#818cf8";
-  const card=el('div',`background:var(--card-bg);border:1px solid rgba(99,102,241,0.25);border-left:3px solid ${color};border-radius:12px;padding:14px 18px;display:flex;align-items:flex-start;gap:14px`);
-  card.className='ai-card';
-  const badge=el('div',"background:rgba(99,102,241,0.15);border:1px solid rgba(99,102,241,0.3);border-radius:7px;padding:3px 8px;font-size:10px;color:#a78bfa;font-weight:800;white-space:nowrap;margin-top:2px");
-  badge.textContent=`✦ ${item.program||'AI'}`;card.appendChild(badge);
-  const body=el('div',"flex:1;min-width:0");
-  const keyBadge=el('div',"background:rgba(99,102,241,0.15);border:1px solid rgba(99,102,241,0.3);border-radius:6px;padding:3px 10px;font-size:13px;color:#c7d2fe;font-weight:700;display:inline-block;margin-bottom:6px");
-  keyBadge.textContent=item.keys||'';body.appendChild(keyBadge);
-  const desc=el('p',"margin:0 0 7px;color:var(--text2);font-size:12px");desc.textContent=item.desc||'';body.appendChild(desc);
-  if(item.example){
-    const fr=el('div',"display:flex;align-items:center;gap:8px");
-    const fb=el('div',"background:var(--code-bg);border:1px solid var(--code-border);border-radius:7px;padding:6px 12px;font-size:12px;color:var(--code-color);flex:1;word-break:break-all;font-weight:600");
-    fb.textContent=item.example;fr.appendChild(fb);fr.appendChild(makeCopyBtn(item.example));body.appendChild(fr);
-  }
-  card.appendChild(body);return card;
 }
 
 
@@ -2348,7 +2809,7 @@ function renderAskAI(){
 
   // ── Ask button ──
   const askBtn=document.createElement('button');
-  const hasKeyAsk=settings.aiProvider==='claude'?!!settings.aiKey:!!settings.gigaKey;
+  const hasKeyAsk=!!getActiveKey();
   askBtn.style.cssText='width:100%;background:linear-gradient(135deg,rgba(168,85,247,0.2),rgba(99,102,241,0.2));border:1px solid rgba(168,85,247,0.4);color:#c084fc;border-radius:12px;padding:12px;font-size:13px;font-weight:800;cursor:pointer;transition:all 0.2s;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:20px';
   if(!hasKeyAsk){askBtn.style.opacity='0.38';askBtn.style.cursor='not-allowed';askBtn.style.animation='dimPulse 2.8s ease-in-out infinite';askBtn.title=settings.lang==='ru'?'Нет API ключа — проверь ⚙ Настройки':'No API key — check ⚙ Settings';}
   else{askBtn.classList.add('anim-glow-purple');}
@@ -2366,7 +2827,8 @@ function renderAskAI(){
     const question=textarea.value.trim();
     if(!question){textarea.focus();return;}
     const provider=settings.aiProvider||'claude';
-    const hasKey=provider==='claude'?!!settings.aiKey:!!settings.gigaKey;
+    const keyMap={claude:settings.aiKey,giga:settings.gigaKey,openai:settings.openaiKey,gemini:settings.geminiKey,groq:settings.groqKey,custom:settings.customKey};
+  const hasKey=!!(keyMap[provider]);
     if(!hasKey){
       resultArea.innerHTML=`<div style="background:rgba(239,68,68,0.06);border:1px solid rgba(239,68,68,0.2);border-radius:12px;padding:14px;color:#fca5a5;font-size:12px">${settings.lang==='ru'?'❌ Нет API ключа. Проверь ⚙ Настройки.':'❌ No API key. Check ⚙ Settings.'}</div>`;
       return;
@@ -3056,14 +3518,16 @@ function showShareResult(record, stats, ru){
   }
   updateCard();
 
-  dlPng.onclick=()=>{
+  dlPng.onclick=async()=>{
     const W=480,H=380,DPR=3;
     const off=document.createElement('canvas');off.width=W*DPR;off.height=H*DPR;
     const ctx=off.getContext('2d');ctx.scale(DPR,DPR);
     drawResultCard(ctx,W,H,nickInput.value.trim());
-    const a=document.createElement('a');a.download=`SearchCopy_Quiz${record.seed}_${nickInput.value||'result'}.png`;a.href=off.toDataURL('image/png');a.click();
+    const a=document.createElement('a');const _qfname=`SearchCopy_Quiz${record.seed}_${nickInput.value||'result'}`;
+    const _qr=await downloadPNG(off,_qfname);
+    if(_qr) showDownloadToast(_qfname,_qr.method);
   };
-  dlPdf.onclick=()=>{
+  dlPdf.onclick=async()=>{
     const W=480,H=380,DPR=3;
     const off=document.createElement('canvas');off.width=W*DPR;off.height=H*DPR;
     const ctx=off.getContext('2d');ctx.scale(DPR,DPR);
@@ -3183,12 +3647,13 @@ function showStatsModal(stats, ru){
   const dlPdf2=document.createElement('button');
   dlPdf2.style.cssText='flex:1;background:var(--bg3);border:1px solid var(--border);color:var(--text2);border-radius:10px;padding:10px;font-size:12px;font-weight:800;cursor:pointer;font-family:inherit';
   dlPdf2.textContent='📄 PDF';
-  dlPng2.onclick=()=>{
+  dlPng2.onclick=async()=>{
     const W=400,H=296,DPR=3;const off=document.createElement('canvas');off.width=W*DPR;off.height=H*DPR;
     const ctx=off.getContext('2d');ctx.scale(DPR,DPR);drawStatsCard(ctx,W,H,ni.value.trim());
-    const a=document.createElement('a');a.download=`SearchCopy_Stats_${ni.value||'profile'}.png`;a.href=off.toDataURL('image/png');a.click();
-  };
-  dlPdf2.onclick=()=>{
+    const a=document.createElement('a');const _sfname=`SearchCopy_Stats_${ni.value||'profile'}`;
+    const _sr=await downloadPNG(off,_sfname);
+    if(_sr) showDownloadToast(_sfname,_sr.method);  };
+  dlPdf2.onclick=async()=>{
     const W=400,H=296,DPR=3;const off=document.createElement('canvas');off.width=W*DPR;off.height=H*DPR;
     const ctx=off.getContext('2d');ctx.scale(DPR,DPR);drawStatsCard(ctx,W,H,ni.value.trim());
     const win3=window.open('','_blank');
@@ -3265,6 +3730,7 @@ function renderExport(){
     btn.innerHTML=`<span>${ICONS[p]||'◉'}</span>${p}`;
     btn.onclick=()=>{
       exportApp=p;
+      buildTypeButtons();
       appRow.querySelectorAll('[data-ep]').forEach(b=>{
         const bc=COLORS[b.dataset.ep]||'#818cf8';
         b.classList.toggle('active',b.dataset.ep===p);
@@ -3292,6 +3758,7 @@ function renderExport(){
     btn.textContent=label;
     btn.onclick=()=>{
       exportPreset=val;
+      buildTypeButtons();
       syncTagsToggleVisibility();
       presetRow.querySelectorAll('[data-preset]').forEach(b=>{
         const bc=b.dataset.preset==='favorites'?'#fbbf24':'#818cf8';
@@ -3315,15 +3782,24 @@ function renderExport(){
   wrap.appendChild(typeLabel);
   const typeRow=document.createElement('div');
   typeRow.style.cssText='display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px';
-  let exportType='hotkey';
-  [['hotkey',ru?'Клавиши':'Hotkeys','⌨'],['formula',ru?'Формулы':'Formulas','📊'],['all',ru?'Всё':'All','◎']].forEach(([val,label,icon])=>{
-    const btn=document.createElement('button');
-    btn.className='pill'+(exportType===val?' active':'');
-    btn.dataset.et=val;
-    btn.innerHTML=`${icon} ${label}`;
-    btn.onclick=()=>{exportType=val;typeRow.querySelectorAll('[data-et]').forEach(b=>b.classList.toggle('active',b.dataset.et===val));updatePreview();};
-    typeRow.appendChild(btn);
-  });
+  let exportType='all';
+  const APPS_WITH_FORMULAS=['Excel']; // only Excel has formulas
+  function buildTypeButtons(){
+    typeRow.innerHTML='';
+    const hasFormulas=exportPreset==='app'?APPS_WITH_FORMULAS.includes(exportApp):true;
+    const typeDefs=[['all',ru?'◎ Всё':'◎ All'],['hotkey',ru?'⌨ Клавиши':'⌨ Keys']];
+    if(hasFormulas) typeDefs.push(['formula',ru?'📊 Формулы':'📊 Formulas']);
+    if(!hasFormulas&&exportType==='formula') exportType='all';
+    typeDefs.forEach(([val,label])=>{
+      const btn=document.createElement('button');
+      btn.className='pill'+(exportType===val?' active':'');
+      btn.dataset.et=val;
+      btn.innerHTML=label;
+      btn.onclick=()=>{exportType=val;typeRow.querySelectorAll('[data-et]').forEach(b=>b.classList.toggle('active',b.dataset.et===val));updatePreview();};
+        typeRow.appendChild(btn);
+    });
+  }
+  buildTypeButtons();
   wrap.appendChild(typeRow);
 
   // Format selector
@@ -3465,15 +3941,28 @@ function renderExport(){
       roundRect(ctx,x,y,ITEM_W,ITEM_H-6,10);ctx.stroke();
       // Left accent bar
       ctx.fillStyle=appColor+'99';roundRect(ctx,x,y,3,ITEM_H-6,2);ctx.fill();
-      // Key badge background
-      const keysText=getKeys(item);
+      // Key badge — hotkey or formula
+      const isFormula=item.type==='formula';
+      const formulaColor='#34d399';
+      const badgeColor=isFormula?formulaColor:appColor;
+      const rawKeys=getKeys(item);
+      const keysText=isFormula?(item.example||'='+rawKeys).slice(0,22):rawKeys.slice(0,20);
       ctx.font='bold 11px ui-monospace,monospace';
-      const kw=ctx.measureText(keysText.slice(0,20)).width;
-      ctx.fillStyle=appColor+'25';roundRect(ctx,x+10,y+7,kw+16,20,6);ctx.fill();
-      ctx.strokeStyle=appColor+'44';ctx.lineWidth=1;roundRect(ctx,x+10,y+7,kw+16,20,6);ctx.stroke();
-      // Key text
+      const kw=Math.min(ctx.measureText(keysText).width, ITEM_W-30);
+      ctx.fillStyle=badgeColor+'25';roundRect(ctx,x+10,y+7,kw+16,20,6);ctx.fill();
+      ctx.strokeStyle=badgeColor+'44';ctx.lineWidth=1;roundRect(ctx,x+10,y+7,kw+16,20,6);ctx.stroke();
+      // type micro-label for formulas
+      if(isFormula){
+        ctx.font='700 8px system-ui,sans-serif';
+        ctx.fillStyle=formulaColor+'99';
+        ctx.fillText('fx',x+10,y+8);
+      }
       ctx.font='bold 11px ui-monospace,monospace';
-      ctx.fillStyle=appColor;ctx.fillText(keysText.slice(0,20),x+18,y+21);
+      ctx.fillStyle=badgeColor;
+      // clip text to badge width
+      ctx.save();ctx.beginPath();ctx.rect(x+10,y+4,kw+16,22);ctx.clip();
+      ctx.fillText(keysText,x+18,y+21);
+      ctx.restore();
       // Description
       ctx.font='11px system-ui,-apple-system,sans-serif';
       ctx.fillStyle=dark?'#94a3b8':'#475569';
@@ -3548,7 +4037,8 @@ function renderExport(){
     drawCard(ctx,W,H,items);
     const fname=`SearchCopy_${exportApp.replace(/\s/g,'_')}_${settings.os||'win'}`;
     if(exportFmt==='png'){
-      const a=document.createElement('a');a.download=fname+'.png';a.href=offscreen.toDataURL('image/png');a.click();
+      const result=await downloadPNG(offscreen,fname);
+      if(result) showDownloadToast(fname, result.method);
     } else {
       // PDF via print-ready HTML in new window
       const dataURL=offscreen.toDataURL('image/png');
@@ -3685,7 +4175,7 @@ function renderReverse(){
   keyInput.onkeydown=e=>{if(e.key==='Enter')doRevSearch();};
 
   // ── AI block ──
-  const hasKeyR=settings.aiProvider==='claude'?!!settings.aiKey:!!settings.gigaKey;
+  const hasKeyR=!!getActiveKey();
   const aiRevDiv=document.createElement('div');
   aiRevDiv.style.cssText=`margin-top:20px;background:linear-gradient(135deg,rgba(99,102,241,0.07),rgba(14,165,233,0.05));border:1px solid rgba(99,102,241,0.18);border-radius:14px;padding:16px;${hasKeyR?'':'opacity:0.5'}`;
   const aiRevHead=el('div',"display:flex;align-items:center;gap:8px;margin-bottom:10px");
@@ -3712,21 +4202,11 @@ function renderReverse(){
       :`You are a keyboard shortcut expert. Explain what the shortcut "${q}" does in ${appCtx} on ${osName}. If you don't know — say so. Plain text, no JSON, max 4 sentences.`;
     try{
       let ans='';
-      if(settings.aiProvider==='claude'){
-        const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',
-          headers:{'Content-Type':'application/json','x-api-key':settings.aiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
-          body:JSON.stringify({model:'claude-haiku-4-5',max_tokens:300,system:sp,messages:[{role:'user',content:`Что делает ${q}?`}]})});
-        const d=await r.json();ans=d.content?.[0]?.text||'';
-      } else {
-        const invoke=window.__TAURI__?.core?.invoke||window.__TAURI__?.tauri?.invoke;
-        if(!invoke)throw new Error(ru?'GigaChat только в приложении':'GigaChat is desktop-only');
-        const ak=settings.gigaKey.startsWith('Basic ')?settings.gigaKey.slice(6).trim():settings.gigaKey;
-        ans=await invoke('giga_search',{authKey:ak,systemPrompt:sp,query:`Что делает ${q}?`});
-      }
+      ans=await callAI(sp,`Что делает ${q}?`,300);
       ans=ans.replace(/\`\`\`[\s\S]*?\`\`\`/g,'').replace(/\`([^\`]+)\`/g,'$1').trim();
       aiRevResult.innerHTML='';
       const box=el('div',"background:var(--card-bg);border:1px solid rgba(99,102,241,0.2);border-radius:10px;padding:12px;animation:fadeUp 0.25s ease");
-      const badge=el('div',"font-size:10px;font-weight:800;color:#818cf8;margin-bottom:6px",`✦ ${settings.aiProvider==='giga'?'GigaChat':'Claude'} · ${q}`);
+      const badge=el('div',"font-size:10px;font-weight:800;color:#818cf8;margin-bottom:6px",`✦ ${({claude:'Claude Haiku',giga:'GigaChat',openai:'GPT-4o mini',gemini:'Gemini Flash Lite',groq:'Llama 3.1',deepseek:'DeepSeek',mistral:'Mistral',yandex:'YandexGPT',custom:'Custom AI'}[settings.aiProvider]||settings.aiProvider)} · ${q}`);
       const text=el('div',"font-size:12px;color:var(--text);line-height:1.7",ans);
       box.appendChild(badge);box.appendChild(text);
       aiRevResult.appendChild(box);
@@ -3892,28 +4372,49 @@ function renderGuide(){
       demo.appendChild(keyRow);
       demo._cleanup=()=>clearInterval(cycleKey);
     } else if(step.anim==='copy'){
-      // Animated copy button
+      // Animated copy — cycles hotkeys AND formulas
       const copyRow=el('div',"display:flex;align-items:center;gap:8px");
-      const kbd=document.createElement('div');
-      const shortcuts=['⌘+C','Ctrl+C','Ctrl+Shift+T','⌘+Space'];
+      const items2=[
+        {txt:'Ctrl + C',color:'#818cf8',hint:ru?'Клавиша':'Hotkey'},
+        {txt:'=SUM(A:A)',color:'#34d399',hint:ru?'Формула':'Formula'},
+        {txt:'Ctrl + Z',color:'#818cf8',hint:ru?'Клавиша':'Hotkey'},
+        {txt:'=VLOOKUP()',color:'#34d399',hint:ru?'Формула':'Formula'},
+        {txt:'Ctrl + S',color:'#818cf8',hint:ru?'Клавиша':'Hotkey'},
+        {txt:'=IF(A1>0,…)',color:'#34d399',hint:ru?'Формула':'Formula'},
+      ];
       let si=0;
+      const hintTag=el('div','font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:1px;padding:2px 7px;border-radius:10px;background:rgba(99,102,241,0.1);color:#818cf8;transition:all 0.3s;white-space:nowrap');
+      hintTag.textContent=items2[0].hint;
+      const kbd=document.createElement('div');
       kbd.style.cssText='background:rgba(99,102,241,0.12);border:1px solid rgba(99,102,241,0.3);border-radius:8px;padding:5px 14px;font-size:13px;font-weight:900;color:#818cf8;font-family:monospace;flex:1;text-align:center;transition:all 0.3s';
-      kbd.textContent=shortcuts[0];
+      kbd.textContent=items2[0].txt;
       const copyBtn2=document.createElement('div');
       copyBtn2.style.cssText='background:rgba(52,211,153,0.12);border:1px solid rgba(52,211,153,0.3);border-radius:8px;padding:5px 12px;font-size:11px;font-weight:800;color:#34d399;cursor:pointer;white-space:nowrap;transition:all 0.25s';
       copyBtn2.textContent='⎘ '+(ru?'Копировать':'Copy');
       let copied=false;
       const cycleShortcut=setInterval(()=>{
-        si=(si+1)%shortcuts.length;
+        si=(si+1)%items2.length;
+        const it=items2[si];
         kbd.style.opacity='0';kbd.style.transform='translateY(4px)';
-        setTimeout(()=>{kbd.textContent=shortcuts[si];kbd.style.opacity='1';kbd.style.transform='translateY(0)';},250);
+        hintTag.style.opacity='0';
+        setTimeout(()=>{
+          kbd.textContent=it.txt;
+          kbd.style.color=it.color;
+          kbd.style.background=it.color+'1a';
+          kbd.style.borderColor=it.color+'44';
+          hintTag.textContent=it.hint;
+          hintTag.style.color=it.color;
+          hintTag.style.background=it.color+'15';
+          kbd.style.opacity='1';kbd.style.transform='translateY(0)';
+          hintTag.style.opacity='1';
+        },250);
       },1400);
       const flashCopy=setInterval(()=>{
         if(copied)return;
         copyBtn2.style.background='rgba(52,211,153,0.3)';copyBtn2.style.transform='scale(0.96)';
         setTimeout(()=>{copyBtn2.style.background='rgba(52,211,153,0.12)';copyBtn2.style.transform='scale(1)';},300);
       },1800);
-      copyRow.appendChild(kbd);copyRow.appendChild(copyBtn2);
+      copyRow.appendChild(hintTag);copyRow.appendChild(kbd);copyRow.appendChild(copyBtn2);
       demo.appendChild(copyRow);
       demo._cleanup=()=>{clearInterval(cycleShortcut);clearInterval(flashCopy);};
 
@@ -4051,7 +4552,7 @@ function renderGuide(){
 
   // ── AI Help section ──
   const aiDiv=document.createElement('div');
-  const hasKeyG=settings.aiProvider==='claude'?!!settings.aiKey:!!settings.gigaKey;
+  const hasKeyG=!!getActiveKey();
   aiDiv.style.cssText=`background:linear-gradient(135deg,rgba(168,85,247,0.08),rgba(99,102,241,0.06));border:1px solid rgba(168,85,247,0.2);border-radius:16px;padding:18px;margin-top:8px;${hasKeyG?'animation:glowPurple 3s ease-in-out infinite':'opacity:0.5'}`;
   const aiHead=el('div',"display:flex;align-items:center;gap:10px;margin-bottom:12px");
   const aiIconG=el('div',"font-size:20px;animation:floatY 3s ease-in-out infinite","✦");
@@ -4085,21 +4586,11 @@ function renderGuide(){
       :`You are a helper ONLY for the SearchCopy app. SearchCopy is a desktop app for quickly finding keyboard shortcuts for Excel, Word, VS Code, Figma, Chrome and other programs. Features: shortcut search, Ask AI tab, Guide tab, API key settings (Claude and GigaChat), Windows/macOS/Linux support. Answer ONLY questions about SearchCopy and its setup. If the question is unrelated — say: "I can only help with SearchCopy setup and usage." Plain text only, max 4 sentences, no JSON or markdown.`;
     try{
       let ans='';
-      if(settings.aiProvider==='claude'){
-        const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',
-          headers:{'Content-Type':'application/json','x-api-key':settings.aiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
-          body:JSON.stringify({model:'claude-haiku-4-5',max_tokens:400,system:sp,messages:[{role:'user',content:q}]})});
-        const d=await r.json();ans=d.content?.[0]?.text||'';
-      } else {
-        const invoke=window.__TAURI__?.core?.invoke||window.__TAURI__?.tauri?.invoke;
-        if(!invoke)throw new Error(ru?'GigaChat только в приложении':'GigaChat is desktop-only');
-        const ak=settings.gigaKey.startsWith('Basic ')?settings.gigaKey.slice(6).trim():settings.gigaKey;
-        ans=await invoke('giga_search',{authKey:ak,systemPrompt:sp,query:q});
-      }
+      ans=await callAI(sp,q,400);
       ans=ans.replace(/```[\s\S]*?```/g,'').replace(/`([^`]+)`/g,'$1').trim();
       guideResult.innerHTML='';
       const box=el('div',"background:var(--card-bg);border:1px solid rgba(168,85,247,0.2);border-radius:12px;padding:14px;animation:fadeUp 0.3s ease");
-      const bBadge=el('div',"font-size:10px;font-weight:800;color:#c084fc;margin-bottom:8px",`✦ ${settings.aiProvider==='giga'?'GigaChat':'Claude'}`);
+      const bBadge=el('div',"font-size:10px;font-weight:800;color:#c084fc;margin-bottom:8px",`✦ ${({claude:'Claude Haiku',giga:'GigaChat',openai:'GPT-4o mini',gemini:'Gemini Flash Lite',groq:'Llama 3.1',deepseek:'DeepSeek',mistral:'Mistral',yandex:'YandexGPT',custom:'Custom AI'}[settings.aiProvider]||settings.aiProvider)}`);
       const bText=el('div',"font-size:12px;color:var(--text);line-height:1.7;white-space:pre-wrap",ans);
       box.appendChild(bBadge);box.appendChild(bText);
       guideResult.appendChild(box);
@@ -4866,8 +5357,8 @@ function render(){
   inputRow.appendChild(inputWrap);
 
   // ── AI button ──
-  const providerLabel=settings.aiProvider==='giga'?'GigaChat':'Claude';
-  const hasKeySearch=settings.aiProvider==='claude'?!!settings.aiKey:!!settings.gigaKey;
+  const providerLabel=({claude:'Claude Haiku',giga:'GigaChat',openai:'GPT-4o mini',gemini:'Gemini Flash Lite',groq:'Llama 3.1',deepseek:'DeepSeek',mistral:'Mistral',yandex:'YandexGPT',custom:'Custom AI'}[settings.aiProvider]||settings.aiProvider);
+  const hasKeySearch=!!getActiveKey();
   const aiBtn=document.createElement('button');
   aiBtn.className='ai-btn'+(state.aiMode?' active':'')+(hasKeySearch?'':' no-key');
   if(!hasKeySearch){aiBtn.title=settings.lang==='ru'?'Нет API ключа — проверь ⚙ Настройки':'No API key — check ⚙ Settings';}

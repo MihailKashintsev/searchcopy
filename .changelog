@@ -1,1 +1,8 @@
-Оптимизация работы приложения
+- Fixed: Android downloads now work via Share API + blob fallback
+- Added: Download success toast with filename animation
+- Added: 9 AI providers: Claude, GigaChat, OpenAI, Gemini, Groq, DeepSeek, Mistral, YandexGPT, Custom
+- Fixed: GigaChat API link now points to correct portal
+- Fixed: All providers correctly detect API key presence
+- Fixed: ru is not defined error in Settings
+- Removed: duplicate Claude key field in Settings
+- Fixed: Export cheatsheet shows both hotkeys and formulas when "All" selected
