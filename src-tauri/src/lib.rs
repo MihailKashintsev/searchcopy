@@ -26,7 +26,7 @@ pub fn run() {
     #[cfg(desktop)]
     {
         builder = builder
-            .plugin(tauri_plugin_global_shortcut::init())
+            .plugin(tauri_plugin_global_shortcut::Builder::new().build())
             .setup(|app| {
                 setup_tray(app)?;
                 register_default_hotkey(app);
@@ -44,8 +44,6 @@ pub fn run() {
 fn setup_tray(app: &mut tauri::App) -> tauri::Result<()> {
     use tauri::menu::{Menu, MenuItem};
     use tauri::tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent};
-    use tauri::Manager;
-
     let show_i   = MenuItem::with_id(app, "show",   "Открыть SearchCopy", true, None::<&str>)?;
     let widget_i = MenuItem::with_id(app, "widget", "🔍 Виджет поиска",   true, None::<&str>)?;
     let quiz_i   = MenuItem::with_id(app, "quiz",   "🎯 Викторина дня",   true, None::<&str>)?;
