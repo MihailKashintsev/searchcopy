@@ -2,81 +2,111 @@ mod giga;
 mod updater;
 use giga::giga_search;
 use updater::download_and_install;
-
-use tauri::{
-    menu::{Menu, MenuItem},
-    tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent},
-    Manager,
-    WebviewUrl, WebviewWindowBuilder,
-};
+use tauri::Manager;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-    tauri::Builder::default()
+    let mut builder = tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_updater::Builder::new().build())
         .plugin(tauri_plugin_process::init())
         .plugin(tauri_plugin_shell::init())
         .plugin(tauri_plugin_http::init())
-        .plugin(tauri_plugin_global_shortcut::Builder::new().build())
-        .setup(|app| {
-            #[cfg(not(target_os = "android"))]
-            {
-                setup_tray(app)?;
-                if let Err(e) = register_hotkey(app, "Ctrl+Shift+Space") { eprintln!("[hotkey] {}", e); }
-            }
-            Ok(())
-        })
         .invoke_handler(tauri::generate_handler![
-            greet, get_version, giga_search, download_and_install,
-            toggle_widget, hide_widget, show_main_window, set_widget_always_on_top,
+            greet,
+            get_version,
+            giga_search,
+            download_and_install,
+            toggle_widget,
+            hide_widget,
+            show_main_window,
+            set_widget_always_on_top,
             register_widget_hotkey,
-        ])
+        ]);
+
+    // Desktop-only plugins
+    #[cfg(desktop)]
+    {
+        builder = builder
+            .plugin(tauri_plugin_global_shortcut::init())
+            .setup(|app| {
+                setup_tray(app)?;
+                register_default_hotkey(app);
+                Ok(())
+            });
+    }
+
+    #[cfg(mobile)]
+    {
+        builder = builder.setup(|_app| Ok(()));
+    }
+
+    builder
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
 
-#[cfg(not(target_os = "android"))]
-fn register_hotkey(app: &tauri::App, hotkey: &str) -> Result<(), Box<dyn std::error::Error>> {
+// ── Tray + hotkey setup (desktop only) ──
+
+#[cfg(desktop)]
+fn register_default_hotkey(app: &tauri::App) {
     use tauri_plugin_global_shortcut::{GlobalShortcutExt, ShortcutState};
-
-    let app_handle = app.handle().clone();
-    let shortcut_str = hotkey.to_string();
-
-    app.global_shortcut().on_shortcut(shortcut_str.as_str(), move |_app, _shortcut, event| {
+    let handle = app.handle().clone();
+    let _ = app.global_shortcut().on_shortcut("Ctrl+Shift+Space", move |_app, _sc, event| {
         if event.state() == ShortcutState::Pressed {
-            let handle = app_handle.clone();
-            tauri::async_runtime::spawn(async move {
-                let _ = toggle_widget(handle).await;
-            });
+            let h = handle.clone();
+            tauri::async_runtime::spawn(async move { let _ = toggle_widget(h).await; });
         }
-    })?;
-
-    Ok(())
+    });
 }
 
-#[tauri::command]
-async fn register_widget_hotkey(app: tauri::AppHandle, hotkey: String) -> Result<(), String> {
-    #[cfg(not(target_os = "android"))]
-    {
-        use tauri_plugin_global_shortcut::GlobalShortcutExt;
-        // Unregister all existing shortcuts first
-        app.global_shortcut().unregister_all()
-            .map_err(|e| e.to_string())?;
-        // Register new one
-        let handle = app.clone();
-        app.global_shortcut().on_shortcut(hotkey.as_str(), move |_app, _shortcut, event| {
-            use tauri_plugin_global_shortcut::ShortcutState;
-            if event.state() == ShortcutState::Pressed {
-                let h = handle.clone();
-                tauri::async_runtime::spawn(async move {
-                    let _ = toggle_widget(h).await;
-                });
+#[cfg(desktop)]
+fn setup_tray(app: &mut tauri::App) -> tauri::Result<()> {
+    use tauri::menu::{Menu, MenuItem};
+    use tauri::tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent};
+
+    let show_i   = MenuItem::with_id(app, "show",   "Открыть SearchCopy", true, None::<&str>)?;
+    let widget_i = MenuItem::with_id(app, "widget", "🔍 Виджет поиска",   true, None::<&str>)?;
+    let quiz_i   = MenuItem::with_id(app, "quiz",   "🎯 Викторина дня",   true, None::<&str>)?;
+    let sep      = tauri::menu::PredefinedMenuItem::separator(app)?;
+    let quit_i   = MenuItem::with_id(app, "quit",   "Выход",              true, None::<&str>)?;
+    let menu     = Menu::with_items(app, &[&show_i, &widget_i, &quiz_i, &sep, &quit_i])?;
+
+    TrayIconBuilder::new()
+        .icon(app.default_window_icon().unwrap().clone())
+        .menu(&menu)
+        .tooltip("SearchCopy — горячие клавиши и формулы")
+        .show_menu_on_left_click(false)
+        .on_menu_event(|app, event| match event.id.as_ref() {
+            "show" => {
+                if let Some(w) = app.get_webview_window("main") {
+                    let _ = w.show(); let _ = w.set_focus();
+                }
             }
-        }).map_err(|e| e.to_string())?;
-    }
+            "widget" => {
+                let h = app.clone();
+                tauri::async_runtime::spawn(async move { let _ = toggle_widget(h).await; });
+            }
+            "quiz" => {
+                if let Some(w) = app.get_webview_window("main") {
+                    let _ = w.eval("currentTab='trainer';render();");
+                    let _ = w.show(); let _ = w.set_focus();
+                }
+            }
+            "quit" => app.exit(0),
+            _ => {}
+        })
+        .on_tray_icon_event(|tray, event| {
+            if let TrayIconEvent::Click { button: MouseButton::Left, button_state: MouseButtonState::Up, .. } = event {
+                let h = tray.app_handle().clone();
+                tauri::async_runtime::spawn(async move { let _ = toggle_widget(h).await; });
+            }
+        })
+        .build(app)?;
     Ok(())
 }
+
+// ── Commands ──
 
 #[tauri::command]
 async fn toggle_widget(app: tauri::AppHandle) -> Result<(), String> {
@@ -87,19 +117,7 @@ async fn toggle_widget(app: tauri::AppHandle) -> Result<(), String> {
             let _ = w.show();
             let _ = w.set_focus();
         }
-        return Ok(());
     }
-    WebviewWindowBuilder::new(&app, "widget", WebviewUrl::App("widget.html".into()))
-        .title("SearchCopy")
-        .inner_size(320.0, 520.0)
-        .min_inner_size(200.0, 120.0)
-        .max_inner_size(500.0, 900.0)
-        .resizable(true)
-        .always_on_top(true)
-        .skip_taskbar(true)
-        .shadow(true)
-        .build()
-        .map_err(|e: tauri::Error| e.to_string())?;
     Ok(())
 }
 
@@ -112,60 +130,36 @@ async fn hide_widget(app: tauri::AppHandle) -> Result<(), String> {
 #[tauri::command]
 async fn show_main_window(app: tauri::AppHandle) -> Result<(), String> {
     if let Some(w) = app.get_webview_window("main") {
-        let _ = w.show(); let _ = w.set_focus(); let _ = w.unminimize();
+        let _ = w.show(); let _ = w.set_focus();
     }
     Ok(())
 }
 
 #[tauri::command]
 async fn set_widget_always_on_top(app: tauri::AppHandle, value: bool) -> Result<(), String> {
-    if let Some(w) = app.get_webview_window("widget") { let _ = w.set_always_on_top(value); }
+    #[cfg(desktop)]
+    if let Some(w) = app.get_webview_window("widget") {
+        let _ = w.set_always_on_top(value);
+    }
     Ok(())
 }
 
-#[cfg(not(target_os = "android"))]
-fn setup_tray(app: &mut tauri::App) -> tauri::Result<()> {
-    let show_i   = MenuItem::with_id(app, "show",   "Открыть SearchCopy",  true, None::<&str>)?;
-    let widget_i = MenuItem::with_id(app, "widget", "🔍 Виджет поиска",    true, None::<&str>)?;
-    let quiz_i   = MenuItem::with_id(app, "quiz",   "🎯 Викторина дня",    true, None::<&str>)?;
-    let sep      = tauri::menu::PredefinedMenuItem::separator(app)?;
-    let quit_i   = MenuItem::with_id(app, "quit",   "Выход",               true, None::<&str>)?;
-    let menu = Menu::with_items(app, &[&show_i, &widget_i, &quiz_i, &sep, &quit_i])?;
-
-    let _tray = TrayIconBuilder::new()
-        .icon(app.default_window_icon().unwrap().clone())
-        .menu(&menu)
-        .tooltip("SearchCopy — горячие клавиши и формулы")
-        .show_menu_on_left_click(false)
-        .on_menu_event(|app, event| match event.id.as_ref() {
-            "show" => {
-                if let Some(w) = app.get_webview_window("main") {
-                    let _ = w.show(); let _ = w.set_focus(); let _ = w.unminimize();
+#[tauri::command]
+async fn register_widget_hotkey(app: tauri::AppHandle, hotkey: String) -> Result<(), String> {
+    #[cfg(desktop)]
+    {
+        use tauri_plugin_global_shortcut::{GlobalShortcutExt, ShortcutState};
+        let _ = app.global_shortcut().unregister_all();
+        let h = app.clone();
+        app.global_shortcut()
+            .on_shortcut(hotkey.as_str(), move |_app, _sc, event| {
+                if event.state() == ShortcutState::Pressed {
+                    let handle = h.clone();
+                    tauri::async_runtime::spawn(async move { let _ = toggle_widget(handle).await; });
                 }
-            }
-            "widget" => {
-                let app2 = app.clone();
-                tauri::async_runtime::spawn(async move { let _ = toggle_widget(app2).await; });
-            }
-            "quiz" => {
-                if let Some(w) = app.get_webview_window("main") {
-                    let _ = w.eval("currentTab='trainer';render();");
-                    let _ = w.show(); let _ = w.set_focus(); let _ = w.unminimize();
-                }
-            }
-            "quit" => { app.exit(0); }
-            _ => {}
-        })
-        .on_tray_icon_event(|tray, event| {
-            if let TrayIconEvent::Click {
-                button: MouseButton::Left,
-                button_state: MouseButtonState::Up, ..
-            } = event {
-                let app = tray.app_handle().clone();
-                tauri::async_runtime::spawn(async move { let _ = toggle_widget(app).await; });
-            }
-        })
-        .build(app)?;
+            })
+            .map_err(|e| e.to_string())?;
+    }
     Ok(())
 }
 
