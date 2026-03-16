@@ -1,0 +1,10 @@
+- Added: Floating search widget (always-on-top window)
+- Added: Global hotkey Ctrl+Shift+Space to summon widget from any app
+- Added: Mini/Ultra/Nano adaptive modes in widget by window size
+- Added: Quiz notifications with permission toggle in Settings
+- Added: Widget hotkey customization in Settings
+- Added: 3 new guide steps: Widget, Hotkey, Notifications
+- Added: System tray with widget toggle and quiz shortcut
+- Fixed: Light theme text visibility (buttons, toggles, segments)
+- Fixed: Notifications section now visible in Settings
+- Fixed: Widget search results (settings alias bug)

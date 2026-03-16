@@ -1,0 +1,1777 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SearchCopy</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#0c0d16;--bg2:#111220;--bg3:rgba(255,255,255,0.04);
+  --border:rgba(255,255,255,0.08);--border2:rgba(255,255,255,0.13);
+  --accent:#818cf8;--accent2:#a855f7;--green:#34d399;--orange:#f97316;--red:#f87171;
+  --text:#e2e8f0;--text2:#94a3b8;--text3:#475569;
+  --mono:'JetBrains Mono',monospace;
+  --sans:'Inter',system-ui,sans-serif;
+  --r:12px;
+}
+html,body{width:100%;height:100%;min-height:100vh;background:var(--bg);color:var(--text);
+  font-family:var(--sans);font-size:13px;overflow:hidden;-webkit-user-select:none;user-select:none;}
+
+/* ── Drag bar ── */
+#bar{height:32px;background:rgba(255,255,255,0.025);border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:flex-end;padding:0 8px;
+  flex-shrink:0;}
+
+.bar-actions{display:flex;gap:3px;-webkit-app-region:no-drag;}
+.bar-btn{width:24px;height:24px;border-radius:7px;border:1px solid var(--border);
+  background:transparent;color:var(--text3);cursor:pointer;font-size:13px;
+  display:flex;align-items:center;justify-content:center;transition:all 0.15s;
+  font-family:var(--sans);padding:0;line-height:1;}
+.bar-btn:hover{background:rgba(255,255,255,0.07);color:var(--text);}
+.bar-btn.active{border-color:var(--accent)44;background:rgba(129,140,248,0.12);color:var(--accent);}
+
+/* ── Search ── */
+#search-box{padding:10px 10px 6px;flex-shrink:0;}
+.sq-wrap{position:relative;display:flex;align-items:center;gap:6px;}
+.sq-icon{position:absolute;left:10px;color:var(--text3);font-size:13px;pointer-events:none;
+  transition:color 0.2s;}
+#q{width:100%;background:rgba(255,255,255,0.06);border:1.5px solid var(--border);
+  border-radius:10px;padding:9px 60px 9px 32px;font-size:clamp(11px,3.5vw,13px);font-family:var(--sans);
+  color:var(--text);outline:none;transition:all 0.2s;}
+#q::placeholder{color:var(--text3);}
+#q:focus{border-color:rgba(129,140,248,0.5);background:rgba(255,255,255,0.08);}
+#q:focus ~ .sq-shortcuts .sq-icon{color:var(--accent);}
+.sq-shortcuts{position:absolute;right:8px;display:flex;align-items:center;gap:4px;}
+.sq-kbd{font-size:9px;font-weight:700;color:var(--text3);background:rgba(255,255,255,0.06);
+  border:1px solid var(--border);border-radius:4px;padding:1px 4px;font-family:var(--mono);
+  cursor:pointer;transition:all 0.15s;letter-spacing:0;}
+.sq-kbd:hover{background:rgba(255,255,255,0.1);color:var(--text2);}
+.sq-kbd.ai-active{color:var(--accent);border-color:var(--accent)44;background:rgba(129,140,248,0.12);}
+
+/* ── Mode tabs ── */
+#mode-tabs{display:flex;gap:4px;padding:0 10px 6px;flex-shrink:0;}
+.mode-tab{flex:1;padding:4px 0;border-radius:8px;border:1px solid var(--border);
+  background:transparent;color:var(--text3);font-size:10px;font-weight:700;
+  font-family:var(--sans);cursor:pointer;transition:all 0.15s;text-align:center;}
+.mode-tab.active{background:rgba(129,140,248,0.12);border-color:var(--accent)55;color:var(--accent);}
+.mode-tab:hover:not(.active){background:rgba(255,255,255,0.04);color:var(--text2);}
+
+/* ── Program pills ── */
+#pills{display:flex;gap:4px;padding:0 10px 6px;overflow-x:auto;flex-shrink:0;scrollbar-width:none;}
+#pills::-webkit-scrollbar{display:none;}
+.pill{display:flex;align-items:center;gap:3px;padding:3px 8px;border-radius:20px;
+  border:1px solid var(--border);background:transparent;color:var(--text3);
+  font-size:10px;font-weight:700;font-family:var(--sans);cursor:pointer;
+  white-space:nowrap;transition:all 0.15s;flex-shrink:0;}
+.pill:hover:not(.active){border-color:rgba(255,255,255,0.2);color:var(--text2);}
+
+/* ── Results ── */
+#results{flex:1;overflow-y:auto;padding:0 8px 6px;
+  scrollbar-width:thin;scrollbar-color:rgba(255,255,255,0.1) transparent;}
+#results::-webkit-scrollbar{width:3px;}
+#results::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.1);border-radius:2px;}
+
+/* ── Card ── */
+.card{border-radius:10px;border:1px solid var(--border);background:var(--bg3);
+  margin-bottom:5px;cursor:pointer;transition:all 0.15s;position:relative;overflow:hidden;}
+.card:hover{background:rgba(255,255,255,0.06);border-color:var(--border2);}
+.card:active{transform:scale(0.98);}
+.card-inner{padding:8px 10px;}
+
+/* Left accent stripe */
+.card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:2.5px;border-radius:10px 0 0 10px;background:var(--card-color,#818cf8);}
+
+/* Card header row */
+.card-head{display:flex;align-items:center;gap:6px;margin-bottom:5px;}
+.card-app-badge{display:flex;align-items:center;gap:4px;font-size:9px;font-weight:800;
+  letter-spacing:0.4px;text-transform:uppercase;padding:2px 6px;border-radius:5px;}
+.card-type{font-size:9px;font-weight:700;padding:1px 5px;border-radius:4px;margin-left:auto;}
+.type-formula{background:rgba(52,211,153,0.12);color:var(--green);}
+.type-hotkey{background:rgba(129,140,248,0.12);color:var(--accent);}
+
+/* Key display */
+.card-key{font-family:var(--mono);font-size:clamp(11px,3.5vw,13px);font-weight:700;
+  line-height:1.3;margin-bottom:4px;display:flex;align-items:flex-start;gap:6px;flex-wrap:wrap;}
+.key-chip{display:inline-block;background:rgba(255,255,255,0.06);border:1px solid var(--border);
+  border-radius:5px;padding:1px 6px;font-size:11px;white-space:nowrap;}
+.formula-text{color:var(--green);}
+
+/* Description */
+.card-desc{font-size:clamp(10px,3vw,11.5px);color:var(--text2);line-height:1.45;margin-bottom:4px;}
+
+/* Template (for formulas) */
+.card-template{font-family:var(--mono);font-size:10px;color:var(--text3);
+  background:rgba(52,211,153,0.06);border:1px solid rgba(52,211,153,0.12);
+  border-radius:6px;padding:3px 7px;margin-bottom:4px;display:none;}
+/* template shown via JS hover */
+
+/* Tags */
+.card-tags{display:flex;flex-wrap:wrap;gap:3px;margin-top:3px;}
+.tag{font-size:9px;color:var(--text3);background:rgba(255,255,255,0.04);
+  border:1px solid rgba(255,255,255,0.06);border-radius:4px;padding:1px 5px;}
+
+/* Actions row */
+.card-actions{display:flex;gap:4px;margin-top:6px;align-items:center;}
+.act-btn{font-size:10px;font-weight:700;font-family:var(--sans);padding:3px 9px;
+  border-radius:6px;border:1px solid var(--border);background:transparent;
+  color:var(--text3);cursor:pointer;transition:all 0.15s;white-space:nowrap;}
+.act-btn:hover{background:rgba(255,255,255,0.07);color:var(--text);}
+.act-btn.primary{border-color:var(--accent)44;background:rgba(129,140,248,0.1);color:var(--accent);}
+.act-btn.primary:hover{background:rgba(129,140,248,0.18);}
+.act-btn.green{border-color:rgba(52,211,153,0.35);background:rgba(52,211,153,0.08);color:var(--green);}
+.act-btn.green:hover{background:rgba(52,211,153,0.15);}
+
+/* Copy flash overlay */
+.copy-flash{position:absolute;inset:0;border-radius:10px;
+  background:rgba(52,211,153,0.1);border:1px solid rgba(52,211,153,0.35);
+  display:flex;align-items:center;justify-content:center;
+  font-size:11px;font-weight:800;color:var(--green);pointer-events:none;
+  opacity:0;transition:opacity 0.12s;}
+.card.flash .copy-flash{opacity:1;}
+
+/* ── AI result card ── */
+.ai-card{border-radius:10px;border:1px solid rgba(129,140,248,0.25);
+  background:linear-gradient(135deg,rgba(129,140,248,0.06),rgba(168,85,247,0.04));
+  padding:10px;margin-bottom:5px;}
+.ai-card-head{font-size:10px;font-weight:800;color:var(--accent);margin-bottom:6px;
+  display:flex;align-items:center;gap:5px;}
+.ai-card-body{font-size:12px;color:var(--text2);line-height:1.6;}
+.ai-loading{display:flex;align-items:center;gap:8px;color:var(--text3);font-size:11px;padding:8px 0;}
+.ai-dot{width:5px;height:5px;border-radius:50%;background:var(--accent);
+  animation:pulse 1.2s ease-in-out infinite;}
+.ai-dot:nth-child(2){animation-delay:0.2s;}
+.ai-dot:nth-child(3){animation-delay:0.4s;}
+@keyframes pulse{0%,100%{opacity:0.3;transform:scale(0.8);}50%{opacity:1;transform:scale(1.2);}}
+
+/* ── Empty state ── */
+.empty{text-align:center;padding:20px 12px;color:var(--text3);}
+.empty-icon{font-size:26px;margin-bottom:8px;display:block;}
+.empty-t{font-size:12px;font-weight:700;color:var(--text2);margin-bottom:3px;}
+.empty-h{font-size:11px;}
+
+/* ── Footer ── */
+#footer{display:flex;align-items:center;justify-content:space-between;padding:5px 10px;
+  border-top:1px solid var(--border);flex-shrink:0;}
+.ft-stat{font-size:10px;color:var(--text3);font-weight:600;}
+.ft-open{font-size:10px;font-weight:700;color:var(--accent);cursor:pointer;
+  border:1px solid rgba(129,140,248,0.3);border-radius:6px;padding:2px 8px;
+  background:transparent;font-family:var(--sans);transition:all 0.15s;}
+.ft-open:hover{background:rgba(129,140,248,0.12);}
+
+/* ── App layout ── */
+#app{display:flex;flex-direction:column;height:100vh;}
+
+/* ── Glow bg ── */
+body::before{content:'';position:fixed;top:-80px;left:-80px;width:240px;height:240px;
+  background:radial-gradient(circle,rgba(129,140,248,0.07) 0%,transparent 70%);pointer-events:none;}
+body::after{content:'';position:fixed;bottom:-60px;right:-60px;width:200px;height:200px;
+  background:radial-gradient(circle,rgba(168,85,247,0.05) 0%,transparent 70%);pointer-events:none;}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(5px);}to{opacity:1;transform:translateY(0);}}
+.card,.ai-card{animation:fadeUp 0.18s ease both;}
+
+/* ── Scrollbar visible state ── */
+#results:hover::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.15);}
+
+/* ════ RESPONSIVE ════ */
+
+/* Narrow window (<260px) — icon-only pills, no tags, compact cards */
+@container style(--narrow: 1) { }
+
+/* Use vw-based breakpoints */
+@media (max-width:260px){
+  #pills .pill span:last-child{display:none;}       /* hide pill labels */
+  .pill{padding:3px 5px;gap:0;}
+  .card-inner{padding:5px 7px;}
+  .card-key{font-size:11px;}
+  .card-desc{display:none;}                          /* hide desc, key is enough */
+  .card-tags{display:none;}
+  .card-actions{display:none;}
+  .ft-open{display:none;}
+  #search-box{padding:6px 6px 4px;}
+  #pills{padding:0 6px 4px;}
+  #results{padding:0 4px 4px;}
+}
+
+@media (max-width:300px){
+  .card-tags{display:none;}
+  .act-btn:not(.primary):not(.green){display:none;} /* hide secondary btns */
+  .card-inner{padding:6px 8px;}
+  .card-key{font-size:11px;}
+  #q{padding:7px 44px 7px 28px;font-size:12px;}
+  .sq-icon{font-size:12px;}
+  .ft-open{font-size:9px;padding:2px 6px;}
+}
+
+@media (max-width:340px){
+  .card-desc{font-size:10.5px;}
+  .tag{font-size:8px;padding:1px 4px;}
+  #q{font-size:12px;}
+  .act-btn{font-size:9px;padding:2px 7px;}
+}
+
+/* Compact height */
+@media (max-height:380px){
+  #bar{height:26px;}
+  #search-box{padding:6px 8px 4px;}
+  #pills{padding:0 8px 4px;}
+  .card-inner{padding:5px 8px;}
+  .card-tags{display:none;}
+  .card-actions{margin-top:4px;}
+  .act-btn{padding:2px 7px;}
+  #footer{padding:3px 8px;}
+  .empty{padding:10px 12px;}
+  .empty-icon{font-size:20px;margin-bottom:4px;}
+}
+
+@media (max-height:300px){
+  #pills{display:none;}
+  .card-tags{display:none;}
+  .card-actions{display:none;}
+  #bar{height:24px;}
+  #footer{padding:2px 8px;}
+}
+
+/* Width-adaptive pills: when narrow, pills wrap into 2 rows */
+@media (max-width:300px){
+  #pills{flex-wrap:wrap;max-height:52px;overflow:hidden;}
+}
+
+/* ════ MINI MODE ════ */
+body.mini #pills{display:none;}
+body.mini #footer{display:none;}
+body.mini .card-tags{display:none;}
+body.mini .card-actions{display:none;}
+body.mini .card-desc{display:none;}
+body.mini .card-head{margin-bottom:2px;}
+body.mini .card-inner{padding:5px 8px;}
+body.mini .card{margin-bottom:3px;border-radius:8px;}
+body.mini .card-key{font-size:12px;margin-bottom:0;}
+body.mini #search-box{padding:6px 8px 4px;}
+body.mini #bar{height:28px;}
+body.mini #results{padding:0 6px 4px;}
+body.mini #app{min-height:80px;}
+
+/* Only show top 3 results in mini mode */
+body.mini .card:nth-child(n+4){display:none;}
+
+/* Mini mode indicator on search */
+body.mini #q{border-color:rgba(129,140,248,0.4);background:rgba(129,140,248,0.06);}
+body.mini #mini-btn{color:var(--accent);border-color:var(--accent)44;background:rgba(129,140,248,0.12);}
+
+/* ── ULTRA-MINI: window height < 200px ── */
+body.ultra #pills{display:none;}
+body.ultra #footer{display:none;}
+body.ultra #bar{height:24px;}
+body.ultra #search-box{padding:4px 6px 3px;}
+body.ultra #results{padding:0 4px 3px;}
+body.ultra .card-tags{display:none;}
+body.ultra .card-actions{display:none;}
+body.ultra .card-desc{display:none;}
+body.ultra .card-head{margin-bottom:1px;}
+body.ultra .card-inner{padding:3px 7px;}
+body.ultra .card{margin-bottom:2px;border-radius:6px;}
+body.ultra .card-key{font-size:11px;margin-bottom:0;}
+body.ultra .card:nth-child(n+4){display:none;}
+body.ultra #q{padding:5px 36px 5px 26px;font-size:11px;border-radius:7px;}
+body.ultra .sq-icon{font-size:11px;}
+body.ultra .bar-btn{width:20px;height:20px;font-size:11px;}
+body.ultra .bar-actions{gap:2px;}
+
+/* ── NANO: window height < 120px — just search bar ── */
+body.nano #pills{display:none;}
+body.nano #footer{display:none;}
+body.nano #bar{height:20px;}
+body.nano #results{display:none;}
+body.nano #search-box{padding:3px 5px;}
+body.nano #q{padding:4px 28px 4px 24px;font-size:11px;border-radius:6px;}
+body.nano .bar-btn{width:18px;height:18px;font-size:10px;}
+body.nano .bar-actions{gap:2px;}
+body.nano .sq-icon{font-size:10px;left:7px;}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- Compact toolbar under native titlebar -->
+  <div id="bar">
+    <div class="bar-actions">
+      <button class="bar-btn" id="ai-toggle-btn" title="AI поиск">✦ AI</button>
+      <button class="bar-btn active" id="pin-btn" title="Поверх окон">📌</button>
+      <button class="bar-btn" id="mini-btn" title="Мини режим">⊡</button>
+      <button class="bar-btn" id="main-btn" title="Открыть SearchCopy">↗</button>
+    </div>
+  </div>
+
+  <!-- Search -->
+  <div id="search-box">
+    <div class="sq-wrap">
+      <span class="sq-icon">🔍</span>
+      <input id="q" type="text" placeholder="Что хочешь сделать?" autocomplete="off" autofocus spellcheck="false">
+      <div class="sq-shortcuts">
+        <span class="sq-kbd" id="clear-btn" title="Очистить">✕</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Program pills -->
+  <div id="pills"></div>
+
+  <!-- Results -->
+  <div id="results"></div>
+
+  <!-- Footer -->
+  <div id="footer">
+    <span class="ft-stat" id="ft-stat"></span>
+    <button class="ft-open" id="ft-open">Открыть SearchCopy ↗</button>
+  </div>
+
+</div>
+
+<script>
+// ═══ INJECTED ENGINE ═══
+
+const DB={
+  Excel:[
+    // ── Формулы ──
+    {id:1,keys:"SUM",type:"formula",template:"=SUM({col}:{col})",example:"=SUM(A:A)",
+      desc:{ru:"Сумма столбца",en:"Sum of column"},
+      tags:{ru:["сумма","посчитать","столбец","итого","сложить","суммировать","сумм","=сумм","диапазон суммирования","сложить столбец","сложить числа"],en:["sum","total","column","add","=sum","range"]}},
+    {id:2,keys:"AVERAGE",type:"formula",template:"=AVERAGE({col}:{col})",example:"=AVERAGE(A:A)",
+      desc:{ru:"Среднее значение",en:"Average"},
+      tags:{ru:["среднее","средний","avg","=срзнач","среднее значение","средняя","среднее арифметическое","среднее по столбцу"],en:["average","mean","avg","=average","arithmetic mean"]}},
+    {id:3,keys:"VLOOKUP / ВПР",type:"formula",template:"=VLOOKUP({col}2,B:C,2,0)",example:"=VLOOKUP(A2,B:C,2,0)",
+      desc:{ru:"Поиск в таблице (ВПР)",en:"Table lookup (VLOOKUP)"},
+      tags:{ru:["впр","найти","поиск","подтянуть","справочник","подтянуть данные","искомое значение","место поиска","номер столбца","точное совпадение","истина","ложь","диапазон","возврат","впр формула","поиск по таблице","найти значение в таблице","вертикальный поиск"],en:["vlookup","find","lookup","reference","search value","lookup range","column index","exact match","true","false"]}},
+    {id:4,keys:"IF / ЕСЛИ",type:"formula",template:'=IF({col}1>0,"Да","Нет")',example:'=IF(A1>0,"Yes","No")',
+      desc:{ru:"Логическое условие",en:"Logical condition"},
+      tags:{ru:["если","условие","логика","ветвление","=если","истина","ложь","значение если истина","значение если ложь","проверка условия","если больше","если равно"],en:["if","condition","logic","true","false","value if true","value if false"]}},
+    {id:5,keys:"COUNTIF / СЧЁТЕСЛИ",type:"formula",template:'=COUNTIF({col}:{col},"условие")',example:'=COUNTIF(A:A,"да")',
+      desc:{ru:"Подсчёт по условию",en:"Count by condition"},
+      tags:{ru:["посчитать","количество","счётесли","сколько","count","=счётесли","диапазон","критерий","условие подсчёта","сколько ячеек","подсчёт по условию"],en:["count","countif","how many","range","criteria"]}},
+    {id:6,keys:"SUMIF / СУММЕСЛИ",type:"formula",template:'=SUMIF({col}:{col},"условие",B:B)',example:'=SUMIF(A:A,"да",B:B)',
+      desc:{ru:"Сумма по условию",en:"Sum by condition"},
+      tags:{ru:["сумма с условием","суммесли","=суммесли","диапазон условия","критерий","диапазон суммирования","сложить если","суммировать по условию"],en:["sum if","sumif","range","criteria","sum range"]}},
+    {id:7,keys:"INDEX+MATCH",type:"formula",template:"=INDEX(B:B,MATCH({col}2,A:A,0))",example:"=INDEX(B:B,MATCH(A2,A:A,0))",
+      desc:{ru:"Гибкий поиск (лучше ВПР)",en:"Flexible lookup (better than VLOOKUP)"},
+      tags:{ru:["гибкий поиск","индекс поискпоз","match","=индекс","=поискпоз","массив","номер строки","лучше впр","двумерный поиск","поиск по строке и столбцу"],en:["index match","flexible lookup","array","row number","better than vlookup"]}},
+    {id:8,keys:"IFERROR / ЕСЛИОШИБКА",type:"formula",template:'=IFERROR({col}1,"—")',example:'=IFERROR(A1,"—")',
+      desc:{ru:"Скрыть ошибку",en:"Hide error"},
+      tags:{ru:["ошибка","скрыть ошибку","еслиошибка","=еслиошибка","обработка ошибок","если ошибка","н/д","знач","дел0","скрыть нд"],en:["error","hide error","iferror","handle error","n/a","#value","#div0"]}},
+    {id:9,keys:"CONCATENATE / СЦЕПИТЬ",type:"formula",template:'={col}1&" "&{col}2',example:'=A1&" "&B1',
+      desc:{ru:"Склеить ячейки",en:"Merge cells text"},
+      tags:{ru:["объединить","склеить","сцепить","соединить","concat"],en:["merge","join","concatenate","combine"]}},
+    {id:10,keys:"TODAY / СЕГОДНЯ",type:"formula",template:"=TODAY()",example:"=TODAY()",
+      desc:{ru:"Сегодняшняя дата",en:"Today's date"},
+      tags:{ru:["дата","сегодня","текущая дата"],en:["date","today","current date"]}},
+    {id:11,keys:"ROUND / ОКРУГЛ",type:"formula",template:"=ROUND({col}1,2)",example:"=ROUND(A1,2)",
+      desc:{ru:"Округлить число",en:"Round number"},
+      tags:{ru:["округлить","округление","round"],en:["round","rounding"]}},
+    {id:12,keys:"TRIM / СЖПРОБЕЛЫ",type:"formula",template:"=TRIM({col}1)",example:"=TRIM(A1)",
+      desc:{ru:"Убрать лишние пробелы",en:"Remove extra spaces"},
+      tags:{ru:["пробелы","убрать пробелы","сжпробелы"],en:["trim","spaces","clean"]}},
+    {id:13,keys:"SUBTOTAL / ПРОМЕЖУТОЧНЫЕ.ИТОГИ",type:"formula",complex:true,template:"=SUBTOTAL(9,{col}:{col})",example:"=SUBTOTAL(9,B:B)",
+      desc:{ru:"Сумма с учётом фильтра",en:"Sum respecting filter"},
+      tags:{ru:["сумма фильтр","видимые строки","промежуточные"],en:["subtotal","filtered sum"]}},
+    {id:14,keys:"VLOOKUP внешний файл",type:"formula",complex:true,
+      template:"=VLOOKUP({col}2,'[Файл.xlsx]Лист'!$A$1:$Z$999,2,0)",
+      example:"=VLOOKUP(D22,'[База.xlsx]Лист1'!$A$1:$Z$999,2,0)",
+      desc:{ru:"ВПР из другого файла",en:"VLOOKUP from external file"},
+      tags:{ru:["впр другой файл","внешний файл"],en:["vlookup external","cross-file"]}},
+    {id:15,keys:"CONCATENATE несколько",type:"formula",complex:true,
+      template:'=CONCATENATE({col}3,{col}4," ",{col}5)',example:'=CONCATENATE(G3,H3," ",I3)',
+      desc:{ru:"Склеить несколько ячеек",en:"Combine multiple cells"},
+      tags:{ru:["сцепить несколько","собрать строку"],en:["concatenate cells","combine multiple"]}},
+    {id:16,keys:"MAX / MIN",type:"formula",template:"=MAX({col}:{col})",example:"=MAX(A:A)",
+      desc:{ru:"Максимум / минимум в диапазоне",en:"Max / min in range"},
+      tags:{ru:["максимум","минимум","наибольший","наименьший"],en:["max","min","maximum","minimum"]}},
+    {id:17,keys:"LEN / ДЛСТР",type:"formula",template:"=LEN({col}1)",example:"=LEN(A1)",
+      desc:{ru:"Длина текста в ячейке",en:"Text length in cell"},
+      tags:{ru:["длина","символов","длстр"],en:["length","len","characters"]}},
+    {id:18,keys:"LEFT/RIGHT/MID",type:"formula",template:'=LEFT({col}1,3)',example:'=LEFT(A1,3)',
+      desc:{ru:"Извлечь часть текста",en:"Extract text part"},
+      tags:{ru:["часть текста","левый","правый","mid","substr"],en:["left","right","mid","extract"]}},
+    {id:19,keys:"DATE / ДАТА",type:"formula",template:"=DATE(год,месяц,день)",example:"=DATE(2024,1,15)",
+      desc:{ru:"Создать дату из частей",en:"Create date from parts"},
+      tags:{ru:["дата из частей","создать дату"],en:["date","make date"]}},
+    {id:191,keys:"TEXT / ТЕКСТ",type:"formula",template:'=TEXT({col}1,"ДД.ММ.ГГГГ")',example:'=TEXT(A1,"DD.MM.YYYY")',
+      desc:{ru:"Форматировать число/дату как текст",en:"Format number/date as text"},
+      tags:{ru:["форматировать","текст","дата формат"],en:["text","format","date format"]}},
+    {id:192,keys:"SUMPRODUCT",type:"formula",template:"=SUMPRODUCT(({col}:{col}=\"кр\")*B:B)",example:"=SUMPRODUCT((A:A=\"да\")*B:B)",
+      desc:{ru:"Сумма с множественным условием",en:"Sum with multiple conditions"},
+      tags:{ru:["сумма несколько условий","суммпроизв"],en:["sumproduct","multiple conditions"]}},
+    {id:193,keys:"UNIQUE (365)",type:"formula",template:"=UNIQUE({col}:{col})",example:"=UNIQUE(A:A)",
+      desc:{ru:"Уникальные значения (Excel 365)",en:"Unique values (Excel 365)"},
+      tags:{ru:["уникальные","дубли","уникальные значения"],en:["unique","duplicates"]}},
+    {id:194,keys:"XLOOKUP",type:"formula",template:"=XLOOKUP({col}2,A:A,B:B)",example:"=XLOOKUP(D2,A:A,B:B)",
+      desc:{ru:"Поиск (новая версия ВПР)",en:"Lookup (next-gen VLOOKUP)"},
+      tags:{ru:["поиск","xlookup","новый впр"],en:["xlookup","lookup","search"]}},
+    // ── Горячие клавиши ──
+    {id:20,keys:{win:"Alt + =",mac:"⌘ + Shift + T",linux:"Alt + ="},type:"hotkey",
+      desc:{ru:"Автосумма",en:"AutoSum"},
+      tags:{ru:["автосумма","быстрая сумма"],en:["autosum","quick sum"]}},
+    {id:21,keys:"Ctrl + Shift + L",type:"hotkey",
+      desc:{ru:"Фильтр вкл/выкл",en:"Toggle filter"},
+      tags:{ru:["фильтр","включить фильтр"],en:["filter","toggle"]}},
+    {id:22,keys:"Ctrl + T",type:"hotkey",
+      desc:{ru:"Умная таблица",en:"Create table"},
+      tags:{ru:["таблица","умная таблица","table"],en:["table","smart table"]}},
+    {id:23,keys:"F4",type:"hotkey",
+      desc:{ru:"Абсолютная ссылка $A$1",en:"Absolute reference $A$1"},
+      tags:{ru:["закрепить","абсолютная ссылка","$","доллар"],en:["lock","absolute","$"]}},
+    {id:24,keys:"Ctrl + ;",type:"hotkey",
+      desc:{ru:"Вставить текущую дату",en:"Insert today's date"},
+      tags:{ru:["вставить дату","сегодня вставить"],en:["insert date","today"]}},
+    {id:25,keys:"Ctrl + Shift + +",type:"hotkey",
+      desc:{ru:"Вставить строку/столбец",en:"Insert row/column"},
+      tags:{ru:["добавить строку","вставить строку"],en:["insert row","add row"]}},
+    {id:26,keys:"Ctrl + -",type:"hotkey",
+      desc:{ru:"Удалить строку/столбец",en:"Delete row/column"},
+      tags:{ru:["удалить строку","удалить столбец"],en:["delete row"]}},
+    {id:27,keys:"F2",type:"hotkey",
+      desc:{ru:"Редактировать ячейку",en:"Edit cell"},
+      tags:{ru:["редактировать ячейку","изменить"],en:["edit cell"]}},
+    {id:28,keys:"Ctrl + D",type:"hotkey",
+      desc:{ru:"Заполнить вниз",en:"Fill down"},
+      tags:{ru:["заполнить вниз","протянуть формулу"],en:["fill down","copy down"]}},
+    {id:281,keys:"Ctrl + Shift + End",type:"hotkey",
+      desc:{ru:"Выделить до конца данных",en:"Select to last used cell"},
+      tags:{ru:["выделить всё","до конца","последняя ячейка"],en:["select all data","last cell"]}},
+    {id:282,keys:"Ctrl + Home / End",type:"hotkey",
+      desc:{ru:"В начало / конец таблицы",en:"Go to start / end of data"},
+      tags:{ru:["начало","конец","навигация"],en:["navigate","start","end"]}},
+    {id:283,keys:"Ctrl + Shift + F3",type:"hotkey",
+      desc:{ru:"Создать именованный диапазон",en:"Create named range"},
+      tags:{ru:["именованный диапазон","имя ячейки"],en:["named range"]}},
+    {id:284,keys:"Alt + F11",type:"hotkey",
+      desc:{ru:"Открыть редактор VBA",en:"Open VBA editor"},
+      tags:{ru:["vba","макрос","редактор"],en:["vba","macro","editor"]}},
+
+  // ── Extra Excel formulas ──
+    {id:1300,keys:"COUNTIF",type:"formula",template:"=COUNTIF({range},{criteria})",example:'=COUNTIF(A:A,">0")',
+      desc:{ru:"Количество ячеек по условию",en:"Count cells matching condition"},
+      tags:{ru:["счётесли","посчитать","количество","сколько","count","if condition","условие"],en:["countif","count if","count cells","condition"]}},
+    {id:1301,keys:"SUMIF",type:"formula",template:"=SUMIF({range},{criteria},{sum_range})",example:'=SUMIF(A:A,">0",B:B)',
+      desc:{ru:"Сумма по условию",en:"Sum cells matching condition"},
+      tags:{ru:["суммесли","сумма условие","sumif","условная сумма","сложить если"],en:["sumif","sum if","conditional sum"]}},
+    {id:1302,keys:"AVERAGEIF",type:"formula",template:"=AVERAGEIF({range},{criteria},{avg_range})",example:'=AVERAGEIF(A:A,">0",B:B)',
+      desc:{ru:"Среднее по условию",en:"Average cells matching condition"},
+      tags:{ru:["среднее условие","средняя если","averageif"],en:["averageif","conditional average"]}},
+    {id:1303,keys:"CONCATENATE",type:"formula",template:"=CONCATENATE({text1},{text2})",example:'=CONCATENATE(A1," ",B1)',
+      desc:{ru:"Объединить текст из ячеек",en:"Combine text from cells"},
+      tags:{ru:["сцепить","объединить","concatenate","склеить текст","соединить строки"],en:["concatenate","combine","join text","merge cells"]}},
+    {id:1304,keys:"LEFT",type:"formula",template:"=LEFT({text},{num_chars})",example:"=LEFT(A1,3)",
+      desc:{ru:"Первые N символов строки",en:"First N characters of text"},
+      tags:{ru:["первые символы","left","начало строки","подстрока"],en:["left","first characters","substring"]}},
+    {id:1305,keys:"RIGHT",type:"formula",template:"=RIGHT({text},{num_chars})",example:"=RIGHT(A1,3)",
+      desc:{ru:"Последние N символов строки",en:"Last N characters of text"},
+      tags:{ru:["последние символы","right","конец строки","подстрока"],en:["right","last characters","substring"]}},
+    {id:1306,keys:"MID",type:"formula",template:"=MID({text},{start},{num_chars})",example:"=MID(A1,2,5)",
+      desc:{ru:"Подстрока из середины текста",en:"Extract characters from middle of text"},
+      tags:{ru:["середина","подстрока","mid","часть строки"],en:["mid","middle","substring","extract"]}},
+    {id:1307,keys:"LEN",type:"formula",template:"=LEN({text})",example:"=LEN(A1)",
+      desc:{ru:"Длина строки (количество символов)",en:"Length of text string"},
+      tags:{ru:["длина","количество символов","len","размер строки"],en:["len","length","characters","string length"]}},
+    {id:1308,keys:"TRIM",type:"formula",template:"=TRIM({text})",example:"=TRIM(A1)",
+      desc:{ru:"Убрать лишние пробелы",en:"Remove extra spaces from text"},
+      tags:{ru:["пробелы","убрать пробелы","trim","пробел","очистить текст"],en:["trim","spaces","remove spaces","clean"]}},
+    {id:1309,keys:"UPPER",type:"formula",template:"=UPPER({text})",example:"=UPPER(A1)",
+      desc:{ru:"Перевести текст в верхний регистр",en:"Convert text to uppercase"},
+      tags:{ru:["верхний регистр","заглавные","upper","caps","большие буквы"],en:["uppercase","upper","caps","all caps"]}},
+    {id:1310,keys:"LOWER",type:"formula",template:"=LOWER({text})",example:"=LOWER(A1)",
+      desc:{ru:"Перевести текст в нижний регистр",en:"Convert text to lowercase"},
+      tags:{ru:["нижний регистр","строчные","lower","маленькие буквы"],en:["lowercase","lower","small caps"]}},
+    {id:1311,keys:"TEXT",type:"formula",template:"=TEXT({value},{format})",example:'=TEXT(A1,"DD.MM.YYYY")',
+      desc:{ru:"Форматировать число как текст",en:"Format number or date as text"},
+      tags:{ru:["форматировать число","text","дата текстом","формат даты"],en:["text","format number","date format","number to text"]}},
+    {id:1312,keys:"DATEVALUE",type:"formula",template:"=DATEVALUE({date_text})",example:'=DATEVALUE("01.01.2025")',
+      desc:{ru:"Преобразовать дату-текст в число",en:"Convert date text to serial number"},
+      tags:{ru:["дата из текста","datevalue","преобразовать дату"],en:["datevalue","date text","convert date"]}},
+    {id:1313,keys:"SUMPRODUCT",type:"formula",template:"=SUMPRODUCT({array1},{array2})",example:"=SUMPRODUCT(A1:A10,B1:B10)",
+      desc:{ru:"Сумма произведений диапазонов",en:"Sum of products of ranges"},
+      tags:{ru:["суммпроизв","произведение сумма","сумма массивов"],en:["sumproduct","dot product","weighted sum"]}},
+    {id:1314,keys:"MAX",type:"formula",template:"=MAX({range})",example:"=MAX(A:A)",
+      desc:{ru:"Максимальное значение в диапазоне",en:"Maximum value in range"},
+      tags:{ru:["максимум","наибольший","max","самый большой"],en:["max","maximum","largest","biggest"]}},
+    {id:1315,keys:"MIN",type:"formula",template:"=MIN({range})",example:"=MIN(A:A)",
+      desc:{ru:"Минимальное значение в диапазоне",en:"Minimum value in range"},
+      tags:{ru:["минимум","наименьший","min","самый маленький"],en:["min","minimum","smallest","lowest"]}},
+    {id:1316,keys:"COUNTA",type:"formula",template:"=COUNTA({range})",example:"=COUNTA(A:A)",
+      desc:{ru:"Количество непустых ячеек",en:"Count non-empty cells"},
+      tags:{ru:["счёта","непустые","непустых","counta"],en:["counta","non-empty","count filled"]}},
+    {id:1317,keys:"ROUND",type:"formula",template:"=ROUND({number},{digits})",example:"=ROUND(A1,2)",
+      desc:{ru:"Округлить до N знаков",en:"Round to N decimal places"},
+      tags:{ru:["округл","округлить","round","знаки","десятичные"],en:["round","decimal","round off"]}},
+  ],
+  Word:[
+    {id:40,keys:"Ctrl + B / I / U",type:"hotkey",
+      desc:{ru:"Жирный / Курсив / Подчёркивание",en:"Bold / Italic / Underline"},
+      tags:{ru:["жирный","курсив","подчеркнуть","форматирование"],en:["bold","italic","underline"]}},
+    {id:41,keys:"Ctrl + Enter",type:"hotkey",
+      desc:{ru:"Разрыв страницы",en:"Page break"},
+      tags:{ru:["новая страница","разрыв страницы"],en:["page break"]}},
+    {id:42,keys:"Ctrl + Alt + 1/2/3",type:"hotkey",
+      desc:{ru:"Стиль Заголовок 1/2/3",en:"Heading 1/2/3"},
+      tags:{ru:["заголовок","стиль","heading"],en:["heading","style"]}},
+    {id:43,keys:{win:"Ctrl + Shift + C",mac:"⌘ + Shift + C"},type:"hotkey",
+      desc:{ru:"Копировать форматирование",en:"Copy formatting"},
+      tags:{ru:["скопировать форматирование","формат по образцу"],en:["copy formatting","format painter"]}},
+    {id:44,keys:"Ctrl + F",type:"hotkey",
+      desc:{ru:"Найти",en:"Find"},
+      tags:{ru:["найти","поиск"],en:["find","search"]}},
+    {id:45,keys:"Ctrl + H",type:"hotkey",
+      desc:{ru:"Найти и заменить",en:"Find and replace"},
+      tags:{ru:["заменить","поиск замена"],en:["replace","find replace"]}},
+    {id:46,keys:"Ctrl + L/E/R/J",type:"hotkey",
+      desc:{ru:"Выравнивание текста",en:"Text alignment"},
+      tags:{ru:["выравнивание","по центру","выровнять"],en:["align","center","justify"]}},
+    {id:47,keys:"Ctrl + Shift + N",type:"hotkey",
+      desc:{ru:"Обычный стиль (сброс)",en:"Normal style (reset)"},
+      tags:{ru:["сброс стиля","обычный текст"],en:["normal style","reset formatting"]}},
+    {id:48,keys:"Ctrl + ]  / Ctrl + [",type:"hotkey",
+      desc:{ru:"Размер шрифта +/−",en:"Font size +/−"},
+      tags:{ru:["размер шрифта","увеличить шрифт"],en:["font size","increase font"]}},
+    {id:49,keys:"Ctrl + Shift + >/<",type:"hotkey",
+      desc:{ru:"Размер шрифта больше/меньше",en:"Font size bigger/smaller"},
+      tags:{ru:["шрифт","размер"],en:["font","size"]}},
+    {id:491,keys:{win:"Ctrl + Shift + S",mac:"⌘ + Shift + S"},type:"hotkey",
+      desc:{ru:"Применить стиль по имени",en:"Apply style by name"},
+      tags:{ru:["стиль","применить стиль"],en:["style","apply style"]}},
+    {id:492,keys:"Ctrl + K",type:"hotkey",
+      desc:{ru:"Вставить гиперссылку",en:"Insert hyperlink"},
+      tags:{ru:["ссылка","гиперссылка","вставить ссылку"],en:["link","hyperlink","insert link"]}},
+    {id:493,keys:"F7",type:"hotkey",
+      desc:{ru:"Проверка орфографии",en:"Spell check"},
+      tags:{ru:["орфография","проверка","spell"],en:["spell check","grammar"]}},
+    {id:494,keys:"Ctrl + Shift + E",type:"hotkey",
+      desc:{ru:"Режим отслеживания изменений",en:"Track changes mode"},
+      tags:{ru:["отслеживание","правки","изменения"],en:["track changes","review"]}},
+  ],
+
+  PowerPoint:[
+    {id:50,keys:"F5",type:"hotkey",desc:{ru:"Запустить показ с начала",en:"Start slideshow"},
+      tags:{ru:["показ","запустить","презентация"],en:["slideshow","present"]}},
+    {id:51,keys:"Shift + F5",type:"hotkey",desc:{ru:"Показ с текущего слайда",en:"From current slide"},
+      tags:{ru:["текущий слайд","показ слайда"],en:["current slide"]}},
+    {id:52,keys:"Ctrl + M",type:"hotkey",desc:{ru:"Новый слайд",en:"New slide"},
+      tags:{ru:["новый слайд","добавить слайд"],en:["new slide","add slide"]}},
+    {id:53,keys:"Ctrl + D",type:"hotkey",desc:{ru:"Дублировать слайд",en:"Duplicate slide"},
+      tags:{ru:["дублировать","копия слайда"],en:["duplicate"]}},
+    {id:54,keys:"B / W",type:"hotkey",desc:{ru:"Чёрный/белый экран во время показа",en:"Black/white screen during show"},
+      tags:{ru:["чёрный экран","пауза"],en:["black screen","pause show"]}},
+    {id:55,keys:"Ctrl + G",type:"hotkey",desc:{ru:"Группировать объекты",en:"Group objects"},
+      tags:{ru:["группировать","группа"],en:["group"]}},
+    {id:551,keys:"Ctrl + Shift + G",type:"hotkey",desc:{ru:"Разгруппировать объекты",en:"Ungroup objects"},
+      tags:{ru:["разгруппировать"],en:["ungroup"]}},
+    {id:552,keys:"Tab",type:"hotkey",desc:{ru:"Перейти к следующему объекту",en:"Select next object"},
+      tags:{ru:["следующий объект","выбрать объект","tab"],en:["next object","select"]}},
+    {id:553,keys:{win:"Ctrl + Shift + C",mac:"⌘ + Shift + C"},type:"hotkey",
+      desc:{ru:"Копировать форматирование объекта",en:"Copy object formatting"},
+      tags:{ru:["копировать стиль","формат","форматирование"],en:["copy style","format"]}},
+    {id:554,keys:"Ctrl + E / L / R",type:"hotkey",
+      desc:{ru:"Выравнивание текста на слайде",en:"Text alignment on slide"},
+      tags:{ru:["выравнивание","по центру"],en:["align","center"]}},
+    {id:555,keys:"E",type:"hotkey",
+      desc:{ru:"Стереть пометки во время показа",en:"Erase drawing during show"},
+      tags:{ru:["стереть","ластик","пометки"],en:["erase","pen","drawing"]}},
+    {id:556,keys:{win:"Ctrl + Shift + F5",mac:"⌘ + Shift + F5"},type:"hotkey",
+      desc:{ru:"Режим докладчика",en:"Presenter view"},
+      tags:{ru:["режим докладчика","заметки","presenter"],en:["presenter view","notes"]}},
+  ],
+
+  "VS Code":[
+    {id:60,keys:{win:"Ctrl + P",mac:"⌘ + P"},type:"hotkey",desc:{ru:"Быстро открыть файл",en:"Quick open file"},
+      tags:{ru:["найти файл","открыть файл","перейти к файлу"],en:["open file","quick open","go to file"]}},
+    {id:61,keys:{win:"Ctrl + Shift + P",mac:"⌘ + Shift + P"},type:"hotkey",desc:{ru:"Командная палитра",en:"Command palette"},
+      tags:{ru:["команда","палитра","действие"],en:["command","palette","action"]}},
+    {id:62,keys:"Alt + ↑/↓",type:"hotkey",desc:{ru:"Переместить строку",en:"Move line"},
+      tags:{ru:["переместить строку","двигать"],en:["move line","reorder"]}},
+    {id:63,keys:"Ctrl + /",type:"hotkey",desc:{ru:"Закомментировать строку",en:"Toggle comment"},
+      tags:{ru:["комментарий","закомментировать","коммент"],en:["comment","toggle comment"]}},
+    {id:64,keys:{win:"Ctrl + D",mac:"⌘ + D"},type:"hotkey",desc:{ru:"Выделить следующее вхождение",en:"Select next occurrence"},
+      tags:{ru:["мультикурсор","выделить слово","следующее"],en:["multi cursor","select word","occurrence"]}},
+    {id:65,keys:{win:"Ctrl + `",mac:"⌘ + `"},type:"hotkey",desc:{ru:"Открыть терминал",en:"Open terminal"},
+      tags:{ru:["терминал","консоль"],en:["terminal","console"]}},
+    {id:66,keys:{win:"Ctrl + Shift + K",mac:"⌘ + Shift + K"},type:"hotkey",desc:{ru:"Удалить строку",en:"Delete line"},
+      tags:{ru:["удалить строку"],en:["delete line"]}},
+    {id:67,keys:{win:"Ctrl + Shift + F",mac:"⌘ + Shift + F"},type:"hotkey",desc:{ru:"Поиск по всем файлам",en:"Search in files"},
+      tags:{ru:["поиск по проекту","найти везде","глобальный поиск"],en:["global search","search files"]}},
+    {id:68,keys:{win:"Ctrl + Shift + L",mac:"⌘ + Shift + L"},type:"hotkey",desc:{ru:"Выделить все вхождения",en:"Select all occurrences"},
+      tags:{ru:["все вхождения","мультикурсор все"],en:["select all","all occurrences"]}},
+    {id:681,keys:{win:"Alt + Shift + ↑/↓",mac:"⌥ + Shift + ↑/↓"},type:"hotkey",desc:{ru:"Дублировать строку",en:"Duplicate line"},
+      tags:{ru:["дублировать строку","копия строки"],en:["duplicate line","copy line"]}},
+    {id:682,keys:{win:"Ctrl + Shift + [",mac:"⌘ + ⌥ + ["},type:"hotkey",desc:{ru:"Свернуть блок кода",en:"Fold code block"},
+      tags:{ru:["свернуть","fold","блок кода"],en:["fold","collapse","code block"]}},
+    {id:683,keys:{win:"Ctrl + K Ctrl + C",mac:"⌘ + K ⌘ + C"},type:"hotkey",desc:{ru:"Добавить комментарий к строке",en:"Add line comment"},
+      tags:{ru:["добавить комментарий","закомментировать"],en:["add comment","line comment"]}},
+    {id:684,keys:{win:"F12",mac:"F12"},type:"hotkey",desc:{ru:"Перейти к определению",en:"Go to definition"},
+      tags:{ru:["определение","перейти к функции","go to"],en:["go to definition","function"]}},
+    {id:685,keys:{win:"Ctrl + .",mac:"⌘ + ."},type:"hotkey",desc:{ru:"Быстрые исправления / рефакторинг",en:"Quick fix / refactor"},
+      tags:{ru:["исправить","рефакторинг","quick fix","лампочка"],en:["quick fix","refactor","lightbulb"]}},
+    {id:686,keys:{win:"Ctrl + Shift + I",mac:"⌥ + Shift + F"},type:"hotkey",desc:{ru:"Форматировать документ",en:"Format document"},
+      tags:{ru:["форматировать","prettier","форматирование кода"],en:["format","prettier","beautify"]}},
+    {id:687,keys:{win:"Ctrl + B",mac:"⌘ + B"},type:"hotkey",desc:{ru:"Скрыть/показать боковую панель",en:"Toggle sidebar"},
+      tags:{ru:["боковая панель","скрыть панель","sidebar"],en:["sidebar","toggle panel"]}},
+  ],
+
+  Photoshop:[
+    {id:70,keys:{win:"Ctrl + J",mac:"⌘ + J"},type:"hotkey",desc:{ru:"Дублировать слой",en:"Duplicate layer"},
+      tags:{ru:["дублировать слой","копия слоя"],en:["duplicate layer","copy layer"]}},
+    {id:71,keys:{win:"Ctrl + T",mac:"⌘ + T"},type:"hotkey",desc:{ru:"Свободная трансформация",en:"Free transform"},
+      tags:{ru:["трансформация","масштаб","повернуть","resize"],en:["transform","scale","rotate","resize"]}},
+    {id:72,keys:"[ / ]",type:"hotkey",desc:{ru:"Размер кисти −/+",en:"Brush size −/+"},
+      tags:{ru:["кисть","размер кисти"],en:["brush","brush size"]}},
+    {id:73,keys:{win:"Ctrl + Alt + Z",mac:"⌘ + ⌥ + Z"},type:"hotkey",desc:{ru:"Несколько шагов назад",en:"Step backward"},
+      tags:{ru:["история","отменить несколько","шаг назад"],en:["history","step back","undo"]}},
+    {id:74,keys:{win:"Ctrl + Shift + Alt + E",mac:"⌘ + ⌥ + Shift + E"},type:"hotkey",desc:{ru:"Объединить видимые слои (stamp)",en:"Merge visible layers (stamp)"},
+      tags:{ru:["объединить слои","stamp","сплющить"],en:["merge layers","stamp","flatten"]}},
+    {id:75,keys:{win:"Ctrl + L",mac:"⌘ + L"},type:"hotkey",desc:{ru:"Уровни",en:"Levels"},
+      tags:{ru:["уровни","яркость","контраст"],en:["levels","brightness","contrast"]}},
+    {id:751,keys:{win:"Ctrl + M",mac:"⌘ + M"},type:"hotkey",desc:{ru:"Кривые",en:"Curves"},
+      tags:{ru:["кривые","цвет","коррекция"],en:["curves","color","correction"]}},
+    {id:752,keys:{win:"Ctrl + U",mac:"⌘ + U"},type:"hotkey",desc:{ru:"Цветовой тон/насыщенность",en:"Hue/Saturation"},
+      tags:{ru:["насыщенность","тон","цвет","hue"],en:["hue","saturation","color"]}},
+    {id:753,keys:{win:"Ctrl + Shift + U",mac:"⌘ + Shift + U"},type:"hotkey",desc:{ru:"Обесцветить слой",en:"Desaturate"},
+      tags:{ru:["обесцветить","чб","чёрно-белый"],en:["desaturate","grayscale","black and white"]}},
+    {id:754,keys:"V",type:"hotkey",desc:{ru:"Инструмент «Перемещение»",en:"Move tool"},
+      tags:{ru:["перемещение","move","переместить объект"],en:["move","move tool"]}},
+    {id:755,keys:"C",type:"hotkey",desc:{ru:"Кадрирование",en:"Crop tool"},
+      tags:{ru:["кадрирование","crop","обрезать"],en:["crop","trim","cut"]}},
+    {id:756,keys:"S",type:"hotkey",desc:{ru:"Штамп клонирования",en:"Clone stamp"},
+      tags:{ru:["штамп","клонирование","clone"],en:["clone stamp","stamp","clone"]}},
+    {id:757,keys:{win:"Ctrl + Shift + N",mac:"⌘ + Shift + N"},type:"hotkey",desc:{ru:"Новый слой",en:"New layer"},
+      tags:{ru:["новый слой","создать слой"],en:["new layer","create layer"]}},
+  ],
+
+  Figma:[
+    {id:80,keys:{win:"Ctrl + D",mac:"⌘ + D"},type:"hotkey",desc:{ru:"Дублировать элемент",en:"Duplicate element"},
+      tags:{ru:["дублировать","копия"],en:["duplicate","copy"]}},
+    {id:81,keys:{win:"Ctrl + G",mac:"⌘ + G"},type:"hotkey",desc:{ru:"Группировать",en:"Group"},
+      tags:{ru:["группировать","группа"],en:["group"]}},
+    {id:82,keys:{win:"Ctrl + Shift + G",mac:"⌘ + Shift + G"},type:"hotkey",desc:{ru:"Разгруппировать",en:"Ungroup"},
+      tags:{ru:["разгруппировать"],en:["ungroup"]}},
+    {id:83,keys:{win:"Ctrl + Alt + C",mac:"⌘ + ⌥ + C"},type:"hotkey",desc:{ru:"Копировать свойства",en:"Copy properties"},
+      tags:{ru:["копировать свойства","копировать стиль"],en:["copy style","copy properties"]}},
+    {id:84,keys:"K",type:"hotkey",desc:{ru:"Инструмент масштаба",en:"Scale tool"},
+      tags:{ru:["масштаб","изменить размер","scale"],en:["scale","resize"]}},
+    {id:85,keys:{win:"Ctrl + \\",mac:"⌘ + \\"},type:"hotkey",desc:{ru:"Скрыть/показать UI",en:"Toggle UI"},
+      tags:{ru:["скрыть интерфейс","полный экран"],en:["hide ui","fullscreen"]}},
+    {id:86,keys:{win:"Ctrl + Shift + E",mac:"⌘ + Shift + E"},type:"hotkey",desc:{ru:"Экспортировать",en:"Export"},
+      tags:{ru:["экспорт","сохранить png","export"],en:["export","save png"]}},
+    {id:87,keys:"C",type:"hotkey",desc:{ru:"Инструмент комментариев",en:"Comment tool"},
+      tags:{ru:["комментарий","добавить комментарий"],en:["comment","add comment"]}},
+    {id:871,keys:"F",type:"hotkey",desc:{ru:"Инструмент Frame",en:"Frame tool"},
+      tags:{ru:["frame","фрейм","frame tool"],en:["frame","artboard"]}},
+    {id:872,keys:"A",type:"hotkey",desc:{ru:"Авторазмещение / Auto layout",en:"Auto layout"},
+      tags:{ru:["auto layout","автомакет","auto layout"],en:["auto layout","responsive"]}},
+    {id:873,keys:{win:"Ctrl + E",mac:"⌘ + E"},type:"hotkey",desc:{ru:"Развернуть (flatten) объект",en:"Flatten object"},
+      tags:{ru:["flatten","развернуть","объединить контуры"],en:["flatten","merge paths"]}},
+    {id:874,keys:{win:"Ctrl + P",mac:"⌘ + P"},type:"hotkey",desc:{ru:"Инструмент «Перо»",en:"Pen tool"},
+      tags:{ru:["перо","pen","кривые","контур"],en:["pen","bezier","path"]}},
+    {id:875,keys:{win:"Alt + перетащить",mac:"⌥ + перетащить"},type:"hotkey",desc:{ru:"Скопировать при перетаскивании",en:"Copy while dragging"},
+      tags:{ru:["скопировать перетащить","alt drag"],en:["drag copy","alt drag"]}},
+  ],
+
+  Chrome:[
+    {id:90,keys:{win:"Ctrl + T",mac:"⌘ + T"},type:"hotkey",desc:{ru:"Новая вкладка",en:"New tab"},
+      tags:{ru:["новая вкладка","открыть вкладку"],en:["new tab","open tab"]}},
+    {id:91,keys:{win:"Ctrl + W",mac:"⌘ + W"},type:"hotkey",desc:{ru:"Закрыть вкладку",en:"Close tab"},
+      tags:{ru:["закрыть вкладку","закрыть"],en:["close tab","close"]}},
+    {id:92,keys:{win:"Ctrl + Shift + T",mac:"⌘ + Shift + T"},type:"hotkey",desc:{ru:"Открыть закрытую вкладку",en:"Reopen closed tab"},
+      tags:{ru:["вернуть вкладку","открыть закрытую"],en:["reopen tab","restore tab"]}},
+    {id:93,keys:{win:"Ctrl + L",mac:"⌘ + L"},type:"hotkey",desc:{ru:"Перейти в адресную строку",en:"Focus address bar"},
+      tags:{ru:["адресная строка","url"],en:["address bar","url bar"]}},
+    {id:94,keys:{win:"Ctrl + Shift + J",mac:"⌘ + ⌥ + J"},type:"hotkey",desc:{ru:"Консоль разработчика",en:"Developer console"},
+      tags:{ru:["консоль","devtools","разработчик"],en:["console","devtools","developer"]}},
+    {id:95,keys:{win:"Ctrl + R",mac:"⌘ + R"},type:"hotkey",desc:{ru:"Обновить страницу",en:"Refresh page"},
+      tags:{ru:["обновить","перезагрузить"],en:["refresh","reload"]}},
+    {id:96,keys:{win:"Ctrl + Shift + N",mac:"⌘ + Shift + N"},type:"hotkey",desc:{ru:"Режим инкогнито",en:"Incognito mode"},
+      tags:{ru:["инкогнито","приватный режим"],en:["incognito","private"]}},
+    {id:97,keys:{win:"Ctrl + 1..9",mac:"⌘ + 1..9"},type:"hotkey",desc:{ru:"Переключить на вкладку 1-9",en:"Switch to tab 1-9"},
+      tags:{ru:["переключить вкладку","перейти на вкладку"],en:["switch tab"]}},
+    {id:971,keys:{win:"Ctrl + Tab",mac:"⌘ + ⌥ + →"},type:"hotkey",desc:{ru:"Следующая вкладка",en:"Next tab"},
+      tags:{ru:["следующая вкладка","переключить"],en:["next tab","switch tab"]}},
+    {id:972,keys:{win:"Ctrl + F5",mac:"⌘ + Shift + R"},type:"hotkey",desc:{ru:"Жёсткое обновление (без кэша)",en:"Hard reload (no cache)"},
+      tags:{ru:["без кэша","жёсткое обновление","hard reload"],en:["hard reload","no cache","force reload"]}},
+    {id:973,keys:{win:"F12",mac:"⌘ + ⌥ + I"},type:"hotkey",desc:{ru:"DevTools (инструменты разработчика)",en:"DevTools"},
+      tags:{ru:["devtools","инструменты разработчика","inspect"],en:["devtools","inspect","developer tools"]}},
+    {id:974,keys:{win:"Ctrl + U",mac:"⌘ + U"},type:"hotkey",desc:{ru:"Просмотр исходного кода страницы",en:"View page source"},
+      tags:{ru:["исходный код","html страницы"],en:["page source","view source","html"]}},
+  ],
+
+  Windows:[
+    {id:100,keys:{win:"Win + E",mac:"⌘ + Space (Finder)",linux:"Super + E"},type:"hotkey",
+      desc:{ru:"Проводник / Finder",en:"File Explorer / Finder"},
+      tags:{ru:["проводник","открыть папку","файловый менеджер"],en:["explorer","finder","file manager"]}},
+    {id:101,keys:{win:"Win + D",mac:"⌘ + M",linux:"Super + D"},type:"hotkey",
+      desc:{ru:"Показать рабочий стол",en:"Show desktop"},
+      tags:{ru:["рабочий стол","свернуть все"],en:["desktop","minimize all"]}},
+    {id:102,keys:{win:"Win + L",mac:"⌘ + Ctrl + Q",linux:"Super + L"},type:"hotkey",
+      desc:{ru:"Заблокировать экран",en:"Lock screen"},
+      tags:{ru:["заблокировать","блокировка"],en:["lock","lock screen"]}},
+    {id:103,keys:{win:"Win + V",mac:"⌘ + Shift + V",linux:"Super + V"},type:"hotkey",
+      desc:{ru:"История буфера обмена",en:"Clipboard history"},
+      tags:{ru:["история буфера","clipboard","скопированное"],en:["clipboard","history","paste history"]}},
+    {id:104,keys:{win:"Win + Shift + S",mac:"⌘ + Shift + 4",linux:"PrtSc"},type:"hotkey",
+      desc:{ru:"Снимок экрана области",en:"Screenshot area"},
+      tags:{ru:["скриншот","снимок экрана","прин скрин"],en:["screenshot","snip","capture"]}},
+    {id:105,keys:{win:"Alt + Tab",mac:"⌘ + Tab",linux:"Alt + Tab"},type:"hotkey",
+      desc:{ru:"Переключить окно",en:"Switch window"},
+      tags:{ru:["переключить окно","alt tab"],en:["switch window","alt tab"]}},
+    {id:106,keys:{win:"Win + Tab",mac:"Ctrl + ↑",linux:"Super + Tab"},type:"hotkey",
+      desc:{ru:"Виртуальный рабочий стол / Task View",en:"Task / virtual desktop view"},
+      tags:{ru:["виртуальный рабочий стол","task view"],en:["task view","virtual desktop"]}},
+    {id:107,keys:{win:"Win + →/←",mac:"⌘ + Ctrl + →/←",linux:"Super + →/←"},type:"hotkey",
+      desc:{ru:"Прикрепить окно к краю",en:"Snap window to side"},
+      tags:{ru:["прикрепить окно","разделить экран","snap"],en:["snap","split screen","tile"]}},
+    {id:108,keys:{win:"Ctrl + Shift + Esc",mac:"⌘ + Space → Activity Monitor",linux:"Ctrl + Alt + Delete"},type:"hotkey",
+      desc:{ru:"Диспетчер задач",en:"Task manager"},
+      tags:{ru:["диспетчер задач","процессы","завершить процесс"],en:["task manager","processes","kill process"]}},
+    {id:109,keys:{win:"Win + R",mac:"⌘ + Space",linux:"Alt + F2"},type:"hotkey",
+      desc:{ru:"Выполнить / запустить приложение",en:"Run / launch app"},
+      tags:{ru:["выполнить","запустить","run"],en:["run","launch","execute"]}},
+    {id:110,keys:{win:"Win + I",mac:"⌘ + ,",linux:"Super + I"},type:"hotkey",
+      desc:{ru:"Открыть настройки системы",en:"Open system settings"},
+      tags:{ru:["настройки","параметры системы"],en:["settings","preferences","system"]}},
+    {id:111,keys:{win:"Win + P",mac:"⌘ + F1",linux:"Super + P"},type:"hotkey",
+      desc:{ru:"Режим экрана/проектора",en:"Display/projector mode"},
+      tags:{ru:["проектор","второй монитор","дублировать экран"],en:["projector","second screen","display"]}},
+    {id:1111,keys:{win:"Win + X",mac:"—"},type:"hotkey",
+      desc:{ru:"Меню быстрого доступа (Power User)",en:"Quick access menu (Power User)"},
+      tags:{ru:["быстрое меню","power user"],en:["quick menu","power user"]}},
+    {id:1112,keys:{win:"Win + PrtSc",mac:"⌘ + Shift + 3"},type:"hotkey",
+      desc:{ru:"Сохранить скриншот в файл",en:"Save screenshot to file"},
+      tags:{ru:["сохранить скриншот","скриншот файл"],en:["save screenshot","screenshot file"]}},
+  ],
+
+  Terminal:[
+    {id:120,keys:{win:"cls",mac:"clear",linux:"clear"},type:"hotkey",
+      desc:{ru:"Очистить терминал",en:"Clear terminal"},
+      tags:{ru:["очистить терминал","cls","clear"],en:["clear","cls"]}},
+    {id:121,keys:"Ctrl + C",type:"hotkey",
+      desc:{ru:"Остановить процесс",en:"Stop process"},
+      tags:{ru:["остановить","прервать процесс","interrupt","kill"],en:["stop","kill","interrupt"]}},
+    {id:122,keys:{win:"↑/↓",mac:"Ctrl + P/N",linux:"↑/↓"},type:"hotkey",
+      desc:{ru:"История команд",en:"Command history"},
+      tags:{ru:["история команд","предыдущая команда"],en:["history","previous command"]}},
+    {id:123,keys:"Tab",type:"hotkey",
+      desc:{ru:"Автодополнение пути/команды",en:"Autocomplete path/command"},
+      tags:{ru:["автодополнение","tab completion"],en:["autocomplete","tab complete"]}},
+    {id:124,keys:"cd /путь",type:"hotkey",
+      desc:{ru:"Перейти в папку",en:"Change directory"},
+      tags:{ru:["перейти в папку","cd","сменить директорию"],en:["cd","directory","navigate"]}},
+    {id:125,keys:{win:"ls / dir",mac:"ls",linux:"ls"},type:"hotkey",
+      desc:{ru:"Список файлов",en:"List files"},
+      tags:{ru:["список файлов","показать папку","ls","dir"],en:["list files","ls","dir"]}},
+    {id:126,keys:"grep -r «текст» .",type:"hotkey",
+      desc:{ru:"Поиск текста в файлах рекурсивно",en:"Search text in files recursively"},
+      tags:{ru:["найти в файлах","grep","поиск в файлах"],en:["grep","search files","find text"]}},
+    {id:127,keys:"mkdir имя",type:"hotkey",
+      desc:{ru:"Создать папку",en:"Create folder"},
+      tags:{ru:["создать папку","mkdir"],en:["mkdir","create folder"]}},
+    {id:1271,keys:"mv старое новое",type:"hotkey",
+      desc:{ru:"Переименовать / переместить файл",en:"Rename / move file"},
+      tags:{ru:["переименовать","переместить файл","mv"],en:["mv","rename","move"]}},
+    {id:1272,keys:"cp -r откуда куда",type:"hotkey",
+      desc:{ru:"Копировать папку рекурсивно",en:"Copy folder recursively"},
+      tags:{ru:["копировать папку","cp"],en:["cp","copy folder"]}},
+    {id:1273,keys:"sudo !!",type:"hotkey",
+      desc:{ru:"Повторить предыдущую команду как root",en:"Repeat last command as root"},
+      tags:{ru:["sudo","права","root","повторить"],en:["sudo","root","repeat","admin"]}},
+    {id:1274,keys:"Ctrl + R",type:"hotkey",
+      desc:{ru:"Обратный поиск по истории команд",en:"Reverse search in command history"},
+      tags:{ru:["поиск истории","reverse search","ctrl r"],en:["reverse search","history","ctrl r"]}},
+    {id:1275,keys:"Ctrl + A / E",type:"hotkey",
+      desc:{ru:"В начало / конец строки",en:"Go to start / end of line"},
+      tags:{ru:["начало строки","конец строки","курсор"],en:["start of line","end of line","cursor"]}},
+  ],
+
+  Telegram:[
+    {id:130,keys:{win:"Ctrl + F",mac:"⌘ + F"},type:"hotkey",desc:{ru:"Поиск по чатам",en:"Search chats"},
+      tags:{ru:["поиск","найти чат","найти сообщение"],en:["search","find chat","find message"]}},
+    {id:131,keys:{win:"Ctrl + N",mac:"⌘ + N"},type:"hotkey",desc:{ru:"Новое сообщение",en:"New message"},
+      tags:{ru:["новое сообщение","написать"],en:["new message","compose"]}},
+    {id:132,keys:{win:"Ctrl + Shift + M",mac:"⌘ + Shift + M"},type:"hotkey",desc:{ru:"Отключить звук чата",en:"Mute chat"},
+      tags:{ru:["отключить звук","mute","без звука"],en:["mute","silence"]}},
+    {id:133,keys:{win:"Alt + ↑/↓",mac:"⌘ + ↑/↓"},type:"hotkey",desc:{ru:"Следующий/предыдущий чат",en:"Next/previous chat"},
+      tags:{ru:["следующий чат","переключить чат"],en:["next chat","switch chat"]}},
+    {id:134,keys:"Ctrl + Enter",type:"hotkey",desc:{ru:"Отправить (если Enter = новая строка)",en:"Send (when Enter = new line)"},
+      tags:{ru:["отправить"],en:["send"]}},
+    {id:1341,keys:{win:"Ctrl + /",mac:"⌘ + /"},type:"hotkey",desc:{ru:"Быстрые команды бота",en:"Bot commands"},
+      tags:{ru:["команды бота","slash","/"],en:["bot commands","slash commands"]}},
+  ],
+
+  Notion:[
+    {id:140,keys:"/",type:"hotkey",desc:{ru:"Вызвать меню блоков",en:"Open block menu"},
+      tags:{ru:["блок","добавить блок","слэш","вставить"],en:["block","add block","slash","insert"]}},
+    {id:141,keys:{win:"Ctrl + Shift + 1-6",mac:"⌘ + ⌥ + 1-6"},type:"hotkey",desc:{ru:"Заголовок уровня 1-3, текст, список",en:"Heading 1-3, text, list"},
+      tags:{ru:["заголовок","стиль","heading"],en:["heading","style","text"]}},
+    {id:142,keys:{win:"Ctrl + [  / ]",mac:"⌘ + [  / ]"},type:"hotkey",desc:{ru:"Уменьшить/увеличить отступ",en:"Decrease/increase indent"},
+      tags:{ru:["отступ","вложенность","indent"],en:["indent","outdent","nest"]}},
+    {id:143,keys:{win:"Ctrl + Shift + H",mac:"⌘ + Shift + H"},type:"hotkey",desc:{ru:"Выделить цветом",en:"Highlight text"},
+      tags:{ru:["выделить цветом","подсветить","маркер"],en:["highlight","color","marker"]}},
+    {id:144,keys:{win:"Ctrl + Shift + L",mac:"⌘ + Shift + L"},type:"hotkey",desc:{ru:"Вставить ссылку",en:"Insert link"},
+      tags:{ru:["вставить ссылку","ссылка","link"],en:["link","insert link","url"]}},
+    {id:145,keys:{win:"Ctrl + Shift + M",mac:"⌘ + Shift + M"},type:"hotkey",desc:{ru:"Добавить комментарий",en:"Add comment"},
+      tags:{ru:["комментарий","добавить комментарий"],en:["comment","add comment"]}},
+    {id:146,keys:{win:"Ctrl + P",mac:"⌘ + P"},type:"hotkey",desc:{ru:"Быстрый поиск / переход по страницам",en:"Quick find / jump to page"},
+      tags:{ru:["поиск","найти страницу","перейти"],en:["search","quick find","navigate"]}},
+    {id:147,keys:"::",type:"hotkey",desc:{ru:"Вставить эмодзи",en:"Insert emoji"},
+      tags:{ru:["эмодзи","emoji","смайл"],en:["emoji","insert emoji"]}},
+    {id:148,keys:"[[",type:"hotkey",desc:{ru:"Ссылка на страницу Notion",en:"Link to Notion page"},
+      tags:{ru:["ссылка на страницу","упомянуть страницу"],en:["link to page","mention page"]}},
+  ],
+
+  Slack:[
+    {id:150,keys:{win:"Ctrl + K",mac:"⌘ + K"},type:"hotkey",desc:{ru:"Быстрый переход к каналу/DM",en:"Quick switch to channel/DM"},
+      tags:{ru:["перейти к каналу","быстрый переход"],en:["quick switch","go to channel","jump"]}},
+    {id:151,keys:{win:"Ctrl + Shift + K",mac:"⌘ + Shift + K"},type:"hotkey",desc:{ru:"Список личных сообщений",en:"DM list"},
+      tags:{ru:["личные сообщения","DM","переписка"],en:["DM","direct messages","personal"]}},
+    {id:152,keys:{win:"Alt + ↑/↓",mac:"⌥ + ↑/↓"},type:"hotkey",desc:{ru:"Следующий/предыдущий канал",en:"Next/previous channel"},
+      tags:{ru:["следующий канал","переключить канал"],en:["next channel","switch channel"]}},
+    {id:153,keys:{win:"Ctrl + Shift + M",mac:"⌘ + Shift + M"},type:"hotkey",desc:{ru:"Упоминания и реакции",en:"Mentions & reactions"},
+      tags:{ru:["упоминания","реакции","@me"],en:["mentions","reactions","highlights"]}},
+    {id:154,keys:{win:"Ctrl + /",mac:"⌘ + /"},type:"hotkey",desc:{ru:"Список горячих клавиш Slack",en:"Slack shortcuts list"},
+      tags:{ru:["список клавиш","помощь"],en:["shortcuts","help","keyboard"]}},
+    {id:155,keys:{win:"Ctrl + Shift + A",mac:"⌘ + Shift + A"},type:"hotkey",desc:{ru:"Все непрочитанные",en:"All unreads"},
+      tags:{ru:["непрочитанные","unread"],en:["unreads","unread","notifications"]}},
+    {id:156,keys:"+:emoji:",type:"hotkey",desc:{ru:"Добавить реакцию (emoji)",en:"Add reaction"},
+      tags:{ru:["реакция","эмодзи","лайк"],en:["reaction","emoji","like"]}},
+  ],
+
+  "After Effects":[
+    {id:160,keys:{win:"Ctrl + K",mac:"⌘ + K"},type:"hotkey",desc:{ru:"Настройки композиции",en:"Composition settings"},
+      tags:{ru:["настройки","композиция","comp settings"],en:["composition","settings","comp"]}},
+    {id:161,keys:"Spacebar",type:"hotkey",desc:{ru:"Воспроизведение / пауза",en:"Play / pause"},
+      tags:{ru:["воспроизведение","пауза","play"],en:["play","pause","preview"]}},
+    {id:162,keys:"0 (numpad)",type:"hotkey",desc:{ru:"RAM предпросмотр",en:"RAM preview"},
+      tags:{ru:["предпросмотр","ram preview","рендер"],en:["ram preview","preview","render"]}},
+    {id:163,keys:"U",type:"hotkey",desc:{ru:"Показать анимированные свойства слоя",en:"Show animated layer properties"},
+      tags:{ru:["анимация","свойства слоя","keyframe"],en:["animated","layer properties","keyframe"]}},
+    {id:164,keys:"P / S / R / T / A",type:"hotkey",desc:{ru:"Position / Scale / Rotation / Opacity / Anchor",en:"Position / Scale / Rotation / Opacity / Anchor"},
+      tags:{ru:["позиция","масштаб","поворот","прозрачность","опорная точка"],en:["position","scale","rotation","opacity","anchor"]}},
+    {id:165,keys:{win:"Ctrl + D",mac:"⌘ + D"},type:"hotkey",desc:{ru:"Дублировать слой",en:"Duplicate layer"},
+      tags:{ru:["дублировать слой","копия"],en:["duplicate","copy layer"]}},
+    {id:166,keys:{win:"Ctrl + Shift + C",mac:"⌘ + Shift + C"},type:"hotkey",desc:{ru:"Создать прекомпозицию",en:"Pre-compose"},
+      tags:{ru:["прекомп","precomp","вложенная компа"],en:["precompose","pre-comp","nest"]}},
+    {id:167,keys:"F3",type:"hotkey",desc:{ru:"Открыть Effect Controls",en:"Open Effect Controls"},
+      tags:{ru:["эффекты","настройки эффекта","effect controls"],en:["effects","effect controls"]}},
+  ],
+
+  Premiere:[
+    {id:170,keys:{win:"Ctrl + I",mac:"⌘ + I"},type:"hotkey",desc:{ru:"Импортировать файл",en:"Import file"},
+      tags:{ru:["импорт","добавить файл","import"],en:["import","add file"]}},
+    {id:171,keys:{win:"Ctrl + M",mac:"⌘ + M"},type:"hotkey",desc:{ru:"Экспорт (рендер)",en:"Export (render)"},
+      tags:{ru:["экспорт","рендер","сохранить видео"],en:["export","render","save video"]}},
+    {id:172,keys:"C",type:"hotkey",desc:{ru:"Инструмент «Бритва» (разрезать клип)",en:"Razor tool (cut clip)"},
+      tags:{ru:["разрезать","бритва","cut","резка"],en:["cut","razor","split"]}},
+    {id:173,keys:"V",type:"hotkey",desc:{ru:"Инструмент выделения",en:"Selection tool"},
+      tags:{ru:["выделение","selection","стрелка"],en:["selection","arrow","select"]}},
+    {id:174,keys:{win:"Ctrl + Z",mac:"⌘ + Z"},type:"hotkey",desc:{ru:"Отменить действие",en:"Undo"},
+      tags:{ru:["отмена","undo","шаг назад"],en:["undo","step back"]}},
+    {id:175,keys:"I / O",type:"hotkey",desc:{ru:"Поставить In / Out точку",en:"Set In / Out point"},
+      tags:{ru:["in point","out point","маркер","обрезка"],en:["in point","out point","mark","trim"]}},
+    {id:176,keys:",",type:"hotkey",desc:{ru:"Вставить клип на временную шкалу",en:"Insert clip to timeline"},
+      tags:{ru:["вставить","insert","таймлайн","timeline"],en:["insert","timeline","add clip"]}},
+    {id:177,keys:{win:"Ctrl + Shift + D",mac:"⌘ + Shift + D"},type:"hotkey",desc:{ru:"Применить видеопереход по умолчанию",en:"Apply default video transition"},
+      tags:{ru:["переход","transition","dissolve","монтаж"],en:["transition","dissolve","cut"]}},
+  ],
+
+  Blender:[
+    {id:180,keys:"G / R / S",type:"hotkey",desc:{ru:"Захват / поворот / масштаб объекта",en:"Grab / rotate / scale"},
+      tags:{ru:["перемещение","поворот","масштаб","трансформация"],en:["grab","rotate","scale","transform"]}},
+    {id:181,keys:"Tab",type:"hotkey",desc:{ru:"Режим редактирования / объекта",en:"Edit / object mode toggle"},
+      tags:{ru:["режим редактирования","edit mode","object mode"],en:["edit mode","object mode","toggle"]}},
+    {id:182,keys:"Numpad 1/3/7",type:"hotkey",desc:{ru:"Вид спереди / сбоку / сверху",en:"Front / side / top view"},
+      tags:{ru:["вид","перспектива","ортогональный"],en:["view","front","side","top","ortho"]}},
+    {id:183,keys:"Shift + A",type:"hotkey",desc:{ru:"Добавить объект/меш",en:"Add object/mesh"},
+      tags:{ru:["добавить объект","новый меш","add mesh"],en:["add","mesh","object"]}},
+    {id:184,keys:"X / Delete",type:"hotkey",desc:{ru:"Удалить объект",en:"Delete object"},
+      tags:{ru:["удалить","delete"],en:["delete","remove"]}},
+    {id:185,keys:"Ctrl + R",type:"hotkey",desc:{ru:"Loop cut (петлевой разрез)",en:"Loop cut"},
+      tags:{ru:["loop cut","разрез","петля","cut"],en:["loop cut","edge loop","cut"]}},
+    {id:186,keys:"F12",type:"hotkey",desc:{ru:"Рендер изображения",en:"Render image"},
+      tags:{ru:["рендер","рендерить","render"],en:["render","f12","image render"]}},
+    {id:187,keys:"N",type:"hotkey",desc:{ru:"Панель свойств (N-panel)",en:"Properties panel (N-panel)"},
+      tags:{ru:["n-panel","свойства","панель"],en:["n-panel","properties","sidebar"]}},
+    {id:188,keys:"Ctrl + S",type:"hotkey",desc:{ru:"Сохранить файл .blend",en:"Save .blend file"},
+      tags:{ru:["сохранить","blend"],en:["save","blend file"]}},
+  ],
+
+  Zoom:[
+    {id:190,keys:{win:"Alt + A",mac:"⌘ + Shift + A"},type:"hotkey",desc:{ru:"Включить/выключить микрофон",en:"Toggle microphone"},
+      tags:{ru:["микрофон","mute","муте","звук"],en:["mute","microphone","audio"]}},
+    {id:191,keys:{win:"Alt + V",mac:"⌘ + Shift + V"},type:"hotkey",desc:{ru:"Включить/выключить камеру",en:"Toggle camera"},
+      tags:{ru:["камера","видео","включить камеру"],en:["camera","video","toggle video"]}},
+    {id:192,keys:{win:"Alt + S",mac:"⌘ + Shift + S"},type:"hotkey",desc:{ru:"Начать демонстрацию экрана",en:"Start screen share"},
+      tags:{ru:["демонстрация экрана","share screen","показать экран"],en:["screen share","share","present"]}},
+    {id:193,keys:{win:"Alt + R",mac:"⌘ + Shift + R"},type:"hotkey",desc:{ru:"Начать запись",en:"Start recording"},
+      tags:{ru:["запись","record","записать"],en:["record","recording","start recording"]}},
+    {id:194,keys:{win:"Alt + F",mac:"⌘ + Shift + F"},type:"hotkey",desc:{ru:"Полноэкранный режим",en:"Full screen"},
+      tags:{ru:["полный экран","fullscreen"],en:["fullscreen","full screen"]}},
+    {id:195,keys:{win:"Alt + H",mac:"⌘ + Shift + H"},type:"hotkey",desc:{ru:"Показать/скрыть участников",en:"Show/hide participants"},
+      tags:{ru:["участники","список","participants"],en:["participants","list","attendees"]}},
+  ],
+  VSCode:[
+    {id:1100,keys:{win:"Ctrl + P",mac:"⌘ + P"},type:"hotkey",desc:{ru:"Быстрый открыть файл",en:"Quick open file"},
+      tags:{ru:["открыть файл","быстрый файл","перейти к файлу"],en:["open file","quick open","go to file"]}},
+    {id:1101,keys:{win:"Ctrl + Shift + P",mac:"⌘ + Shift + P"},type:"hotkey",desc:{ru:"Палитра команд",en:"Command palette"},
+      tags:{ru:["команды","палитра","все команды"],en:["command","palette","all commands"]}},
+    {id:1102,keys:{win:"Ctrl + `",mac:"⌃ + `"},type:"hotkey",desc:{ru:"Открыть терминал",en:"Open terminal"},
+      tags:{ru:["терминал","консоль","открыть терминал"],en:["terminal","console"]}},
+    {id:1103,keys:{win:"Ctrl + /",mac:"⌘ + /"},type:"hotkey",desc:{ru:"Закомментировать строку",en:"Toggle comment"},
+      tags:{ru:["комментарий","закомментировать","//"],en:["comment","toggle comment","uncomment"]}},
+    {id:1104,keys:{win:"Alt + ↑ / ↓",mac:"⌥ + ↑ / ↓"},type:"hotkey",desc:{ru:"Переместить строку вверх/вниз",en:"Move line up/down"},
+      tags:{ru:["переместить строку","двигать строку","swap lines"],en:["move line","swap line"]}},
+    {id:1105,keys:{win:"Ctrl + D",mac:"⌘ + D"},type:"hotkey",desc:{ru:"Выделить следующее совпадение",en:"Select next occurrence"},
+      tags:{ru:["выделить","совпадение","multi cursor","мультикурсор"],en:["select next","occurrence","multi cursor"]}},
+    {id:1106,keys:{win:"Ctrl + Shift + K",mac:"⌘ + Shift + K"},type:"hotkey",desc:{ru:"Удалить строку",en:"Delete line"},
+      tags:{ru:["удалить строку","del line"],en:["delete line","remove line"]}},
+    {id:1107,keys:{win:"Ctrl + B",mac:"⌘ + B"},type:"hotkey",desc:{ru:"Скрыть/показать sidebar",en:"Toggle sidebar"},
+      tags:{ru:["sidebar","боковая панель","скрыть панель"],en:["sidebar","toggle sidebar"]}},
+    {id:1108,keys:{win:"F12",mac:"F12"},type:"hotkey",desc:{ru:"Перейти к определению",en:"Go to definition"},
+      tags:{ru:["определение","декларация","go to def"],en:["definition","declaration","go to def"]}},
+    {id:1109,keys:{win:"Ctrl + Shift + F",mac:"⌘ + Shift + F"},type:"hotkey",desc:{ru:"Поиск по всем файлам",en:"Search across files"},
+      tags:{ru:["поиск везде","глобальный поиск","grep"],en:["global search","find in files","grep"]}},
+    {id:1110,keys:{win:"Alt + Shift + F",mac:"⌥ + Shift + F"},type:"hotkey",desc:{ru:"Форматировать файл",en:"Format document"},
+      tags:{ru:["форматировать","prettier","форматирование"],en:["format","prettier","beautify"]}},
+    {id:1111,keys:{win:"Ctrl + Z / Ctrl + Y",mac:"⌘ + Z / ⌘ + Shift + Z"},type:"hotkey",desc:{ru:"Отменить / Вернуть",en:"Undo / Redo"},
+      tags:{ru:["отмена","вернуть","undo","redo"],en:["undo","redo"]}},
+  ],
+  AfterEffects:[
+    {id:1200,keys:{win:"Space",mac:"Space"},type:"hotkey",desc:{ru:"Воспроизвести превью",en:"Preview playback"},
+      tags:{ru:["воспроизвести","запустить","preview","плей"],en:["play","preview","space"]}},
+    {id:1201,keys:{win:"Ctrl + Shift + D",mac:"⌘ + Shift + D"},type:"hotkey",desc:{ru:"Разрезать слой",en:"Split layer"},
+      tags:{ru:["разрезать","разделить слой","split"],en:["split","cut layer","divide"]}},
+    {id:1202,keys:{win:"U",mac:"U"},type:"hotkey",desc:{ru:"Показать все изменённые свойства",en:"Show modified properties"},
+      tags:{ru:["показать свойства","keyframe","кейфреймы","изменения"],en:["properties","keyframes","modified"]}},
+    {id:1203,keys:{win:"Ctrl + D",mac:"⌘ + D"},type:"hotkey",desc:{ru:"Дублировать слой",en:"Duplicate layer"},
+      tags:{ru:["дублировать","копировать слой","duplicate"],en:["duplicate","copy layer"]}},
+    {id:1204,keys:{win:"Ctrl + Shift + C",mac:"⌘ + Shift + C"},type:"hotkey",desc:{ru:"Pre-compose слои",en:"Pre-compose layers"},
+      tags:{ru:["прекомп","precomp","сгруппировать слои"],en:["precompose","precomp","group layers"]}},
+    {id:1205,keys:{win:"T",mac:"T"},type:"hotkey",desc:{ru:"Показать прозрачность слоя",en:"Show layer opacity"},
+      tags:{ru:["прозрачность","opacity","непрозрачность"],en:["opacity","transparency"]}},
+    {id:1206,keys:{win:"Ctrl + Alt + Y",mac:"⌘ + ⌥ + Y"},type:"hotkey",desc:{ru:"Новый adjustment layer",en:"New adjustment layer"},
+      tags:{ru:["adjustment","корректирующий слой","adjustments"],en:["adjustment layer","correction"]}},
+  ],
+  Notion:[
+    {id:1250,keys:{win:"Ctrl + \\",mac:"⌘ + \\"},type:"hotkey",desc:{ru:"Закрыть/открыть боковую панель",en:"Toggle sidebar"},
+      tags:{ru:["sidebar","боковая","скрыть панель"],en:["sidebar","toggle"]}},
+    {id:1251,keys:{win:"/",mac:"/"},type:"hotkey",desc:{ru:"Вставить блок (слэш-меню)",en:"Insert block (slash menu)"},
+      tags:{ru:["блок","вставить блок","слэш","команда","/ меню"],en:["block","insert","slash","command"]}},
+    {id:1252,keys:{win:"Ctrl + Shift + H",mac:"⌘ + Shift + H"},type:"hotkey",desc:{ru:"Выделить текст цветом",en:"Highlight text"},
+      tags:{ru:["выделить","подсветить","цвет","highlight"],en:["highlight","color","mark"]}},
+    {id:1253,keys:{win:"Ctrl + Shift + 1",mac:"⌘ + Shift + 1"},type:"hotkey",desc:{ru:"Заголовок H1",en:"Heading 1"},
+      tags:{ru:["заголовок","h1","большой заголовок"],en:["heading","h1","title"]}},
+    {id:1254,keys:{win:"Ctrl + Shift + 2",mac:"⌘ + Shift + 2"},type:"hotkey",desc:{ru:"Заголовок H2",en:"Heading 2"},
+      tags:{ru:["заголовок","h2","подзаголовок"],en:["heading","h2","subheading"]}},
+    {id:1255,keys:{win:"Ctrl + Shift + 7",mac:"⌘ + Shift + 7"},type:"hotkey",desc:{ru:"Нумерованный список",en:"Numbered list"},
+      tags:{ru:["нумерованный список","1 2 3","список"],en:["numbered list","ordered","ol"]}},
+    {id:1256,keys:{win:"Ctrl + Shift + 8",mac:"⌘ + Shift + 8"},type:"hotkey",desc:{ru:"Список с точками",en:"Bullet list"},
+      tags:{ru:["список точки","bullet","маркированный список"],en:["bullet","list","unordered"]}},
+    {id:1257,keys:{win:"Ctrl + Shift + 9",mac:"⌘ + Shift + 9"},type:"hotkey",desc:{ru:"Задача / чекбокс",en:"Todo / checkbox"},
+      tags:{ru:["задача","чекбокс","todo","checkbox","done"],en:["todo","checkbox","task","check"]}},
+    {id:1258,keys:{win:"Ctrl + [",mac:"⌘ + ["},type:"hotkey",desc:{ru:"Уменьшить отступ блока",en:"Decrease block indent"},
+      tags:{ru:["отступ","убрать вложение","dedent"],en:["dedent","indent","outdent"]}},
+    {id:1259,keys:{win:"Ctrl + ]",mac:"⌘ + ]"},type:"hotkey",desc:{ru:"Увеличить отступ блока",en:"Increase block indent"},
+      tags:{ru:["отступ","вложение","indent"],en:["indent","nest","block"]}},
+  ],
+};
+
+const PROGRAMS=Object.keys(DB);
+
+const COLORS={
+  Excel:"#22c55e",Word:"#3b82f6",PowerPoint:"#f97316","VS Code":"#a78bfa",
+  Photoshop:"#38bdf8",Figma:"#a855f7",Chrome:"#f59e0b",Windows:"#0ea5e9",
+  Terminal:"#10b981",Telegram:"#06b6d4",Notion:"#e2e8f0",Slack:"#e11d48",
+  "After Effects":"#7c3aed",Premiere:"#1d4ed8",Blender:"#f97316",Zoom:"#2563eb"
+};
+
+
+const ICONS={
+  Excel:"⊞",Word:"W",PowerPoint:"P","VS Code":"</>",Photoshop:"Ps",
+  Figma:"◈",Chrome:"◉",Windows:"⊟",Terminal:">_",Telegram:"✈",
+  Notion:"N",Slack:"#","After Effects":"Ae",Premiere:"Pr",Blender:"⬡",Zoom:"Z",
+  VSCode:"</>",AfterEffects:"Ae"
+};
+
+
+const SYNONYMS={
+  'сцепить':['concatenate','объединить','склеить','соединить','слить','merge','join','concat'],
+  'впр':['vlookup','поиск таблице','подтянуть','подтянуть данные','поискпоз','искомое значение','место поиска','номер столбца','диапазон поиска','вертикальный поиск','точное совпадение'],
+  'сумм':['sum','сложить','итого','total','суммировать'],
+  'если':['if','условие','condition','логика','ветвление'],
+  'счётесли':['countif','посчитать','количество','сколько раз'],
+  'суммесли':['sumif','сумма условие'],
+  'среднее':['average','mean','avg','средний'],
+  'округл':['round','округление'],
+  'сегодня':['today','дата','current date'],
+  'индекс':['index','поискпоз','match'],
+  'удалить':['delete','remove','убрать','стереть','del'],
+  'вставить':['paste','insert','ctrl v'],
+  'скопировать':['copy','ctrl c','копировать'],
+  'найти':['find','search','ctrl f','поиск'],
+  'сохранить':['save','ctrl s'],
+  'отменить':['undo','ctrl z'],
+  'переместить':['move','drag','двигать'],
+  'скриншот':['screenshot','снимок экрана','printscreen','prntscr'],
+  'терминал':['terminal','console','консоль'],
+  'комментарий':['comment','закомментировать','//'],
+  'форматировать':['format','formatter','prettier'],
+  'дублировать':['duplicate','копия','copy'],
+  'группировать':['group','group objects'],
+  'трансформация':['transform','scale','resize','rotate'],
+  'фильтр':['filter','autofilter','сортировка'],
+  'ссылка':['link','hyperlink','url','href'],
+  'заголовок':['heading','header','h1','h2','title'],
+  'шрифт':['font','typeface','размер шрифта'],
+  'выравнивание':['align','alignment','center','justify'],
+  'блок':['block','элемент','node'],
+  'слой':['layer','уровень'],
+  'кисть':['brush','pen','draw'],
+  'экспорт':['export','save as','сохранить как'],
+  'импорт':['import','load','загрузить'],
+};
+
+
+const FORMULA_MAP={
+  'ВПР':'VLOOKUP','ВЛOOKUP':'VLOOKUP','СУММ':'SUM','СРЗНАЧ':'AVERAGE',
+  'ЕСЛИ':'IF','СЧЁТЕСЛИ':'COUNTIF','СУММЕСЛИ':'SUMIF','ИНДЕКС':'INDEX',
+  'ПОИСКПОЗ':'MATCH','ЕСЛИОШИБКА':'IFERROR','СЦЕПИТЬ':'CONCATENATE',
+  'СЕГОДНЯ':'TODAY','ОКРУГЛ':'ROUND','СЖПРОБЕЛЫ':'TRIM','ДЛСТР':'LEN',
+  'ТЕКСТ':'TEXT','СУММПРОИЗВ':'SUMPRODUCT','УНИКАЛЬНЫЕ':'UNIQUE',
+  'МАКС':'MAX','МИН':'MIN','ЛЕВСИМВ':'LEFT','ПРАВСИМВ':'RIGHT','ПСТР':'MID',
+};
+
+
+
+function fixLayout(s){
+  const ruChars='йцукенгшщзхъфывапролджэячсмитьбю';
+  const enChars='qwertyuiop[]asdfghjkl;\'zxcvbnm,.';
+  let r='';
+  for(const c of s.toLowerCase()){
+    const i=ruChars.indexOf(c);
+    r+=i>=0?enChars[i]:c;
+  }
+  return r;
+}
+
+function expandQuery(q){
+  const words=new Set([q]);
+  words.add(fixLayout(q));
+  const low=q.toLowerCase();
+  for(const [key,syns] of Object.entries(SYNONYMS)){
+    if(low.includes(key)){syns.forEach(s=>words.add(s));}
+    for(const s of syns) if(low.includes(s)){words.add(key);syns.forEach(x=>words.add(x));}
+  }
+  return [...words];
+}
+
+function levenshtein(a,b){
+  const m=a.length,n=b.length;
+  const dp=Array.from({length:m+1},(_,i)=>Array.from({length:n+1},(_,j)=>i===0?j:j===0?i:0));
+  for(let i=1;i<=m;i++) for(let j=1;j<=n;j++)
+    dp[i][j]=a[i-1]===b[j-1]?dp[i-1][j-1]:1+Math.min(dp[i-1][j],dp[i][j-1],dp[i-1][j-1]);
+  return dp[m][n];
+}
+
+function extractFormulaName(query){
+  // Detect formula queries like "=ВПР(...)" or "=SUM(...)" or just "ВПР"
+  const formulaMatch = query.match(/^=?([A-ZА-ЯЁ][A-ZА-ЯЁ0-9]*)/i);
+  if(formulaMatch) return formulaMatch[1].toUpperCase();
+  return null;
+}
+
+function parseComplexFormula(query){
+  // Detects queries like "Сумма столбца I и B", "сложить A и C", "средние столбцов D F"
+  const q=query.toLowerCase().trim();
+  const colMatch=q.match(/(?:столб(?:ца?|цов)?|column[s]?)\s+([a-zа-яёa-z,\s]+?)(?:\s+и\s+|\s*,\s*|\s+and\s+)([a-zа-яёa-z]+)/i);
+  const opWords={
+    'сумм':['сумм','сложить','total','сложи','итого','sum'],'среднее':['средн','average','avg','mean'],
+    'количество':['количеств','счёт','сколько','count'],'максимум':['макс','maximum','max','наибольш'],
+    'минимум':['миним','minimum','min','наименьш']
+  };
+  for(const [op,kws] of Object.entries(opWords)){
+    for(const kw of kws){
+      if(q.includes(kw)){
+        // Extract column letters
+        const cols=[...q.matchAll(/\b([a-zA-Z]{1,3})\b/g)]
+          .map(m=>m[1].toUpperCase())
+          .filter(l=>/^[A-Z]{1,3}$/.test(l)&&!/^(И|I|ИЛИ|ОТ|ДО|AND|OR|OF)$/i.test(l));
+        if(cols.length>=2) return {op,cols};
+        if(cols.length===1) return {op,cols};
+        return {op,cols:[]};
+      }
+    }
+  }
+  return null;
+}
+
+function scoreItem(query,item){
+  if(!query||query.trim().length<2) return 0;
+  // Bonus: if query looks like a formula (=ВПР(...) or =SUM), match by name
+  const fname = extractFormulaName(query.trim());
+  if(fname){
+    const mapped = FORMULA_MAP[fname]||fname;
+    const keysStr = (typeof item.keys==='string'?item.keys:Object.values(item.keys||{}).join(' ')).toUpperCase();
+    if(keysStr.includes(mapped)||keysStr.includes(fname)) return 20;
+  }
+  const q=query.toLowerCase().trim();
+  const desc=getDesc(item).toLowerCase();
+  const tags=getTags(item).join(' ').toLowerCase();
+  const keysStr=(typeof item.keys==='string'?item.keys:Object.values(item.keys||{}).join(' ')).toLowerCase();
+  const allText=desc+' '+tags+' '+keysStr;
+  const expanded=expandQuery(q);
+  let s=0;
+  for(const eq of expanded){
+    const e=eq.toLowerCase();
+    if(allText.includes(e)) s+=e===q?10:6;
+    else{
+      const words=e.split(/\s+/);
+      for(const w of words) if(w.length>2&&allText.includes(w)) s+=w===q?5:3;
+    }
+    for(const w of e.split(/\s+/)){
+      if(w.length<3) continue;
+      for(const word of allText.split(/\s+/)){
+        if(word.length>2&&levenshtein(w,word)<=1) s+=2;
+      }
+    }
+  }
+  return s;
+}
+
+function adaptKeys(keys){
+  if(typeof keys==='string') return keys;
+  if(!keys) return '';
+  const os = settings.os || 'win';
+  return keys[os] || keys.win || keys.mac || Object.values(keys)[0] || '';
+}
+
+function getDesc(item){if(!item.desc)return '';if(typeof item.desc==='object')return item.desc[settings.lang||'ru']||item.desc.ru||item.desc.en||'';return item.desc||''}
+
+function getTags(item){return typeof item.tags==='object'?(item.tags[settings.lang]||[]):(item.tags||[])}
+
+function getKeys(item){return adaptKeys(item.keys)}
+
+function doSearch(query,progs,typeFilter){
+  if(query.trim().length<2) return [];
+  // Handle complex formula queries first
+  const complex=parseComplexFormula(query);
+  if(complex&&(progs.includes('Excel')||typeFilter==='formula')){
+    const colStr=complex.cols.length?complex.cols.join(':'): 'A:A';
+    const opMap={
+      'сумм':'SUM','среднее':'AVERAGE','количество':'COUNT',
+      'максимум':'MAX','минимум':'MIN'
+    };
+    const fnName=opMap[complex.op]||'SUM';
+    // Find the matching formula item and boost it massively
+    const synth=complex.cols.length>=2
+      ? `=${fnName}(${complex.cols.join(':')})` // range like =SUM(A:B)  
+      : `=${fnName}(${colStr})`;
+    // Mark synthetic result on the item
+    const out=[];
+    for(const prog of progs){
+      for(const item of DB[prog]||[]){
+        if(typeFilter!=='all'&&item.type!==typeFilter) continue;
+        if(item.type==='formula'&&item.keys&&typeof item.keys==='string'&&item.keys.toUpperCase()===fnName){
+          out.push({...item,_synth:synth,_synthCols:complex.cols,program:prog,score:50});
+          continue;
+        }
+        const s=scoreItem(query,item);
+        if(s>0) out.push({...item,program:prog,score:s});
+      }
+    }
+    out.sort((a,b)=>b.score-a.score);
+    return out.slice(0,16);
+  }
+  const out=[];
+  for(const prog of progs){
+    for(const item of DB[prog]||[]){
+      if(typeFilter!=='all'&&item.type!==typeFilter) continue;
+      const s=scoreItem(query,item);
+      if(s>0) out.push({...item,program:prog,score:s});
+    }
+  }
+  return out.sort((a,b)=>b.score-a.score).slice(0,16);
+}
+
+async function callAI(sp, userMsg, maxTok){
+  const provider = settings.aiProvider||'claude';
+  const km={claude:settings.aiKey,giga:settings.gigaKey,openai:settings.openaiKey,
+    gemini:settings.geminiKey,groq:settings.groqKey,deepseek:settings.deepseekKey,
+    mistral:settings.mistralKey,yandex:settings.yandexKey,custom:settings.customKey};
+  const key = km[provider]||'';
+  if(!key && provider!=='giga') throw new Error('❌ Нет API ключа для '+provider);
+  maxTok = maxTok||400;
+
+  if(provider==='claude'){
+    const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',
+      headers:{'Content-Type':'application/json','x-api-key':key,
+        'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+      body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:maxTok,system:sp,
+        messages:[{role:'user',content:userMsg}]})});
+    const d=await r.json();
+    if(d.error) throw new Error(d.error.message||'Claude error');
+    return d.content?.[0]?.text||'';
+  }
+
+  if(provider==='giga'){
+    const invoke=window.__TAURI__?.core?.invoke||window.__TAURI__?.tauri?.invoke;
+    if(!invoke) throw new Error('GigaChat доступен только в десктоп-приложении');
+    const ak=key.startsWith('Basic ')?key.slice(6).trim():key;
+    return await invoke('giga_search',{authKey:ak,systemPrompt:sp,query:userMsg});
+  }
+
+  if(provider==='openai'){
+    const r=await fetch('https://api.openai.com/v1/chat/completions',{method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},
+      body:JSON.stringify({model:'gpt-4o-mini',max_tokens:maxTok,
+        messages:[{role:'system',content:sp},{role:'user',content:userMsg}]})});
+    const d=await r.json();
+    if(d.error) throw new Error(d.error.message||'OpenAI error');
+    return d.choices?.[0]?.message?.content||'';
+  }
+
+  if(provider==='gemini'){
+    const model='gemini-2.0-flash-lite';
+    const r=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`,
+      {method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({contents:[{role:'user',parts:[{text:sp+'\n\n'+userMsg}]}],
+        generationConfig:{maxOutputTokens:maxTok}})});
+    const d=await r.json();
+    if(d.error) throw new Error(d.error.message||'Gemini error');
+    return d.candidates?.[0]?.content?.parts?.[0]?.text||'';
+  }
+
+  if(provider==='groq'){
+    const r=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},
+      body:JSON.stringify({model:'llama-3.1-8b-instant',max_tokens:maxTok,
+        messages:[{role:'system',content:sp},{role:'user',content:userMsg}]})});
+    const d=await r.json();
+    if(d.error) throw new Error(d.error.message||'Groq error');
+    return d.choices?.[0]?.message?.content||'';
+  }
+
+  if(provider==='deepseek'){
+    const r=await fetch('https://api.deepseek.com/chat/completions',{method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},
+      body:JSON.stringify({model:'deepseek-chat',max_tokens:maxTok,
+        messages:[{role:'system',content:sp},{role:'user',content:userMsg}]})});
+    const d=await r.json();
+    if(d.error) throw new Error(d.error.message||'DeepSeek error');
+    return d.choices?.[0]?.message?.content||'';
+  }
+
+  if(provider==='mistral'){
+    const r=await fetch('https://api.mistral.ai/v1/chat/completions',{method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},
+      body:JSON.stringify({model:'mistral-small-latest',max_tokens:maxTok,
+        messages:[{role:'system',content:sp},{role:'user',content:userMsg}]})});
+    const d=await r.json();
+    if(d.error) throw new Error(d.error.message||'Mistral error');
+    return d.choices?.[0]?.message?.content||'';
+  }
+
+  if(provider==='yandex'){
+    const folder=settings.yandexFolder||'';
+    const r=await fetch('https://llm.api.cloud.yandex.net/foundationModels/v1/completion',
+      {method:'POST',headers:{'Content-Type':'application/json','Authorization':'Api-Key '+key,
+        'x-folder-id':folder},
+      body:JSON.stringify({modelUri:`gpt://${folder}/yandexgpt-lite`,
+        completionOptions:{maxTokens:maxTok,temperature:0.6},
+        messages:[{role:'system',text:sp},{role:'user',text:userMsg}]})});
+    const d=await r.json();
+    if(d.error) throw new Error(d.error.message||'YandexGPT error');
+    return d.result?.alternatives?.[0]?.message?.text||'';
+  }
+
+  // custom (OpenAI-compatible)
+  const url=(settings.customUrl||'').trim()||'https://api.openai.com/v1';
+  const base=url.endsWith('/')?url.slice(0,-1):url;
+  const r=await fetch(base+'/chat/completions',{method:'POST',
+    headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},
+    body:JSON.stringify({model:'gpt-4o-mini',max_tokens:maxTok,
+      messages:[{role:'system',content:sp},{role:'user',content:userMsg}]})});
+  const d=await r.json();
+  if(d.error) throw new Error(d.error.message||'Custom API error');
+  return d.choices?.[0]?.message?.content||'';
+}
+
+// ═══ WIDGET STATE ═══
+const ws = {lang:'ru', os:'win', theme:'dark', aiProvider:'claude'};
+try { Object.assign(ws, JSON.parse(localStorage.getItem('sc_settings_v2') || '{}')); } catch {}
+const settings = ws; // alias so engine functions (adaptKeys, getDesc, getTags) work
+// lang/os/ru derived from ws (ws has defaults so these are always correct)
+const lang = ws.lang;
+const os   = ws.os;
+const ru   = lang === 'ru';
+
+// Widget AI setting: use if global ai enabled AND widget ai enabled
+const widgetAiEnabled = () => {
+  try {
+    const s = JSON.parse(localStorage.getItem('sc_settings_v2') || '{}');
+    return s.widgetAi !== false; // default: true
+  } catch { return true; }
+};
+
+const providerName = () => {
+  const p = ws.aiProvider || 'claude';
+  return {claude:'Claude',giga:'GigaChat',openai:'GPT-4o mini',gemini:'Gemini',
+    groq:'Groq',deepseek:'DeepSeek',mistral:'Mistral',yandex:'YandexGPT',custom:'Custom'}[p]||p;
+};
+
+const hasApiKey = () => {
+  try {
+    const s = JSON.parse(localStorage.getItem('sc_settings_v2') || '{}');
+    const p = s.aiProvider || 'claude';
+    const km = {claude:s.aiKey,giga:s.gigaKey,openai:s.openaiKey,gemini:s.geminiKey,
+      groq:s.groqKey,deepseek:s.deepseekKey,mistral:s.mistralKey,yandex:s.yandexKey,custom:s.customKey};
+    return !!(km[p] || (p === 'giga'));
+  } catch { return false; }
+};
+
+// Active programs
+let activeProgs = Object.keys(DB).slice(0, 4);
+try {
+  const saved = JSON.parse(localStorage.getItem('sc_widget_progs') || 'null');
+  if (Array.isArray(saved) && saved.length) activeProgs = saved;
+} catch {}
+
+let aiMode = false;
+let aiLoading = false;
+let aiResult  = null;
+let aiQuery   = '';
+let searchTimer = null;
+
+// Tauri invoke
+const invoke = window.__TAURI__?.core?.invoke || window.__TAURI__?.tauri?.invoke;
+
+// ═══ PILLS ═══
+function renderPills() {
+  const el = document.getElementById('pills');
+  el.innerHTML = '';
+  Object.keys(DB).forEach(prog => {
+    const active = activeProgs.includes(prog);
+    const color  = COLORS[prog] || '#818cf8';
+    const pill   = document.createElement('button');
+    pill.className = 'pill' + (active ? ' active' : '');
+    if (active) {
+      pill.style.cssText = `border-color:${color}66;color:${color};background:${color}14;`;
+    }
+    pill.innerHTML = `<span>${ICONS[prog]||'●'}</span><span>${prog}</span>`;
+    pill.onclick = () => {
+      if (active) {
+        if (activeProgs.length > 1) activeProgs = activeProgs.filter(p => p !== prog);
+      } else {
+        activeProgs = [...activeProgs, prog];
+      }
+      localStorage.setItem('sc_widget_progs', JSON.stringify(activeProgs));
+      renderPills();
+      runSearch();
+    };
+    el.appendChild(pill);
+  });
+}
+
+// ═══ SEARCH ═══
+function getDisplayKey(item) {
+  if (item.type === 'formula') {
+    return item._synth || item.example || ('=' + (typeof item.keys === 'string' ? item.keys : Object.values(item.keys||{})[0] || ''));
+  }
+  const k = item.keys;
+  if (!k) return '';
+  if (typeof k === 'string') return k;
+  return k[os] || k.win || k.mac || Object.values(k)[0] || '';
+}
+
+function getCopyText(item) {
+  return getDisplayKey(item);
+}
+
+function renderResults(items, query) {
+  const el = document.getElementById('results');
+  const ft = document.getElementById('ft-stat');
+  el.innerHTML = '';
+
+  if (!items.length) {
+    el.innerHTML = `<div class="empty">
+      <span class="empty-icon">${query.length < 2 ? '⌘' : '🔭'}</span>
+      <div class="empty-t">${query.length < 2 ? (ru?'Начни вводить запрос':'Start typing') : (ru?'Ничего не найдено':'Nothing found')}</div>
+      <div class="empty-h">${query.length < 2 ? (ru?'Поиск по '+Object.keys(DB).length+' командам':'Search across '+Object.keys(DB).length+' shortcuts') : (ru?'Попробуй другие слова или AI ✦':'Try AI search ✦ or rephrase')}</div>
+    </div>`;
+    ft.textContent = '';
+    return;
+  }
+
+  ft.textContent = ru ? `Найдено: ${items.length}` : `Found: ${items.length}`;
+  requestAnimationFrame(applyAutoMode);
+
+  items.forEach((item, i) => {
+    const prog  = item.program || activeProgs[0] || '';
+    const color = COLORS[prog] || '#818cf8';
+    const isFx  = item.type === 'formula';
+    const keyTxt = getDisplayKey(item);
+    const desc  = getDesc(item);
+    const tmpl  = item.template || '';
+    const tags  = (typeof item.tags === 'object' ? (item.tags[lang] || item.tags.ru || item.tags.en || []) : (item.tags || [])).slice(0, 4);
+    const ex    = item.example || '';
+
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.style.animationDelay = `${Math.min(i, 6) * 25}ms`;
+    card.style.setProperty('--c', color);
+    card.querySelector?.('before')?.style?.setProperty('background', color);
+
+    // Left stripe via CSS var on element
+    card.style.setProperty('--card-color', color);
+
+    // Key rendering
+    const keyParts = keyTxt.split(/\s*\+\s*/);
+    let keyHtml = '';
+    if (isFx) {
+      keyHtml = `<span class="formula-text">${keyTxt}</span>`;
+    } else if (keyParts.length > 1) {
+      keyHtml = keyParts.map(p => `<span class="key-chip">${p}</span>`).join('<span style="color:var(--text3);padding:0 2px">+</span>');
+    } else {
+      keyHtml = `<span class="key-chip">${keyTxt}</span>`;
+    }
+
+    // OS key (secondary)
+    let otherKey = '';
+    if (!isFx && typeof item.keys === 'object') {
+      const altOs = os === 'mac' ? 'win' : 'mac';
+      const altKey = item.keys[altOs];
+      if (altKey && altKey !== keyTxt) {
+        const altLabel = altOs === 'mac' ? 'Mac' : 'Win';
+        otherKey = `<span style="font-size:9px;color:var(--text3);font-family:var(--mono)">${altLabel}: ${altKey}</span>`;
+      }
+    }
+
+    // Template (formula)
+    let templateHtml = '';
+    if (isFx && tmpl) {
+      templateHtml = `<div class="card-template">template: ${tmpl}</div>`;
+    }
+
+    // Tags
+    const tagsHtml = tags.length
+      ? `<div class="card-tags">${tags.map(t=>`<span class="tag">${t}</span>`).join('')}</div>`
+      : '';
+
+    card.innerHTML = `
+      <div class="card-inner">
+        <div class="card-head">
+          <div class="card-app-badge" style="background:${color}14;color:${color}">${ICONS[prog]||'●'}&nbsp;${prog}</div>
+          <div class="card-type ${isFx?'type-formula':'type-hotkey'}">${isFx?'fx':'⌨'}</div>
+        </div>
+        <div class="card-key">${keyHtml}</div>
+        ${otherKey ? `<div style="margin-bottom:4px">${otherKey}</div>` : ''}
+        ${templateHtml}
+        <div class="card-desc">${desc}</div>
+        ${tagsHtml}
+        <div class="card-actions">
+          <button class="act-btn ${isFx?'green':'primary'}" data-copy="${keyTxt.replace(/"/g,'&quot;')}">
+            ${ru?'📋 Скопировать':'📋 Copy'}
+          </button>
+          ${ex && ex !== keyTxt ? `<button class="act-btn" data-copy="${ex.replace(/"/g,'&quot;')}" style="color:var(--text2)">⎘ ${ex}</button>` : ''}
+          ${isFx && item.template ? `<button class="act-btn" data-copy="${(item.template||'').replace(/"/g,'&quot;')}" style="color:var(--text3)">${ru?'Шаблон':'Template'}</button>` : ''}
+        </div>
+      </div>
+      <div class="copy-flash">✓ ${ru?'Скопировано!':'Copied!'}</div>
+    `;
+
+    // Copy buttons
+    card.querySelectorAll('[data-copy]').forEach(btn => {
+      btn.addEventListener('click', e => {
+        e.stopPropagation();
+        const text = btn.getAttribute('data-copy');
+        navigator.clipboard?.writeText(text).catch(() => {});
+        card.classList.add('flash');
+        setTimeout(() => card.classList.remove('flash'), 800);
+      });
+    });
+
+    // Card click = copy main key
+    // Show template on hover
+    if (isFx && tmpl) {
+      const tmplEl = card.querySelector('.card-template');
+      card.addEventListener('mouseenter', () => { if(tmplEl) tmplEl.style.display='block'; });
+      card.addEventListener('mouseleave', () => { if(tmplEl) tmplEl.style.display='none'; });
+    }
+
+    card.addEventListener('click', e => {
+      if (e.target.closest('[data-copy]')) return;
+      navigator.clipboard?.writeText(keyTxt).catch(() => {});
+      card.classList.add('flash');
+      setTimeout(() => card.classList.remove('flash'), 800);
+    });
+
+    el.appendChild(card);
+  });
+}
+
+// ═══ AI RESULT ═══
+function renderAiLoading() {
+  const el = document.getElementById('results');
+  el.innerHTML = `<div class="ai-card">
+    <div class="ai-card-head">✦ ${providerName()}</div>
+    <div class="ai-loading">
+      <div class="ai-dot"></div><div class="ai-dot"></div><div class="ai-dot"></div>
+      <span>${ru?'Думаю...':'Thinking...'}</span>
+    </div>
+  </div>`;
+}
+
+function renderAiResult(text, query) {
+  const el = document.getElementById('results');
+  const aiDiv = document.createElement('div');
+  aiDiv.className = 'ai-card';
+  aiDiv.style.animationDelay = '0ms';
+  aiDiv.innerHTML = `
+    <div class="ai-card-head">✦ ${providerName()} · <span style="color:var(--text3)">${query}</span></div>
+    <div class="ai-card-body" id="ai-body"></div>
+    <div class="card-actions" style="margin-top:8px">
+      <button class="act-btn primary" id="ai-copy">${ru?'📋 Скопировать ответ':'📋 Copy answer'}</button>
+    </div>
+  `;
+  el.insertBefore(aiDiv, el.firstChild);
+  aiDiv.querySelector('#ai-body').textContent = text;
+  aiDiv.querySelector('#ai-copy').onclick = () => {
+    navigator.clipboard?.writeText(text).catch(() => {});
+    const btn = aiDiv.querySelector('#ai-copy');
+    btn.textContent = ru ? '✓ Скопировано' : '✓ Copied';
+    setTimeout(() => btn.textContent = ru ? '📋 Скопировать ответ' : '📋 Copy answer', 1500);
+  };
+}
+
+// ═══ MAIN SEARCH ═══
+async function runSearch() {
+  const q = document.getElementById('q').value.trim();
+
+  if (aiMode && widgetAiEnabled() && hasApiKey() && q.length > 2) {
+    // Show local results first instantly, then AI
+    const localResults = doSearch(q, activeProgs, 'all').slice(0, 5);
+    renderResults(localResults, q);
+    // Debounced AI call
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(() => doAiSearch(q), 600);
+    return;
+  }
+
+  if (q.length < 2) {
+    const sample = activeProgs.flatMap(p => (DB[p] || []).slice(0, 3)).slice(0, 9);
+    renderResults(sample, q);
+    document.getElementById('ft-stat').textContent = '';
+    return;
+  }
+
+  const results = doSearch(q, activeProgs, 'all');
+  renderResults(results.slice(0, 12), q);
+}
+
+async function doAiSearch(q) {
+  if (!q || q.length < 3) return;
+  renderAiLoading();
+  // Also show local results below loader
+  const localResults = doSearch(q, activeProgs, 'all').slice(0, 5);
+
+  const sp = ru
+    ? `Ты помощник по горячим клавишам и формулам Excel/Word/Figma и других приложений. Отвечай кратко и по делу — 2-3 предложения максимум. Только если вопрос по теме приложений и горячих клавиш. Язык ответа: русский.`
+    : `You are a hotkeys and formulas assistant for Excel, Word, Figma and other apps. Answer briefly — 2-3 sentences max. Only answer if related to apps and hotkeys. Answer in English.`;
+
+  try {
+    const text = await callAI(sp, q, 200);
+    renderAiLoading(); // re-show loader area
+    const el = document.getElementById('results');
+    el.innerHTML = '';
+    renderAiResult(text.trim(), q);
+    // Append local results below
+    localResults.forEach((item, i) => {
+      const prog = item.program || '';
+      const color = COLORS[prog] || '#818cf8';
+      const isFx = item.type === 'formula';
+      const keyTxt = getDisplayKey(item);
+      const desc = getDesc(item);
+      const mini = document.createElement('div');
+      mini.className = 'card';
+      mini.style.animationDelay = `${(i+1)*30}ms`;
+      mini.innerHTML = `
+        <div class="card-inner" style="padding:6px 10px">
+          <div class="card-head" style="margin-bottom:3px">
+            <div class="card-app-badge" style="background:${color}14;color:${color}">${ICONS[prog]||'●'}&nbsp;${prog}</div>
+            <div class="card-type ${isFx?'type-formula':'type-hotkey'}">${isFx?'fx':'⌨'}</div>
+          </div>
+          <div class="card-key" style="font-size:12px">${isFx?`<span class="formula-text">${keyTxt}</span>`:`<span class="key-chip">${keyTxt}</span>`}</div>
+          <div class="card-desc" style="font-size:11px">${desc}</div>
+        </div>
+        <div class="copy-flash">✓ ${ru?'Скопировано!':'Copied!'}</div>
+      `;
+      mini.onclick = () => {
+        navigator.clipboard?.writeText(keyTxt).catch(()=>{});
+        mini.classList.add('flash');
+        setTimeout(()=>mini.classList.remove('flash'),800);
+      };
+      // Add style for ::before
+      mini.style.setProperty('--card-color', color);
+      el.appendChild(mini);
+    });
+    document.getElementById('ft-stat').textContent = ru ? `✦ AI + ${localResults.length} локальных` : `✦ AI + ${localResults.length} local`;
+  } catch(e) {
+    const el = document.getElementById('results');
+    el.innerHTML = `<div class="ai-card">
+      <div class="ai-card-head" style="color:var(--red)">✦ ${ru?'Ошибка AI':'AI Error'}</div>
+      <div class="ai-card-body" style="color:var(--red)">${String(e.message||e).slice(0,120)}</div>
+    </div>`;
+    // Show local anyway
+    const localResults2 = doSearch(q, activeProgs, 'all').slice(0, 5);
+    renderResults(localResults2, q);
+  }
+}
+
+// ═══ AI TOGGLE ═══
+function updateAiBtn() {
+  const btn = document.getElementById('ai-toggle-btn');
+  const canUseAi = widgetAiEnabled() && hasApiKey();
+  if (aiMode && canUseAi) {
+    btn.classList.add('active');
+    btn.title = `AI вкл (${providerName()})`;
+    document.getElementById('q').placeholder = ru ? '✦ AI-поиск...' : '✦ AI search...';
+  } else {
+    btn.classList.remove('active');
+    btn.title = canUseAi ? (ru?'AI выкл':'AI off') : (ru?'Нет API ключа':'No API key');
+    document.getElementById('q').placeholder = ru ? 'Что хочешь сделать?' : 'What do you want to do?';
+  }
+}
+
+document.getElementById('ai-toggle-btn').onclick = () => {
+  if (!widgetAiEnabled() || !hasApiKey()) {
+    // Show hint
+    const btn = document.getElementById('ai-toggle-btn');
+    btn.title = ru ? 'Включи AI в настройках SearchCopy' : 'Enable AI in SearchCopy settings';
+    btn.style.color = 'var(--red)';
+    setTimeout(() => { btn.style.color=''; }, 1500);
+    return;
+  }
+  aiMode = !aiMode;
+  updateAiBtn();
+  runSearch();
+};
+
+// ═══ CONTROLS ═══
+document.getElementById('q').addEventListener('input', () => {
+  clearTimeout(searchTimer);
+  searchTimer = setTimeout(runSearch, aiMode ? 100 : 80);
+});
+
+document.getElementById('q').addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    if (document.getElementById('q').value) {
+      document.getElementById('q').value = '';
+      runSearch();
+    } else {
+      if (invoke) invoke('hide_widget'); else window.close();
+    }
+  }
+  if (e.key === 'Enter' && aiMode) {
+    clearTimeout(searchTimer);
+    runSearch();
+  }
+});
+
+document.getElementById('clear-btn').onclick = () => {
+  document.getElementById('q').value = '';
+  document.getElementById('q').focus();
+  runSearch();
+};
+
+// drag: handled by native window titlebar
+
+// close via native window button
+document.getElementById('main-btn').onclick = async () => {
+  if (invoke) { await invoke('show_main_window'); await invoke('hide_widget'); }
+};
+document.getElementById('ft-open').onclick = async () => {
+  if (invoke) { await invoke('show_main_window'); await invoke('hide_widget'); }
+};
+
+let pinned = localStorage.getItem('sc_widget_pinned') !== 'false';
+
+function applyPin(val) {
+  pinned = val;
+  localStorage.setItem('sc_widget_pinned', String(val));
+  const btn = document.getElementById('pin-btn');
+  if (btn) {
+    btn.classList.toggle('active', pinned);
+    btn.title = pinned ? (ru ? 'Закреплено поверх окон' : 'Pinned on top') : (ru ? 'Не закреплено' : 'Not pinned');
+    btn.textContent = pinned ? '📌' : '📍';
+  }
+  if (invoke) invoke('set_widget_always_on_top', { value: pinned }).catch(()=>{});
+}
+
+document.getElementById('pin-btn').onclick = () => applyPin(!pinned);
+
+// Apply saved pin state on load
+
+// ── Mini mode ──
+let miniMode = localStorage.getItem('sc_widget_mini') === 'true';
+
+function applyMini(val) {
+  miniMode = val;
+  localStorage.setItem('sc_widget_mini', String(val));
+  document.body.classList.toggle('mini', miniMode);
+  const btn = document.getElementById('mini-btn');
+  if (btn) {
+    btn.title = miniMode ? (ru ? 'Обычный режим' : 'Normal mode') : (ru ? 'Мини режим' : 'Mini mode');
+    btn.textContent = miniMode ? '⊞' : '⊡';
+    btn.classList.toggle('active', miniMode);
+  }
+  // In mini mode only show 3 results max
+  runSearch();
+}
+
+document.getElementById('mini-btn').onclick = () => applyMini(!miniMode);
+applyMini(miniMode);
+
+
+// ── Auto mode by window size ──
+function applyAutoMode() {
+  const h = window.innerHeight;
+  const w = window.innerWidth;
+  document.body.classList.remove('nano', 'ultra');
+  if (h < 120) {
+    document.body.classList.add('nano');
+  } else if (h < 200 || w < 220) {
+    document.body.classList.add('ultra');
+  }
+  // Also limit visible results dynamically
+  const maxCards = h < 120 ? 0 : h < 200 ? 2 : h < 300 ? 3 : miniMode ? 3 : 12;
+  document.querySelectorAll('#results .card').forEach((card, i) => {
+    card.style.display = i < maxCards ? '' : 'none';
+  });
+}
+
+const resizeObs = new ResizeObserver(() => applyAutoMode());
+resizeObs.observe(document.documentElement);
+window.addEventListener('resize', applyAutoMode);
+applyAutoMode();
+
+applyPin(pinned);
+
+// ═══ INIT ═══
+renderPills();
+updateAiBtn();
+runSearch();
+document.getElementById('q').focus();
+
+// Refresh settings when window gets focus (in case user changed settings)
+window.addEventListener('focus', () => {
+  Object.assign(ws, (() => { try { return JSON.parse(localStorage.getItem('sc_settings_v2')||'{}'); } catch { return {}; } })());
+  // settings is same reference as ws, no need to reassign
+  updateAiBtn();
+});
+</script>
+</body>
+</html>

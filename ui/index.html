@@ -16,21 +16,98 @@
   --code-bg:rgba(0,0,0,0.4);--code-border:rgba(255,255,255,0.07);--code-color:#93c5fd;
   --copy-bg:rgba(255,255,255,0.06);--copy-border:rgba(255,255,255,0.12);--copy-color:#64748b;
   --badge-bg:rgba(99,102,241,0.1);--badge-border:rgba(99,102,241,0.22);
-  --seg-bg:rgba(0,0,0,0.2);--toggle-off-bg:rgba(255,255,255,0.04);--empty-color:#1e293b;
+  --seg-bg:rgba(0,0,0,0.2);--toggle-off-bg:rgba(255,255,255,0.04);--empty-color:#1e293b;--seg-active-color:#c7d2fe;
   --shadow:0 8px 40px rgba(0,0,0,0.4);--shadow-focus:0 0 0 2px rgba(99,102,241,0.4),0 24px 60px rgba(0,0,0,0.55);
 }
 .light{
-  --bg:#f0f4ff;--bg2:#ffffff;--bg3:rgba(99,102,241,0.04);
-  --border:rgba(99,102,241,0.12);--border2:rgba(99,102,241,0.2);
-  --text:#0f172a;--text2:#374151;--text3:#6b7280;--text4:#d1d5db;
+  --bg:#f0f4ff;--bg2:#ffffff;--bg3:rgba(99,102,241,0.05);
+  --border:rgba(99,102,241,0.15);--border2:rgba(99,102,241,0.25);
+  --text:#0f172a;--text2:#1e293b;--text3:#475569;--text4:#64748b;
   --input-bg:#ffffff;--card-bg:#ffffff;--chain-bg:#f5f3ff;
   --formula-bg:rgba(14,165,233,0.07);--formula-border:rgba(14,165,233,0.25);--formula-color:#0369a1;
   --code-bg:rgba(99,102,241,0.06);--code-border:rgba(99,102,241,0.18);--code-color:#4338ca;
   --copy-bg:rgba(99,102,241,0.06);--copy-border:rgba(99,102,241,0.15);--copy-color:#6366f1;
   --badge-bg:rgba(99,102,241,0.08);--badge-border:rgba(99,102,241,0.18);
-  --seg-bg:rgba(0,0,0,0.04);--toggle-off-bg:rgba(0,0,0,0.04);--empty-color:#9ca3af;
+  --seg-bg:rgba(0,0,0,0.06);--toggle-off-bg:rgba(0,0,0,0.05);--empty-color:#64748b;--seg-active-color:#3730a3;
   --shadow:0 4px 24px rgba(99,102,241,0.1);--shadow-focus:0 0 0 3px rgba(99,102,241,0.15),0 8px 30px rgba(99,102,241,0.1);
+  /* Light-theme overrides for hardcoded dark values */
+  --tag-bg:rgba(99,102,241,0.07);--tag-border:rgba(99,102,241,0.15);--tag-color:#374151;
+  --hint-color:#374151;
+  --section-color:#374151;
 }
+
+
+
+/* ── Light: save/action buttons ── */
+.light button[style*="color:#c7d2fe"],
+.light button[style*="color: #c7d2fe"]{color:#3730a3 !important;}
+.light button[style*="background:rgba(99,102,241,0.2)"],
+.light button[style*="background: rgba(99,102,241,0.2)"]{
+  background:rgba(99,102,241,0.12) !important;
+  border-color:rgba(99,102,241,0.35) !important;
+  color:#3730a3 !important;
+}
+.light button[style*="color:#818cf8"]{color:#4338ca !important;}
+
+/* ── Light: toggles ── */
+.light div[style*="rgba(255,255,255,0.08)"][style*="border-radius:11px"]{
+  background:rgba(0,0,0,0.1) !important;
+  border-color:rgba(0,0,0,0.2) !important;
+}
+
+/* ── Light: inputs ── */
+.light input[style*="color:var(--text)"],
+.light input[style*="color: var(--text)"]{color:#0f172a !important;background:#fff !important;}
+.light input[style*="background:var(--input-bg)"]{background:#fff !important;color:#0f172a !important;}
+/* ── Light: card backgrounds ── */
+.light [style*="background:rgba(255,255,255,0.0"],
+.light [style*="background: rgba(255,255,255,0.0"]{background:rgba(99,102,241,0.04) !important;}
+
+.light [style*="border:1px solid rgba(255,255,255,0.0"],
+.light [style*="border: 1px solid rgba(255,255,255,0.0"]{border-color:rgba(99,102,241,0.15) !important;}
+
+.light [style*="border:1px solid var(--border)"]{border-color:rgba(99,102,241,0.15) !important;}
+
+/* Fix text3/text4 that render too light */
+.light [style*="color:var(--text3)"]{color:#475569 !important;}
+.light [style*="color:var(--text4)"]{color:#64748b !important;}
+.light [style*="color:#64748b"]{color:#374151 !important;}
+.light [style*="color:#94a3b8"]{color:#475569 !important;}
+.light [style*="color:#475569"]{color:#374151 !important;}
+
+/* Search history, tags etc */
+.light [style*="color:#334155"]{color:#1e293b !important;}
+
+/* ── Light theme hardcoded color fixes ── */
+.light .result-card{background:#fff;border-color:rgba(99,102,241,0.12);}
+.light .result-card:hover{background:#f8faff;border-color:rgba(99,102,241,0.25);}
+.light .key-badge{background:rgba(99,102,241,0.08);border-color:rgba(99,102,241,0.2);color:#4338ca;}
+.light .type-badge{background:rgba(99,102,241,0.08);color:#4338ca;}
+.light .type-badge.formula{background:rgba(16,185,129,0.1);color:#047857;}
+.light .app-pill{background:rgba(99,102,241,0.06);border-color:rgba(99,102,241,0.18);color:#374151;}
+.light .app-pill.active{color:#4338ca;}
+.light .tag-pill{background:rgba(99,102,241,0.06);border-color:rgba(99,102,241,0.15);color:#475569;}
+.light .chain-card{background:#f5f3ff;border-color:rgba(99,102,241,0.2);}
+.light .chain-step{background:#ede9fe;color:#4338ca;}
+.light .copy-btn{background:rgba(99,102,241,0.07);border-color:rgba(99,102,241,0.18);color:#4338ca;}
+.light .copy-btn:hover{background:rgba(99,102,241,0.14);}
+.light .reaction-btn{background:rgba(0,0,0,0.04);border-color:rgba(0,0,0,0.1);}
+.light .sidebar-item{color:#374151;}
+.light .sidebar-item:hover{background:rgba(99,102,241,0.07);color:#1e293b;}
+.light .sidebar-item.active{background:rgba(99,102,241,0.1);color:#4338ca;}
+.light input,
+.light textarea{color:#0f172a;background:#fff;}
+.light input::placeholder,
+.light textarea::placeholder{color:#94a3b8;}
+.light .settings-row{background:#fff;border-color:rgba(99,102,241,0.12);}
+.light .settings-section{color:#475569;}
+.light .seg-btn{color:#374151;}
+.light .seg-btn.active{color:#4338ca;background:rgba(99,102,241,0.1);}
+.light .ai-result-box{background:#fff;border-color:rgba(99,102,241,0.15);}
+.light .empty-hint{color:#64748b;}
+.light .version-badge{color:#64748b;}
+.light .hotkey-chip{background:rgba(99,102,241,0.06);border-color:rgba(99,102,241,0.2);color:#374151;}
+
 body{min-height:100vh;background:var(--bg);font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;color:var(--text);overflow-x:hidden;transition:background 0.3s,color 0.3s}
 input,button,textarea{font-family:inherit}button{cursor:pointer}
 ::-webkit-scrollbar{width:4px}::-webkit-scrollbar-thumb{background:rgba(99,102,241,0.3);border-radius:4px}
@@ -396,6 +473,10 @@ button img.emoji, span img.emoji {
 <div id="app"></div>
 <script>
 
+
+// ── Platform detection ──
+const isAndroid = /Android/i.test(navigator.userAgent);
+const isTauriDesktop = !!window.__TAURI__ && !isAndroid;
 // ── Settings persistence ──
 function loadSettings(){
   try{ return JSON.parse(localStorage.getItem('sc_settings_v2')||'{}'); }catch{ return {}; }
@@ -414,11 +495,81 @@ const detectedOS=(()=>{
 
 // ── Settings state ──
 let settings = Object.assign(
-  {lang:'ru', theme:'dark', os:detectedOS, autoUpdate:true, aiKey:'', gigaKey:'', aiProvider:'claude',openaiKey:'',geminiKey:'',groqKey:'',deepseekKey:'',mistralKey:'',yandexKey:'',yandexFolder:'',customUrl:'',customKey:''},
+  {lang:'ru', theme:'dark', os:detectedOS, autoUpdate:true, aiKey:'', gigaKey:'', aiProvider:'claude', widgetAi:true, notifQuiz:true, widgetHotkey:'Ctrl+Shift+Space',openaiKey:'',geminiKey:'',groqKey:'',deepseekKey:'',mistralKey:'',yandexKey:'',yandexFolder:'',customUrl:'',customKey:''},
   loadSettings()
 );
 
 
+
+// ── Quiz notifications ──
+const NOTIF_KEY = 'sc_notif_scheduled_seed';
+
+async function requestNotifPermission(){
+  if(!('Notification' in window)) return false;
+  if(Notification.permission === 'granted') return true;
+  if(Notification.permission === 'denied') return false;
+  const p = await Notification.requestPermission();
+  return p === 'granted';
+}
+
+function scheduleQuizNotification(){
+  if(!('Notification' in window)) return;
+  if(Notification.permission !== 'granted') return;
+  const seed = getQuizSeed();
+  const alreadyScheduled = localStorage.getItem(NOTIF_KEY);
+  if(alreadyScheduled === String(seed)) return; // already scheduled for this quiz
+  localStorage.setItem(NOTIF_KEY, String(seed));
+  const ms = msToNextQuiz();
+  console.log('[Quiz notif] scheduling in', Math.round(ms/60000), 'min');
+  setTimeout(()=>{
+    try{
+      const ru = settings.lang === 'ru';
+      const n = new Notification(ru ? '🎯 SearchCopy — Новая викторина!' : '🎯 SearchCopy — New Quiz!', {
+        body: ru ? 'Ежедневная викторина обновилась. Проверь свои знания!' : 'Daily quiz updated. Test your skills!',
+        icon: '/favicon.ico',
+        tag: 'searchcopy-quiz',
+        requireInteraction: false,
+      });
+      n.onclick = ()=>{ window.focus(); n.close(); };
+      // Also update tab badge if tab visible
+      updateQuizBadge(true);
+    }catch(e){ console.log('[Quiz notif] error:', e); }
+  }, ms);
+}
+
+function updateQuizBadge(hasNew){
+  // Show a dot on trainer tab nav item
+  const trainerBtns = document.querySelectorAll('[data-tab="trainer"],.tab-trainer');
+  trainerBtns.forEach(btn=>{
+    if(hasNew){
+      if(!btn.querySelector('.quiz-dot')){
+        const dot = document.createElement('span');
+        dot.className = 'quiz-dot';
+        dot.style.cssText = 'position:absolute;top:2px;right:2px;width:7px;height:7px;background:#f97316;border-radius:50%;border:1.5px solid var(--bg1)';
+        btn.style.position = 'relative';
+        btn.appendChild(dot);
+      }
+    } else {
+      btn.querySelectorAll('.quiz-dot').forEach(d=>d.remove());
+    }
+  });
+}
+
+async function initQuizNotifications(){
+  // Ask for permission after a short delay (not immediately on open)
+  const record = getDailyRecord();
+  const seed = getQuizSeed();
+  const doneToday = record && record.seed === seed;
+  if(doneToday){
+    // Already done today — schedule for next quiz
+    scheduleQuizNotification();
+  }
+  // Show badge if quiz seed changed since last check
+  const lastSeenSeed = localStorage.getItem('sc_last_seen_quiz_seed');
+  if(lastSeenSeed && lastSeenSeed !== String(seed)){
+    updateQuizBadge(true);
+  }
+}
 // ── Universal AI key helper ──
 function getActiveKey(){
   const m={claude:settings.aiKey,giga:settings.gigaKey,openai:settings.openaiKey,
@@ -2504,7 +2655,7 @@ function renderSettings(){
     const w=el('div',"display:flex;gap:2px;background:var(--seg-bg);border:1px solid var(--border);border-radius:8px;padding:3px;flex-shrink:0");
     options.forEach(({val,label})=>{
       const on=current===val;
-      const btn=el('button',`background:${on?"rgba(99,102,241,0.25)":"transparent"};border:1px solid ${on?"rgba(99,102,241,0.45)":"transparent"};border-radius:6px;padding:5px 10px;font-size:11px;font-weight:700;color:${on?"#c7d2fe":"var(--text2)"};cursor:pointer;transition:all 0.18s;white-space:nowrap`);
+      const btn=el('button',`background:${on?"rgba(99,102,241,0.2)":"transparent"};border:1px solid ${on?"rgba(99,102,241,0.4)":"transparent"};border-radius:6px;padding:5px 10px;font-size:11px;font-weight:700;color:${on?"var(--seg-active-color, #818cf8)":"var(--text2)"};cursor:pointer;transition:all 0.18s;white-space:nowrap`);
       btn.textContent=label;btn.onclick=()=>onChange(val);w.appendChild(btn);
     });return w;
   }
@@ -2529,6 +2680,75 @@ function renderSettings(){
   const exKeys=[adaptKeys("Ctrl + Z"), adaptKeys("Ctrl + C"), adaptKeys("Win + L")];
   preview.innerHTML=exKeys.map(k=>`<span style="background:rgba(99,102,241,0.15);border:1px solid rgba(99,102,241,0.3);border-radius:5px;padding:2px 8px;color:#c7d2fe;font-weight:700;margin-right:6px">${k}</span>`).join('');
   wrap.appendChild(preview);
+
+// ── Notifications section ──
+  if(!isAndroid){
+    wrap.appendChild(section(ru?'Уведомления':'Notifications'));
+    const notifRow=el('div','background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:14px 16px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;gap:12px');
+    const notifLeft=el('div','display:flex;align-items:center;gap:10px');
+    notifLeft.innerHTML='<span style="font-size:16px">🎯</span><div><div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:2px">'+(ru?'Уведомления о викторине':'Quiz notifications')+'</div><div style="font-size:11px;color:var(--text2)">'+(ru?'Напоминание когда новая викторина доступна':'Reminder when new quiz is available')+'</div></div>';
+    const notifOn = settings.notifQuiz !== false;
+    const notifToggle=el('div','position:relative;width:40px;height:22px;background:'+(notifOn?'rgba(99,102,241,0.5)':'rgba(255,255,255,0.08)')+';border-radius:11px;cursor:pointer;transition:background 0.2s;flex-shrink:0;border:1px solid '+(notifOn?'rgba(99,102,241,0.6)':'var(--border)'));
+    const notifKnob=el('div','position:absolute;top:2px;left:'+(notifOn?'19px':'2px')+';width:16px;height:16px;background:white;border-radius:8px;transition:left 0.2s;box-shadow:0 1px 4px rgba(0,0,0,0.3)');
+    notifToggle.appendChild(notifKnob);
+    notifToggle.onclick=async()=>{
+      const newVal = settings.notifQuiz===false ? true : false;
+      settings.notifQuiz = newVal;
+      saveSettings(settings);
+      notifToggle.style.background=newVal?'rgba(99,102,241,0.5)':'rgba(255,255,255,0.08)';
+      notifToggle.style.borderColor=newVal?'rgba(99,102,241,0.6)':'var(--border)';
+      notifKnob.style.left=newVal?'19px':'2px';
+      if(newVal){
+        const granted = await requestNotifPermission();
+        if(granted){ scheduleQuizNotification(); }
+        else{
+          // Permission denied — revert
+          settings.notifQuiz=false; saveSettings(settings);
+          notifToggle.style.background='rgba(255,255,255,0.08)';
+          notifToggle.style.borderColor='var(--border)';
+          notifKnob.style.left='2px';
+          // Show hint
+          const hint=el('div','font-size:10px;color:#fca5a5;margin-top:6px');
+          hint.textContent=ru?'Разреши уведомления в настройках системы':'Allow notifications in system settings';
+          notifRow.appendChild(hint);
+          setTimeout(()=>hint.remove(),3000);
+        }
+      }
+    };
+    notifRow.appendChild(notifLeft);notifRow.appendChild(notifToggle);
+    wrap.appendChild(notifRow);
+  }
+
+  // ── Hotkey section ──
+  if(!isAndroid){
+    const hkRow=el('div','background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:14px 16px;margin-bottom:8px');
+    const hkHead=el('div','display:flex;align-items:center;gap:10px;margin-bottom:10px');
+    hkHead.innerHTML='<span style="font-size:16px">⌨️</span><div><div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:2px">'+(ru?'Горячая клавиша виджета':'Widget hotkey')+'</div><div style="font-size:11px;color:var(--text2)">'+(ru?'Вызов виджета из любого приложения':'Open widget from any app')+'</div></div>';
+    const hkInputRow=el('div','display:flex;gap:8px');
+    const hkInput=el('input','flex:1;background:var(--input-bg);border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-size:12px;font-family:monospace;color:var(--text);outline:none;transition:border 0.2s');
+    hkInput.value=settings.widgetHotkey||'Ctrl+Shift+Space';
+    hkInput.placeholder='Ctrl+Shift+Space';
+    hkInput.onfocus=()=>hkInput.style.borderColor='rgba(99,102,241,0.5)';
+    hkInput.onblur=()=>hkInput.style.borderColor='var(--border)';
+    const hkSave=el('button','background:rgba(99,102,241,0.2);border:1px solid rgba(99,102,241,0.4);color:#c7d2fe;border-radius:8px;padding:8px 14px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;font-family:inherit');
+    hkSave.textContent=ru?'Сохранить':'Save';
+    hkSave.onclick=()=>{
+      settings.widgetHotkey=hkInput.value.trim()||'Ctrl+Shift+Space';
+      saveSettings(settings);
+      hkSave.textContent=ru?'✓ Сохранено':'✓ Saved';
+      setTimeout(()=>hkSave.textContent=ru?'Сохранить':'Save',1500);
+      // Re-register hotkey via Tauri
+      const inv=window.__TAURI__?.core?.invoke||window.__TAURI__?.tauri?.invoke;
+      if(inv) inv('register_widget_hotkey',{hotkey:settings.widgetHotkey}).catch(()=>{});
+    };
+    hkInputRow.appendChild(hkInput);hkInputRow.appendChild(hkSave);
+    hkRow.appendChild(hkHead);hkRow.appendChild(hkInputRow);
+    const hkNote=el('div','margin-top:8px;font-size:10px;color:var(--text3)');
+    hkNote.textContent=ru?'Формат: Ctrl+Shift+Space, Cmd+Option+Space и т.д.':'Format: Ctrl+Shift+Space, Cmd+Option+Space etc.';
+    hkRow.appendChild(hkNote);
+    wrap.appendChild(hkRow);
+  }
+
 
   // AI Provider section
   wrap.appendChild(section(t.sAI));
@@ -2570,6 +2790,27 @@ function renderSettings(){
 
 
   // ── Dynamic key input rows for each provider ──
+
+  // ── Widget AI toggle ──
+  if(!isAndroid){
+    const waiRow=el('div','background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:14px 16px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;gap:12px');
+    const waiLeft=el('div','display:flex;align-items:center;gap:10px');
+    waiLeft.innerHTML='<span style="font-size:16px">🔍</span><div><div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:2px">'+( ru?'AI в виджете':'AI in Widget')+'</div><div style="font-size:11px;color:var(--text2)">'+(ru?'Использовать AI прямо из плавающего виджета поиска':'Use AI directly from the floating search widget')+'</div></div>';
+    const waiToggle=el('div','position:relative;width:40px;height:22px;background:'+(settings.widgetAi!==false?'rgba(99,102,241,0.5)':'rgba(255,255,255,0.08)')+';border-radius:11px;cursor:pointer;transition:background 0.2s;flex-shrink:0;border:1px solid '+(settings.widgetAi!==false?'rgba(99,102,241,0.6)':'var(--border)'));
+    const waiKnob=el('div','position:absolute;top:2px;left:'+(settings.widgetAi!==false?'19px':'2px')+';width:16px;height:16px;background:white;border-radius:8px;transition:left 0.2s;box-shadow:0 1px 4px rgba(0,0,0,0.3)');
+    waiToggle.appendChild(waiKnob);
+    waiToggle.onclick=()=>{
+      settings.widgetAi=settings.widgetAi===false?true:false;
+      saveSettings(settings);
+      waiToggle.style.background=settings.widgetAi!==false?'rgba(99,102,241,0.5)':'rgba(255,255,255,0.08)';
+      waiToggle.style.borderColor=settings.widgetAi!==false?'rgba(99,102,241,0.6)':'var(--border)';
+      waiKnob.style.left=settings.widgetAi!==false?'19px':'2px';
+    };
+    waiRow.appendChild(waiLeft);
+    waiRow.appendChild(waiToggle);
+    wrap.appendChild(waiRow);
+  }
+
   const KEY_PROVIDERS=[
     {val:'claude', label:'Claude API Key', emoji:'🤖', color:'rgba(99,102,241,0.35)',
       placeholder:'sk-ant-api03-...', field:'aiKey',
@@ -2655,42 +2896,46 @@ function renderSettings(){
     toggle(settings.autoUpdate,val=>{settings.autoUpdate=val;saveSettings(settings);render()})));
 
   // ── Check updates button ──
-  const updBtn=document.createElement('button');
-  updBtn.style.cssText='width:100%;margin-top:12px;background:var(--bg3);border:1px solid var(--border);color:var(--text2);border-radius:12px;padding:11px;font-size:12px;font-weight:800;cursor:pointer;font-family:inherit;transition:all 0.2s;display:flex;align-items:center;justify-content:center;gap:8px';
-  updBtn.innerHTML=`<span style="animation:floatY 2s ease-in-out infinite;display:inline-block">🔄</span> ${settings.lang==='ru'?'Проверить обновления':'Check for updates'}`;
-  updBtn.onmouseover=()=>{updBtn.style.background='rgba(99,102,241,0.1)';updBtn.style.borderColor='rgba(99,102,241,0.3)';updBtn.style.color='#818cf8';};
-  updBtn.onmouseout=()=>{updBtn.style.background='var(--bg3)';updBtn.style.borderColor='var(--border)';updBtn.style.color='var(--text2)';};
-  updBtn.onclick=async()=>{
-    updBtn.innerHTML=`<div class="spinner"></div>${settings.lang==='ru'?'Проверяю...':'Checking...'}`;
-    updBtn.disabled=true;
-    try{
-      const invoke=window.__TAURI__?.core?.invoke||window.__TAURI__?.tauri?.invoke;
-      if(!invoke)throw new Error(settings.lang==='ru'?'Только в десктоп-приложении':'Desktop app only');
-      const cur=await invoke('get_version');
-      const res=await fetch('https://api.github.com/repos/MihailKashintsev/searchcopy/releases/latest');
-      const data=await res.json();
-      const latest=data.tag_name?.replace('v','').trim();
-      if(latest&&latest!==cur.trim()){
-        updBtn.innerHTML=`✨ ${settings.lang==='ru'?'Доступна v'+latest+'! Обновляю...':'v'+latest+' available! Updating...'}`;
-        updBtn.style.color='#4ade80';updBtn.style.borderColor='rgba(52,211,153,0.4)';
-        await checkForUpdates(false);
-      } else {
-        updBtn.innerHTML=`✅ ${settings.lang==='ru'?'У вас последняя версия v'+cur:'You have the latest v'+cur}`;
-        updBtn.style.color='#4ade80';updBtn.style.borderColor='rgba(52,211,153,0.4)';
-        setTimeout(()=>{updBtn.innerHTML=`🔄 ${settings.lang==='ru'?'Проверить обновления':'Check for updates'}`;updBtn.style.color='var(--text2)';updBtn.style.borderColor='var(--border)';updBtn.disabled=false;},3000);
+  if(!isAndroid){
+    const updBtn=document.createElement('button');
+    updBtn.style.cssText='width:100%;margin-top:12px;background:var(--bg3);border:1px solid var(--border);color:var(--text2);border-radius:12px;padding:11px;font-size:12px;font-weight:800;cursor:pointer;font-family:inherit;transition:all 0.2s;display:flex;align-items:center;justify-content:center;gap:8px';
+    updBtn.innerHTML=`<span style="animation:floatY 2s ease-in-out infinite;display:inline-block">🔄</span> ${settings.lang==='ru'?'Проверить обновления':'Check for updates'}`;
+    updBtn.onmouseover=()=>{updBtn.style.background='rgba(99,102,241,0.1)';updBtn.style.borderColor='rgba(99,102,241,0.3)';updBtn.style.color='#818cf8';};
+    updBtn.onmouseout=()=>{updBtn.style.background='var(--bg3)';updBtn.style.borderColor='var(--border)';updBtn.style.color='var(--text2)';};
+    updBtn.onclick=async()=>{
+      updBtn.innerHTML=`<div class="spinner"></div>${settings.lang==='ru'?'Проверяю...':'Checking...'}`;
+      updBtn.disabled=true;
+      try{
+        const invoke=window.__TAURI__?.core?.invoke||window.__TAURI__?.tauri?.invoke;
+        if(!invoke)throw new Error(settings.lang==='ru'?'Только в десктоп-приложении':'Desktop app only');
+        const cur=await invoke('get_version');
+        const res=await fetch('https://api.github.com/repos/MihailKashintsev/searchcopy/releases/latest');
+        const data=await res.json();
+        const latest=data.tag_name?.replace('v','').trim();
+        if(latest&&latest!==cur.trim()){
+          updBtn.innerHTML=`✨ ${settings.lang==='ru'?'Доступна v'+latest+'! Обновляю...':'v'+latest+' available! Updating...'}`;
+          updBtn.style.color='#4ade80';updBtn.style.borderColor='rgba(52,211,153,0.4)';
+          await checkForUpdates(false);
+        } else {
+          updBtn.innerHTML=`✅ ${settings.lang==='ru'?'У вас последняя версия v'+cur:'You have the latest v'+cur}`;
+          updBtn.style.color='#4ade80';updBtn.style.borderColor='rgba(52,211,153,0.4)';
+          setTimeout(()=>{updBtn.innerHTML=`🔄 ${settings.lang==='ru'?'Проверить обновления':'Check for updates'}`;updBtn.style.color='var(--text2)';updBtn.style.borderColor='var(--border)';updBtn.disabled=false;},3000);
+          return;
+        }
+      }catch(e){
+        updBtn.innerHTML=`❌ ${String(e.message||e).slice(0,60)}`;
+        updBtn.style.color='#fca5a5';
+        setTimeout(()=>{updBtn.innerHTML=`🔄 ${settings.lang==='ru'?'Проверить обновления':'Check for updates'}`;updBtn.style.color='var(--text2)';updBtn.disabled=false;},3000);
         return;
       }
-    }catch(e){
-      updBtn.innerHTML=`❌ ${String(e.message||e).slice(0,60)}`;
-      updBtn.style.color='#fca5a5';
-      setTimeout(()=>{updBtn.innerHTML=`🔄 ${settings.lang==='ru'?'Проверить обновления':'Check for updates'}`;updBtn.style.color='var(--text2)';updBtn.disabled=false;},3000);
-      return;
-    }
-    updBtn.disabled=false;
-  };
-  wrap.appendChild(updBtn);
+      updBtn.disabled=false;
+    };
+    wrap.appendChild(updBtn);
 
+  }
   wrap.appendChild(el('div',"text-align:center;color:var(--text3);font-size:10px;margin-top:28px;padding-bottom:8px",t.footer));
+
+
   return wrap;
 }
 
@@ -3153,6 +3398,8 @@ function renderTrainer(){
   wrap.style.animation = 'fadeUp 0.35s ease both';
 
   const seed = getQuizSeed();
+  localStorage.setItem('sc_last_seen_quiz_seed', String(seed));
+  updateQuizBadge(false);
   const record = getDailyRecord();
   const alreadyDone = record && record.seed === seed;
   const stats = getStats();
@@ -3312,6 +3559,10 @@ function finishQuiz(correct, perfect, answers, seed, ru, stats, wrap){
   // Save record
   const record = {seed, correct, total:QUIZ_Q_COUNT, perfect, ts:Date.now()};
   saveDailyRecord(record);
+  // Request notif permission & schedule next quiz
+  requestNotifPermission().then(granted=>{ if(granted) scheduleQuizNotification(); });
+  updateQuizBadge(false);
+  localStorage.setItem('sc_last_seen_quiz_seed', String(seed));
 
   // Update stats
   const s = getStats();
@@ -4217,6 +4468,21 @@ function renderReverse(){
     aiRevBtn.disabled=false;
   };
 
+
+
+    // Android — show RuStore info instead of update button
+  if(isAndroid){
+    const rsBlock = el('div', 'background:linear-gradient(135deg,rgba(99,102,241,0.08),rgba(14,165,233,0.06));border:1px solid rgba(99,102,241,0.2);border-radius:14px;padding:16px;text-align:center');
+    rsBlock.innerHTML = `
+      <div style="font-size:22px;margin-bottom:8px">📦</div>
+      <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:4px">${ru ? 'Обновления через RuStore' : 'Updates via RuStore'}</div>
+      <div style="font-size:11px;color:var(--text2);margin-bottom:12px">${ru ? 'Следите за новыми версиями в магазине приложений' : 'Check the app store for new versions'}</div>
+      <a href="https://rustore.ru" target="_blank" style="display:inline-block;background:rgba(99,102,241,0.15);border:1px solid rgba(99,102,241,0.3);border-radius:10px;padding:8px 18px;font-size:12px;font-weight:700;color:#818cf8;text-decoration:none">
+        ${ru ? '→ Открыть RuStore' : '→ Open RuStore'}
+      </a>
+    `;
+    wrap.appendChild(rsBlock);
+  }
   return wrap;
 }
 
@@ -4282,6 +4548,21 @@ function renderGuide(){
      lines:ru?['Вставь API ключ в ⚙️ Настройки','Нажми «+ AI-поиск» рядом со строкой поиска','Или открой 🤖 AI-чат для свободных вопросов']:
               ['Paste API key in ⚙️ Settings','Click "+ AI search" next to the search bar','Or open 🤖 AI chat for free questions'],
      anim:'ai'},
+    {id:'s9',icon:'🔍',color:'#06b6d4',
+     title:ru?'Виджет поиска':'Search widget',
+     lines:ru?['Кнопка «🔍 Виджет» в правом нижнем углу приложения','Плавающее окно поиска поверх всех программ','Результаты копируются одним кликом']:
+              ['The "🔍 Widget" button at the bottom right of the app','Floating search window stays on top of all apps','Results copy with one click'],
+     anim:'widget'},
+    {id:'s10',icon:'⌨️',color:'#f97316',
+     title:ru?'Глобальный хоткей':'Global hotkey',
+     lines:ru?['Нажми Ctrl+Shift+Space чтобы открыть виджет из любого приложения','Работает когда SearchCopy свёрнут в фон','Можно изменить в ⚙ Настройках']:
+              ['Press Ctrl+Shift+Space to open widget from any app','Works when SearchCopy is minimized','Change shortcut in ⚙ Settings'],
+     anim:'hotkey'},
+    {id:'s11',icon:'🔔',color:'#fbbf24',
+     title:ru?'Уведомления о викторине':'Quiz notifications',
+     lines:ru?['Разреши уведомления — получи напоминание о новой викторине','Викторина обновляется каждые 11 часов','Включается в ⚙ Настройках']:
+              ['Allow notifications to get quiz reminders','Quiz updates every 11 hours','Toggle in ⚙ Settings'],
+     anim:'notif'},
   ];
 
   // Step cards
@@ -4529,6 +4810,85 @@ function renderGuide(){
         else if(aiPhase==='show'){aiResp.style.opacity='0';setTimeout(()=>{aiResp.textContent=answers[qi];aiResp.style.opacity='1';},200);aiPhase='pause';setTimeout(()=>{aiResp.textContent='';inp2.textContent='';ci2=0;qi=(qi+1)%queries.length;aiPhase='type';},1800);}
       },65);
       demo._cleanup=()=>clearInterval(aiAnim);
+    } else if(step.anim==='widget'){
+      const wWrap=el('div','display:flex;flex-direction:column;gap:8px;');
+      // Mini widget mockup
+      const wBox=el('div','background:rgba(12,13,22,0.9);border:1px solid rgba(99,102,241,0.3);border-radius:10px;overflow:hidden;');
+      const wBar=el('div','background:rgba(255,255,255,0.03);border-bottom:1px solid rgba(255,255,255,0.08);padding:5px 8px;display:flex;align-items:center;justify-content:space-between');
+      wBar.innerHTML='<span style="font-size:10px;font-weight:800;color:#818cf8">⌘ SearchCopy</span><span style="font-size:10px;color:#475569">📌 ↗ ×</span>';
+      const wSearch=el('div','padding:6px 8px;');
+      const wInput=el('div','background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:7px;padding:5px 10px;font-size:11px;color:#6366f1;font-family:monospace');
+      wInput.textContent='🔍 ';
+      const wResults=el('div','padding:0 6px 6px;display:flex;flex-direction:column;gap:4px');
+      const wCard=el('div','background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);border-radius:7px;padding:5px 8px;border-left:2px solid #22c55e');
+      wCard.innerHTML='<div style="font-size:9px;color:#22c55e;font-family:monospace">=SUM(A:A)</div><div style="font-size:9px;color:#94a3b8">Сумма столбца</div>';
+      wSearch.appendChild(wInput); wResults.appendChild(wCard);
+      wBox.appendChild(wBar); wBox.appendChild(wSearch); wBox.appendChild(wResults);
+      // Arrow pointing to it
+      const wArrow=el('div','text-align:center;font-size:18px;animation:floatY 2s ease-in-out infinite');
+      wArrow.textContent='↑';
+      const wLabel=el('div','text-align:center;font-size:10px;color:#06b6d4;font-weight:700');
+      wLabel.textContent=ru?'Поверх всех окон':'Always on top';
+      wWrap.appendChild(wBox); wWrap.appendChild(wArrow); wWrap.appendChild(wLabel);
+      demo.appendChild(wWrap);
+      // Animate typing
+      const words=ru?['сложить','ctrl+z','найти файл']:['sum','undo','find file'];
+      let wi=0,ci=0,wTimer;
+      function typeW(){
+        if(ci<=words[wi].length){wInput.textContent='🔍 '+words[wi].slice(0,ci);ci++;}
+        else{setTimeout(()=>{ci=0;wi=(wi+1)%words.length;},900);}
+      }
+      wTimer=setInterval(typeW,80);
+      demo._cleanup=()=>clearInterval(wTimer);
+
+    } else if(step.anim==='hotkey'){
+      const hWrap=el('div','display:flex;flex-direction:column;align-items:center;gap:10px');
+      // Key combo display
+      const hKeys=el('div','display:flex;align-items:center;gap:6px');
+      const keys=[{k:'Ctrl',w:42},{k:'Shift',w:46},{k:'Space',w:56}];
+      const keyEls=keys.map(k=>{
+        const kEl=el('div',`background:rgba(255,255,255,0.07);border:1.5px solid rgba(255,255,255,0.2);border-radius:7px;padding:5px ${k.k==='Space'?14:10}px;font-size:11px;font-weight:800;color:var(--text);font-family:monospace;transition:all 0.15s`);
+        kEl.textContent=k.k;
+        const sep=el('span','color:#475569;font-size:13px');sep.textContent='+';
+        hKeys.appendChild(kEl);
+        if(k.k!=='Space')hKeys.appendChild(sep);
+        return kEl;
+      });
+      const hLabel=el('div','font-size:11px;color:#f97316;font-weight:700;text-align:center');
+      hLabel.textContent=ru?'Вызов виджета из любого приложения':'Open widget from any app';
+      const hBadge=el('div','background:rgba(249,115,22,0.1);border:1px solid rgba(249,115,22,0.3);border-radius:8px;padding:4px 10px;font-size:10px;color:#f97316;font-weight:700;text-align:center');
+      hBadge.textContent=ru?'🌐 Глобальный горячий клавиша':'🌐 Global shortcut';
+      hWrap.appendChild(hKeys);hWrap.appendChild(hLabel);hWrap.appendChild(hBadge);
+      demo.appendChild(hWrap);
+      // Pulse animation on keys
+      let hOn=false,hTimer=setInterval(()=>{
+        hOn=!hOn;
+        keyEls.forEach(k=>{k.style.background=hOn?'rgba(249,115,22,0.15)':'rgba(255,255,255,0.07)';k.style.borderColor=hOn?'rgba(249,115,22,0.5)':'rgba(255,255,255,0.2)';k.style.color=hOn?'#f97316':'var(--text)';});
+      },800);
+      demo._cleanup=()=>clearInterval(hTimer);
+
+    } else if(step.anim==='notif'){
+      const nWrap=el('div','display:flex;flex-direction:column;gap:8px');
+      // Notification mockup
+      const nBox=el('div','background:rgba(15,15,26,0.95);border:1px solid rgba(251,191,36,0.3);border-radius:12px;padding:10px 12px;display:flex;align-items:flex-start;gap:8px;animation:fadeUp 0.3s ease');
+      const nIcon=el('div','font-size:20px;animation:floatY 2s ease-in-out infinite');nIcon.textContent='🎯';
+      const nText=el('div','');
+      nText.innerHTML=`<div style="font-size:12px;font-weight:700;color:#e2e8f0">${ru?'SearchCopy — Новая викторина!':'SearchCopy — New Quiz!'}</div><div style="font-size:10px;color:#94a3b8;margin-top:2px">${ru?'Ежедневная викторина обновилась':'Daily quiz has been updated'}</div>`;
+      nBox.appendChild(nIcon);nBox.appendChild(nText);
+      const nToggle=el('div','display:flex;align-items:center;justify-content:space-between;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:6px 10px');
+      nToggle.innerHTML=`<span style="font-size:10px;color:var(--text2)">${ru?'🔔 Уведомления о викторине':'🔔 Quiz notifications'}</span><div style="width:30px;height:16px;background:rgba(99,102,241,0.5);border-radius:8px;position:relative"><div style="position:absolute;top:2px;right:2px;width:12px;height:12px;background:white;border-radius:6px"></div></div>`;
+      const nSub=el('div','font-size:9px;color:#475569;text-align:center');
+      nSub.textContent=ru?'Включай в ⚙ Настройках':'Enable in ⚙ Settings';
+      nWrap.appendChild(nBox);nWrap.appendChild(nToggle);nWrap.appendChild(nSub);
+      demo.appendChild(nWrap);
+      // Pulse the notification
+      let nVisible=true,nTimer=setInterval(()=>{
+        nVisible=!nVisible;
+        nBox.style.opacity=nVisible?'1':'0.4';
+        nBox.style.transform=nVisible?'scale(1)':'scale(0.97)';
+        nBox.style.transition='all 0.4s ease';
+      },1800);
+      demo._cleanup=()=>clearInterval(nTimer);
     }
 
     content.appendChild(demo);
@@ -4836,7 +5196,7 @@ function showOnboarding(){
   hdr.className='ob-header';
   hdr.innerHTML=`<div>
     <div style="font-size:17px;font-weight:900;color:var(--text)">✨ ${ru?'Что нового?':'What\'s new?'}</div>
-    <div style="font-size:11px;color:var(--text3);margin-top:2px">SearchCopy v1.1.1 · RENDERGAMES</div>
+    <div style="font-size:11px;color:var(--text3);margin-top:2px">SearchCopy v1.1.5 · RENDERGAMES</div>
   </div>`;
   const skipBtn=document.createElement('button');
   skipBtn.style.cssText='background:none;border:none;color:var(--text3);font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;padding:6px 12px;border-radius:10px;transition:all 0.15s';
@@ -5434,8 +5794,23 @@ function render(){
 
   // ── Version badge (bottom right) ──
   const invoke=window.__TAURI__?.core?.invoke||window.__TAURI__?.tauri?.invoke;
+
+  // ── Widget toggle button (desktop only) ──
+  if(isTauriDesktop && !isAndroid){
+    const widgetBtn = el('button', 'position:fixed;bottom:14px;right:80px;font-size:10px;font-weight:700;color:var(--text3);letter-spacing:0.5px;z-index:10;background:transparent;border:1px solid var(--border);border-radius:8px;padding:3px 8px;cursor:pointer;transition:all 0.2s;font-family:inherit');
+    widgetBtn.textContent = '🔍 Виджет';
+    widgetBtn.title = 'Открыть мини-виджет поверх окон';
+    widgetBtn.onmouseenter = () => { widgetBtn.style.borderColor='rgba(129,140,248,0.5)'; widgetBtn.style.color='#818cf8'; };
+    widgetBtn.onmouseleave = () => { widgetBtn.style.borderColor='var(--border)'; widgetBtn.style.color='var(--text3)'; };
+    widgetBtn.onclick = async () => {
+      const inv = window.__TAURI__?.core?.invoke || window.__TAURI__?.tauri?.invoke;
+      if(inv) await inv('toggle_widget');
+    };
+    app.appendChild(widgetBtn);
+  }
+
   const vBadge=el('div',"position:fixed;bottom:14px;right:16px;font-size:10px;font-weight:700;color:var(--text3);letter-spacing:0.5px;z-index:10;pointer-events:none");
-  vBadge.textContent='v1.1.1';
+  vBadge.textContent='v1.1.5';
   app.appendChild(vBadge);
   if(invoke){
     invoke('get_version').then(v=>{vBadge.textContent='v'+v;}).catch(()=>{});
@@ -5549,14 +5924,15 @@ async function runSilentInstall(url, fileName, version){
 
 // ── Dismiss update helpers ──
 function dismissUpdate(version){
-  try{localStorage.setItem('sc_dismissed_update',version);}catch{}
+  try{sessionStorage.setItem('sc_dismissed_update',version);}catch{}
 }
 function isDismissedUpdate(version){
-  try{return localStorage.getItem('sc_dismissed_update')===version;}catch{return false;}
+  try{return sessionStorage.getItem('sc_dismissed_update')===version;}catch{return false;}
 }
 
 // ── Check for updates ──
 async function checkForUpdates(silent=false){
+  if(isAndroid){console.log('[Updater] Android — skipping, use RuStore');return;}
   const invoke=window.__TAURI__?.core?.invoke||window.__TAURI__?.tauri?.invoke;
   if(!invoke){console.log('[Updater] no Tauri invoke');return;}
   try{
@@ -5567,7 +5943,9 @@ async function checkForUpdates(silent=false){
     const data=await res.json();
     const latest=data.tag_name?.replace('v','').trim();
     console.log('[Updater] latest:',latest,'dismissed:',isDismissedUpdate(latest));
-    if(!latest||latest===currentVersion.trim()||isDismissedUpdate(latest))return;
+    // Semver compare: returns true if a > b
+    const semverGt=(a,b)=>{const pa=a.split('.').map(Number),pb=b.split('.').map(Number);for(let i=0;i<3;i++){if((pa[i]||0)>(pb[i]||0))return true;if((pa[i]||0)<(pb[i]||0))return false;}return false;};
+    if(!latest||!semverGt(latest,currentVersion.trim())||isDismissedUpdate(latest))return;
     // Find asset — search by platform keywords, not just extension
     const ua=navigator.userAgent+navigator.platform;
     const isMac=/Mac/.test(ua);const isWin=/Win/.test(ua);
@@ -5615,12 +5993,27 @@ function showUpdateBanner(version,url,fileName){
   document.body.appendChild(banner);
 }
 
+
+// ── Tray navigation ──
+document.addEventListener('tray-nav', (e) => {
+  const tab = e.detail?.replace('?tab=', '') || '';
+  if(tab) {
+    // Simulate tab switch
+    const tabMap = {search:'search', trainer:'trainer'};
+    const t = tabMap[tab];
+    if(t) {
+      currentTab = t;
+      render();
+    }
+  }
+});
 document.addEventListener("DOMContentLoaded",()=>{
   applyTheme();
   render();
   if(settings.autoUpdate!==false) checkForUpdates(true);
+  initQuizNotifications();
 });
-if(document.readyState!=="loading"){applyTheme();render();if(settings.autoUpdate!==false)checkForUpdates(true);}
+if(document.readyState!=="loading"){applyTheme();render();if(settings.autoUpdate!==false)checkForUpdates(true);initQuizNotifications();}
 </script>
 </body>
 </html>
