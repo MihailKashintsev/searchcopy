@@ -2435,7 +2435,7 @@ function parseGigaResponse(text, query, activeProgs){
 // ── AI Search ──
 async function doAiSearch(query){
   const provider=settings.aiProvider||'claude';
-  const keyMap={claude:settings.aiKey,giga:settings.gigaKey,openai:settings.openaiKey,gemini:settings.geminiKey,groq:settings.groqKey,custom:settings.customKey};
+  const keyMap={claude:settings.aiKey,giga:settings.gigaKey,openai:settings.openaiKey,gemini:settings.geminiKey,groq:settings.groqKey,deepseek:settings.deepseekKey,mistral:settings.mistralKey,yandex:settings.yandexKey,custom:settings.customKey};
   const hasKey=!!(keyMap[provider]);
   console.log('[AI DEBUG] provider=',provider,'hasKey=',hasKey,'aiKey len=',settings.aiKey?.length,'gigaKey len=',settings.gigaKey?.length);
   if(!hasKey){
@@ -2564,16 +2564,6 @@ ${osHint}
     if(tf==='chain' && items.some(i=>i.step!=null)){
       items.sort((a,b)=>(a.step||0)-(b.step||0));
       state.aiResult={items,query,provider,isChain:true};
-    } else if(provider==='giga'){
-      const invoke=window.__TAURI__?.core?.invoke||window.__TAURI__?.tauri?.invoke;
-      if(!invoke) throw new Error('GigaChat работает только в десктоп-приложении');
-      const rawKey=settings.gigaKey.trim();
-      const authKey=rawKey.startsWith('Basic ')?rawKey.slice(6).trim():rawKey;
-      const text=await invoke('giga_search',{authKey,systemPrompt:gigaSystemPrompt,query:gigaUserPrompt});
-      if(!text||text.trim()==='') throw new Error('GigaChat вернул пустой ответ');
-      items=parseGigaResponse(text,query,activeProgs);
-      if(items.length===0) throw new Error('GigaChat ответил, но данные не распознаны. Ответ: '+text.slice(0,200));
-
     } else if(provider==='openai'){
       const res=await fetch('https://api.openai.com/v1/chat/completions',{
         method:'POST',
@@ -2604,6 +2594,41 @@ ${osHint}
       if(!res.ok) throw new Error('Groq '+res.status+': '+(await res.text()).slice(0,200));
       const d=await res.json();
       items=parseAIResponse(d.choices?.[0]?.message?.content||'',query,activeProgs);
+
+    } else if(provider==='deepseek'){
+      const res=await fetch('https://api.deepseek.com/chat/completions',{
+        method:'POST',
+        headers:{'Content-Type':'application/json','Authorization':'Bearer '+settings.deepseekKey},
+        body:JSON.stringify({model:'deepseek-chat',max_tokens:1000,
+          messages:[{role:'system',content:systemPrompt},{role:'user',content:query}]})
+      });
+      if(!res.ok) throw new Error('DeepSeek '+res.status+': '+(await res.text()).slice(0,200));
+      const d=await res.json();
+      items=parseAIResponse(d.choices?.[0]?.message?.content||'',query,activeProgs);
+
+    } else if(provider==='mistral'){
+      const res=await fetch('https://api.mistral.ai/v1/chat/completions',{
+        method:'POST',
+        headers:{'Content-Type':'application/json','Authorization':'Bearer '+settings.mistralKey},
+        body:JSON.stringify({model:'mistral-small-latest',max_tokens:1000,
+          messages:[{role:'system',content:systemPrompt},{role:'user',content:query}]})
+      });
+      if(!res.ok) throw new Error('Mistral '+res.status+': '+(await res.text()).slice(0,200));
+      const d=await res.json();
+      items=parseAIResponse(d.choices?.[0]?.message?.content||'',query,activeProgs);
+
+    } else if(provider==='yandex'){
+      const folder=settings.yandexFolder||'';
+      const res=await fetch('https://llm.api.cloud.yandex.net/foundationModels/v1/completion',{
+        method:'POST',
+        headers:{'Content-Type':'application/json','Authorization':'Api-Key '+settings.yandexKey,'x-folder-id':folder},
+        body:JSON.stringify({modelUri:`gpt://${folder}/yandexgpt-lite`,
+          completionOptions:{maxTokens:1000,temperature:0.6},
+          messages:[{role:'system',text:systemPrompt},{role:'user',text:query}]})
+      });
+      if(!res.ok) throw new Error('YandexGPT '+res.status+': '+(await res.text()).slice(0,200));
+      const d=await res.json();
+      items=parseAIResponse(d.result?.alternatives?.[0]?.message?.text||'',query,activeProgs);
 
     } else if(provider==='custom'){
       const baseUrl=(settings.customUrl||'https://api.openai.com/v1').replace(/\/$/,'');

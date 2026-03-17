@@ -1,6 +1,4 @@
-- Fixed: Android widget window removed from config (no longer blocks system UI)
-- Fixed: Global hotkey cfg gates for Android CI build
-- Added: New app icon (S + clipboard + magnifier)
-- Added: Android mipmap icons all densities
-- Improved: Light theme contrast fixes
-- Improved: Widget adaptive modes (Mini/Ultra/Nano) via ResizeObserver
+- Fixed: AI provider selection always used GigaChat regardless of chosen provider
+- Fixed: DeepSeek, Mistral, YandexGPT had no handlers in search function
+- Fixed: keyMap missing deepseek/mistral/yandex keys (hasKey was undefined)
+- Fixed: Duplicate GigaChat block ran after every non-chain AI result
