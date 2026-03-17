@@ -15,21 +15,6 @@
         "minHeight": 500,
         "resizable": true,
         "center": true
-      },
-      {
-        "label": "widget",
-        "title": "SearchCopy",
-        "url": "widget.html",
-        "width": 320,
-        "height": 520,
-        "minWidth": 180,
-        "minHeight": 100,
-        "resizable": true,
-        "alwaysOnTop": true,
-        "skipTaskbar": true,
-        "visible": false,
-        "dragDropEnabled": false,
-        "shadow": true
       }
     ],
     "security": {
@@ -38,6 +23,9 @@
     "withGlobalTauri": true
   },
   "bundle": {
+    "android": {
+  "minSdkVersion": 24
+},
     "active": true,
     "targets": "all",
     "icon": [
