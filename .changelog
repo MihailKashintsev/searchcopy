@@ -1,4 +1,3 @@
-- Fixed: AI provider selection always used GigaChat regardless of chosen provider
-- Fixed: DeepSeek, Mistral, YandexGPT had no handlers in search function
-- Fixed: keyMap missing deepseek/mistral/yandex keys (hasKey was undefined)
-- Fixed: Duplicate GigaChat block ran after every non-chain AI result
+- Fixed: "Ask AI" tab always used GigaChat regardless of selected provider
+- Fixed: keyMap missing deepseek/mistral/yandex in Ask AI handler
+- Fixed: Provider badge now shows correct provider name

@@ -3097,8 +3097,8 @@ function renderAskAI(){
     const question=textarea.value.trim();
     if(!question){textarea.focus();return;}
     const provider=settings.aiProvider||'claude';
-    const keyMap={claude:settings.aiKey,giga:settings.gigaKey,openai:settings.openaiKey,gemini:settings.geminiKey,groq:settings.groqKey,custom:settings.customKey};
-  const hasKey=!!(keyMap[provider]);
+    const keyMap={claude:settings.aiKey,giga:settings.gigaKey,openai:settings.openaiKey,gemini:settings.geminiKey,groq:settings.groqKey,deepseek:settings.deepseekKey,mistral:settings.mistralKey,yandex:settings.yandexKey,custom:settings.customKey};
+    const hasKey=!!(keyMap[provider]);
     if(!hasKey){
       resultArea.innerHTML=`<div style="background:rgba(239,68,68,0.06);border:1px solid rgba(239,68,68,0.2);border-radius:12px;padding:14px;color:#fca5a5;font-size:12px">${settings.lang==='ru'?'❌ Нет API ключа. Проверь ⚙ Настройки.':'❌ No API key. Check ⚙ Settings.'}</div>`;
       return;
@@ -3119,22 +3119,7 @@ function renderAskAI(){
       :`You are an expert on ${askApp} for ${osName}. Answer ONLY questions about ${askApp} — shortcuts, features, settings, interface. If the question is unrelated to ${askApp} — say: "I only answer questions about ${askApp}." ${osKeyInstr} Write hotkeys inline: (Command+C). Plain text only, max 4-5 sentences. FORBIDDEN: JSON, [], {}, code, markdown, backticks.`;
 
     try{
-      let rawText='';
-      if(provider==='claude'){
-        const res=await fetch('https://api.anthropic.com/v1/messages',{
-          method:'POST',
-          headers:{'Content-Type':'application/json','x-api-key':settings.aiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
-          body:JSON.stringify({model:'claude-haiku-4-5',max_tokens:1200,system:sysPrompt,messages:[{role:'user',content:question}]})
-        });
-        if(!res.ok)throw new Error('Claude API '+res.status);
-        const data=await res.json();
-        rawText=data.content?.[0]?.text||'';
-      } else {
-        const invoke=window.__TAURI__?.core?.invoke||window.__TAURI__?.tauri?.invoke;
-        if(!invoke)throw new Error('GigaChat только в десктоп-приложении');
-        const authKey=settings.gigaKey.startsWith('Basic ')?settings.gigaKey.slice(6).trim():settings.gigaKey;
-        rawText=await invoke('giga_search',{authKey,systemPrompt:sysPrompt,query:question});
-      }
+      let rawText=await callAI(sysPrompt, question, 1200);
 
       // Always render as plain text — no JSON parsing
       // Strip any JSON/code artifacts AI might still produce
@@ -3147,7 +3132,8 @@ function renderAskAI(){
       resultArea.innerHTML='';
       const box=el('div',"background:var(--card-bg);border:1px solid rgba(168,85,247,0.2);border-radius:14px;padding:18px;animation:fadeUp 0.3s ease");
       const badge=el('div',"display:inline-flex;align-items:center;gap:6px;background:rgba(168,85,247,0.1);border:1px solid rgba(168,85,247,0.25);border-radius:20px;padding:3px 10px;font-size:10px;color:#c084fc;font-weight:800;margin-bottom:12px");
-      badge.innerHTML=`✦ ${provider==='giga'?'GigaChat':'Claude'} · ${askApp} · ${osName}`;
+      const providerLabels={claude:'Claude',giga:'GigaChat',openai:'OpenAI',gemini:'Gemini',groq:'Groq',deepseek:'DeepSeek',mistral:'Mistral',yandex:'YandexGPT',custom:'Custom API'};
+      badge.innerHTML=`✦ ${providerLabels[provider]||provider} · ${askApp} · ${osName}`;
       const text=el('div',"font-size:13px;color:var(--text);line-height:1.75;white-space:pre-wrap");
       text.textContent=cleanText;
       box.appendChild(badge);box.appendChild(text);
